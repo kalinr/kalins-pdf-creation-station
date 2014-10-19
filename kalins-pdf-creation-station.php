@@ -108,6 +108,9 @@ function kalins_pdf_admin_init(){
 	register_deactivation_hook( __FILE__, 'kalins_pdf_cleanup' );
 	
 	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
+	
+	wp_register_script( 'kalinAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/angular.js' );
+	
 
 	//--------------you may comment-out the foreach loop if you are using hard-coded PDF links in your theme. This will make your admin panels run slightly more efficiently.-------------
 	
@@ -145,6 +148,7 @@ function kalins_pdf_admin_head() {
 	wp_enqueue_script("jquery");
 	wp_enqueue_script("jquery-ui-sortable");
 	wp_enqueue_script("jquery-ui-dialog");
+	wp_enqueue_script( 'kalinAngularJS' );
 }
 
 function kalins_pdf_admin_styles(){//not sure why this didn't work if called from pdf_admin_head
