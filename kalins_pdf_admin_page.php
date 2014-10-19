@@ -257,9 +257,16 @@ app.controller("UIController",["$scope", function($scope) {
 		
 }]);
 
-</script>
+app.controller("InputController",["$scope", function($scope) {
+	var self = this;
+	self.oOptions = <?php echo json_encode($adminOptions); ?>;
+	console.log(self.oOptions);
+}]);
 
-	<div ng-app="kalinsPDFAdminPage" ng-controller="UIController as UICtrl">
+
+</script>
+<div ng-app="kalinsPDFAdminPage" ng-controller="UIController as UICtrl">
+	<div ng-controller="InputController as InputCtrl">
 	
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
@@ -409,4 +416,5 @@ app.controller("UIController",["$scope", function($scope) {
     
 	  </div>
 	</div>
+</div>
 </html>
