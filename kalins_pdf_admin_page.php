@@ -208,30 +208,67 @@ jQuery(document).ready(function($){
 });
 
 
-var app = angular.module('myAppName', []);
+var app = angular.module('kalinsPDFAdminPage', []);
 
 app.controller("UIController",["$scope", function($scope) {
 	var self = this;
-	self.aCollapsed = [true, true, true, true, true, true];
-	
-	this.toggleCollapsed = function(index){
+	self.aCollapsed = [false, false, false, false, false, false];//list of states for the main divs
+	self.bAllCollapsed = false;//state for close/open all button
+	self.sToggleAllTrue = "Open All";
+	self.sToggleAllFalse = "Close All";
+	self.sToggleAll = self.sToggleAllFalse;//model string to show on close/open all button
+
+	//toggle a single div open/closed
+	self.toggleCollapsed = function(index){
 		self.aCollapsed[index] = !self.aCollapsed[index];
+		var nStateCount = 0;
+
+		//loop to see if we have opened or closed more than half the divs since the last time we clicked open/close all
+		for(var i = 0; i < self.aCollapsed.length; i++ ){
+			if(self.aCollapsed[i] != self.bAllCollapsed){
+				nStateCount = nStateCount + 1;
+			}
+		}
+
+		//if we have opened/closed more than half, set the open/close all button text appropriately
+		if(nStateCount>3){
+			self.bAllCollapsed = !self.bAllCollapsed;
+			self.setToggleAllText();
+		}
 	}
 
-	return this;
+	//open or close all main divs
+	self.toggleAll = function(){
+		self.bAllCollapsed = !self.bAllCollapsed;
+		for(var i = 0; i < self.aCollapsed.length; i++ ){
+			self.aCollapsed[i] = self.bAllCollapsed;
+		}
+		self.setToggleAllText();
+	}
+
+	//set the text on the open/close all button
+	self.setToggleAllText = function(){
+		if(self.bAllCollapsed){
+			self.sToggleAll = self.sToggleAllTrue;
+		}else{
+			self.sToggleAll = self.sToggleAllFalse;
+		}
+	}
 		
 }]);
 
 </script>
 
-	<div ng-app="myAppName" ng-controller="UIController as UICtrl">
+	<div ng-app="kalinsPDFAdminPage" ng-controller="UIController as UICtrl">
 	
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
 		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help button to the right.</p>
-	
+		
+		<div class="collapse" ng-click="UICtrl.toggleAll()"><b>{{UICtrl.sToggleAll}}</b></div>
+		
 		<div class="collapse" ng-click="UICtrl.toggleCollapsed(0)"><b>Insert HTML before page or post</b></div>
-	  <div class="txtfieldHolder" ng-show="UICtrl.aCollapsed[0]">
+	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[0]">
 	    <div class="textAreaDiv">
 	      <b>HTML to insert before page:</b><br />
 	      <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8'><?php echo $adminOptions["beforePage"]; ?></textarea>
@@ -243,7 +280,7 @@ app.controller("UIController",["$scope", function($scope) {
 	  </div>
 	  
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(1)"><b>Insert HTML after page or post</b></div>
-	  <div class="txtfieldHolder" ng-show="UICtrl.aCollapsed[1]">
+	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[1]">
 	      <div class="textAreaDiv">
 	          <b>HTML to insert after page:</b><br />
 	          <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8'><?php echo $adminOptions["afterPage"]; ?></textarea>
@@ -255,7 +292,7 @@ app.controller("UIController",["$scope", function($scope) {
 	  </div>
 	  
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(2)"><b>Insert HTML for title and final pages</b></div>
-	  <div class="txtfieldHolder" ng-show="UICtrl.aCollapsed[2]">
+	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
 	      <div class="textAreaDiv">
 	          <b>HTML to insert for title page:</b><br />
 	          <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8'><?php echo $adminOptions["titlePage"]; ?></textarea>
@@ -267,7 +304,7 @@ app.controller("UIController",["$scope", function($scope) {
 	  </div>
 	  
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(3)"><b>Options</b></div>
-	  <div class="generalHolder" ng-show="UICtrl.aCollapsed[3]">
+	  <div class="generalHolder" ng-hide="UICtrl.aCollapsed[3]">
 	      <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' value='<?php echo $adminOptions["headerTitle"]; ?>'></input></p>
 	      <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' value='<?php echo $adminOptions["headerSub"]; ?>'></input></p>
 	      <br/>
@@ -313,7 +350,7 @@ app.controller("UIController",["$scope", function($scope) {
 	    
 	    
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(4)"><b>Shortcodes</b></div>
-	  <div class="generalHolder" ng-show="UICtrl.aCollapsed[4]">
+	  <div class="generalHolder" ng-hide="UICtrl.aCollapsed[4]">
 	  	<b>shortcodes:</b> Use these codes anywhere in the above form to insert blog or page information.
 	  	<p><ul>
 	      <li><b>[current_time format="m-d-Y"]</b> -  PDF creation date/time <b>*</b></li>
@@ -350,7 +387,7 @@ app.controller("UIController",["$scope", function($scope) {
 	  </div>
 	    
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(5)"><b>About</b></div>
-	  <div class="generalHolder" ng-show="UICtrl.aCollapsed[5]">  
+	  <div class="generalHolder" ng-hide="UICtrl.aCollapsed[5]">  
 	  	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 	       
 			<p>
