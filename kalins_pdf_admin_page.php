@@ -116,58 +116,6 @@ jQuery(document).ready(function($){
 		}
 	});
 	
-	$('#btnSave').click(function(){
-		
-		var data = { action: 'kalins_pdf_admin_save',
-			_ajax_nonce : saveNonce
-		}
-
-		data.beforePage = $("#txtBeforePage").val();
-		data.beforePost = $("#txtBeforePost").val();
-		data.afterPage = $("#txtAfterPage").val();
-		data.afterPost = $("#txtAfterPost").val();
-		data.titlePage = $("#txtTitlePage").val();
-		data.finalPage = $("#txtFinalPage").val();
-		data.headerTitle = $("#txtHeaderTitle").val();
-		data.headerSub = $("#txtHeaderSub").val();
-		data.linkText = $("#txtLinkText").val();
-		data.beforeLink = $("#txtBeforeLink").val();
-		data.afterLink = $("#txtAfterLink").val();
-		data.fontSize = $("#txtFontSize").val();
-		data.includeImages = $("#chkIncludeImages").is(':checked');
-		data.runShortcodes = $("#chkRunShortcodes").is(':checked');
-		data.runFilters = $("#chkRunFilters").is(':checked');
-		data.convertYoutube = $("#chkConvertYoutube").is(':checked');
-		data.convertVimeo = $("#chkConvertVimeo").is(':checked');
-		data.convertTed = $("#chkConvertTed").is(':checked');
-		//data.includeTables = $("#chkIncludeTables").is(':checked');
-		data.showLink = $("input[name='kalinsPDFLink']:checked").val();
-		data.wordCount = $("#txtWordCount").val();
-		data.showOnMulti = $("#chkShowOnMulti").is(':checked');
-		data.filenameByTitle = $("#chkFilenameByTitle").is(':checked');//chkAutoGenerate
-		
-		data.autoGenerate = $("#chkAutoGenerate").is(':checked');
-		
-		data.doCleanup =  $("#chkDoCleanup").is(':checked');
-		
-		//alert(data.showLink + "showLink");
-		
-		$('#createStatus').html("Saving settings...");
-
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-		jQuery.post(ajaxurl, data, function(response) {
-			var startPosition = response.indexOf("{");
-			var responseObjString = response.substr(startPosition, response.lastIndexOf("}") - startPosition + 1);
-			
-			var newFileData = JSON.parse(responseObjString);
-			if(newFileData.status == "success"){
-				$('#createStatus').html("Settings saved successfully.");
-			}else{
-				$('#createStatus').html(response);
-			}
-		});
-	});
-	
 	$('#btnCreateAll').click(function(){
 		callCreateAll();
 	});
@@ -257,12 +205,41 @@ app.controller("UIController",["$scope", function($scope) {
 		
 }]);
 
-app.controller("InputController",["$scope", function($scope) {
+app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	var self = this;
+
+	var saveNonce = '<?php echo $save_nonce; //pass a different nonce security string for each possible ajax action?>';
+	var resetNonce = '<?php echo $reset_nonce; ?>';
+	var createAllNonce = '<?php echo $create_nonce; ?>';
+		
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 
-	//self.oOptions.includeImages = true;
+	//the text that shows under the create/reset/create all buttons indicating save status
+	self.sCreateStatus = "";
+
 	console.log(self.oOptions);
+
+	self.saveData = function(){
+		//copy our data into new object
+		var data = JSON.parse( JSON.stringify( self.oOptions ) );
+		data.action = 'kalins_pdf_admin_save';//tell wordpress what to call
+		data._ajax_nonce = saveNonce;//authorize it
+
+		$http({method:"POST", url:ajaxurl, params: data}).
+		  success(function(data, status, headers, config) {				
+				if(data.indexOf("success") > -1){
+					self.sCreateStatus = "Settings saved successfully.";
+				}else{
+					self.sCreateStatus = data;
+				}
+		  }).
+		  error(function(data, status, headers, config) {
+		    self.sCreateStatus = "An error occurred: " + data;
+		  });
+	}
+
+	
+
 }]);
 
 
@@ -345,8 +322,8 @@ app.controller("InputController",["$scope", function($scope) {
 	      <p><!--&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkIncludeTables' name='chkIncludeTables' if($adminOptions["includeTables"] == 'true'){echo "checked='yes' ";} ></input> Include Tables --></p>
 
 				<p align="center"><br />
-	        <button id="btnSave">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll'>Create All</button></p>
-	        <p align="center"><span id="createStatus">&nbsp;</span></p>
+	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll'>Create All</button></p>
+	        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 	  </div>
 	    
 	    

@@ -380,45 +380,45 @@ function kalins_pdf_admin_save(){
 	
 	check_ajax_referer( "kalins_pdf_admin_save" );
 	
-	$outputVar = new stdClass();
+	//$outputVar = new stdClass();
 	
 	$kalinsPDFAdminOptions = array();//collect our passed in values so we can save them for next time
 	
-	$kalinsPDFAdminOptions["beforePage"] = stripslashes($_POST['beforePage']);
-	$kalinsPDFAdminOptions["beforePost"] = stripslashes($_POST['beforePost']);
-	$kalinsPDFAdminOptions["afterPage"] = stripslashes($_POST['afterPage']);
-	$kalinsPDFAdminOptions["afterPost"] = stripslashes($_POST['afterPost']);
-	$kalinsPDFAdminOptions["titlePage"] = stripslashes($_POST['titlePage']);
-	$kalinsPDFAdminOptions["finalPage"] = stripslashes($_POST['finalPage']);
-	$kalinsPDFAdminOptions["headerTitle"] = stripslashes($_POST['headerTitle']);
-	$kalinsPDFAdminOptions["headerSub"] = stripslashes($_POST['headerSub']);
+	$kalinsPDFAdminOptions["beforePage"] = stripslashes($_REQUEST['beforePage']);
+	$kalinsPDFAdminOptions["beforePost"] = stripslashes($_REQUEST['beforePost']);
+	$kalinsPDFAdminOptions["afterPage"] = stripslashes($_REQUEST['afterPage']);
+	$kalinsPDFAdminOptions["afterPost"] = stripslashes($_REQUEST['afterPost']);
+	$kalinsPDFAdminOptions["titlePage"] = stripslashes($_REQUEST['titlePage']);
+	$kalinsPDFAdminOptions["finalPage"] = stripslashes($_REQUEST['finalPage']);
+	$kalinsPDFAdminOptions["headerTitle"] = stripslashes($_REQUEST['headerTitle']);
+	$kalinsPDFAdminOptions["headerSub"] = stripslashes($_REQUEST['headerSub']);
 	
-	$kalinsPDFAdminOptions['linkText'] = stripslashes($_POST['linkText']);
-	$kalinsPDFAdminOptions['beforeLink'] = stripslashes($_POST['beforeLink']);
-	$kalinsPDFAdminOptions['afterLink'] = stripslashes($_POST['afterLink']);
+	$kalinsPDFAdminOptions['linkText'] = stripslashes($_REQUEST['linkText']);
+	$kalinsPDFAdminOptions['beforeLink'] = stripslashes($_REQUEST['beforeLink']);
+	$kalinsPDFAdminOptions['afterLink'] = stripslashes($_REQUEST['afterLink']);
 	
-	$kalinsPDFAdminOptions["fontSize"] = (int) $_POST['fontSize'];
-	$kalinsPDFAdminOptions['wordCount'] = (int) stripslashes($_POST['wordCount']);
+	$kalinsPDFAdminOptions["fontSize"] = (int) $_REQUEST['fontSize'];
+	$kalinsPDFAdminOptions['wordCount'] = (int) stripslashes($_REQUEST['wordCount']);
 	
-	$kalinsPDFAdminOptions['showLink'] = stripslashes($_POST['showLink']);
+	$kalinsPDFAdminOptions['showLink'] = stripslashes($_REQUEST['showLink']);
 	
 	//echo "AAAAH" .$kalinsPDFAdminOptions['showLink'] ."dkdkdk";
 	
-	$kalinsPDFAdminOptions["includeImages"] = stripslashes($_POST['includeImages']);
-	$kalinsPDFAdminOptions["runShortcodes"] = stripslashes($_POST['runShortcodes']);
-	$kalinsPDFAdminOptions["runFilters"] = stripslashes($_POST['runFilters']);
+	$kalinsPDFAdminOptions["includeImages"] = stripslashes($_REQUEST['includeImages']);
+	$kalinsPDFAdminOptions["runShortcodes"] = stripslashes($_REQUEST['runShortcodes']);
+	$kalinsPDFAdminOptions["runFilters"] = stripslashes($_REQUEST['runFilters']);
 	
-	$kalinsPDFAdminOptions["convertYoutube"] = stripslashes($_POST['convertYoutube']);
-	$kalinsPDFAdminOptions["convertVimeo"] = stripslashes($_POST['convertVimeo']);
-	$kalinsPDFAdminOptions["convertTed"] = stripslashes($_POST['convertTed']);
+	$kalinsPDFAdminOptions["convertYoutube"] = stripslashes($_REQUEST['convertYoutube']);
+	$kalinsPDFAdminOptions["convertVimeo"] = stripslashes($_REQUEST['convertVimeo']);
+	$kalinsPDFAdminOptions["convertTed"] = stripslashes($_REQUEST['convertTed']);
 	
-	$kalinsPDFAdminOptions["showOnMulti"] = stripslashes($_POST['showOnMulti']);
-	$kalinsPDFAdminOptions["filenameByTitle"] = stripslashes($_POST['filenameByTitle']);
-	$kalinsPDFAdminOptions["autoGenerate"] = stripslashes($_POST['autoGenerate']);
+	$kalinsPDFAdminOptions["showOnMulti"] = stripslashes($_REQUEST['showOnMulti']);
+	$kalinsPDFAdminOptions["filenameByTitle"] = stripslashes($_REQUEST['filenameByTitle']);
+	$kalinsPDFAdminOptions["autoGenerate"] = stripslashes($_REQUEST['autoGenerate']);
 	
-	//$kalinsPDFAdminOptions["includeTables"] = stripslashes($_POST['includeTables']);
+	//$kalinsPDFAdminOptions["includeTables"] = stripslashes($_REQUEST['includeTables']);
 	
-	$kalinsPDFAdminOptions["doCleanup"] = stripslashes($_POST['doCleanup']);
+	$kalinsPDFAdminOptions["doCleanup"] = stripslashes($_REQUEST['doCleanup']);
 	
 	
 	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);//save options to database
@@ -436,12 +436,10 @@ function kalins_pdf_admin_save(){
 			}
 		}
 		closedir($handle);
-		$outputVar->status = "success";
+		echo "success";
 	}else{
-		$outputVar->status = "fail";
+		echo "Save failed for unknown reason.";
 	}
-	
-	echo json_encode($outputVar);
 }
 
 function kalins_pdf_tool_defaults(){//called when user clicks the reset button
