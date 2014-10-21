@@ -495,47 +495,18 @@ function kalins_pdf_create_all(){
 	
 	$myPosts = get_posts('numberposts=-1&post_type=any');
  	foreach($myPosts as $post) {
-    	if(kalinsPDF_build_pdf($post)){
-			$postCount = $postCount + 1;
-			if($postCount == $postLimit){
-				break;
+    if(kalinsPDF_build_pdf($post)){
+		  $postCount = $postCount + 1;
+			  if($postCount == $postLimit){
+					break;
 			}
 		}
 	}
 	
-	/*if($postCount < $postLimit){ 
-		$myPosts = get_posts('numberposts=-1&post_type=page');
-		foreach($myPosts as $post) {
-			if(kalinsPDF_build_pdf($post)){
-				$postCount = $postCount + 1;
-				if($postCount == $postLimit){
-					break;
-				}
-			}
-		}
-	}*/
-	
-	
-	/*if(false){
-		$outputVar->status = "success";
-	}else{
-		$outputVar->status = "fail";
-	}*/
-	
-	/*if($postCount == $postLimit){
-		$outputVar->complete = "true";
-	}else{
-		$outputVar->complete = "";
-	}*/
-	
-	//$outputVar->complete = ($postCount == $postLimit);
-	
 	$outputVar->createCount = $postCount;
 	
 	$outputVar->totalCount = wp_count_posts("post")->publish + wp_count_posts("page")->publish;
-	
-	
-	
+
 	$existCount = 0;
 	
 	if ($handle = opendir($pdfDir)) {//open pdf directory
@@ -556,8 +527,8 @@ function kalins_pdf_create_all(){
 function kalinsPDF_build_pdf( $post ){
 	
 	$pdfDir = KALINS_PDF_SINGLES_DIR;
-	
-	$fileName = $post_id .'.pdf';
+		
+	$fileName = $post->post_name .'.pdf';
 	
 	if(file_exists($pdfDir .$fileName)){//if the pdf file for this page already exists,
 		return false;

@@ -17,52 +17,6 @@
 
 <script type='text/javascript'>
 
-jQuery(document).ready(function($){
-	
-	var saveNonce = '<?php echo $save_nonce; //pass a different nonce security string for each possible ajax action?>'
-	var resetNonce = '<?php echo $reset_nonce; ?>'
-	var createAllNonce = '<?php echo $create_nonce; ?>'
-	
-	$('#btnCreateAll').click(function(){
-		callCreateAll();
-	});
-	
-	var creationInProcess = false;
-	
-	function callCreateAll(){
-		var data = { action: 'kalins_pdf_create_all',
-			_ajax_nonce : createAllNonce
-		}
-		
-		if(!creationInProcess){
-			$('#createStatus').html("Creating PDF files for all pages and posts.");
-		}
-
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-		jQuery.post(ajaxurl, data, function(response) {
-			var startPosition = response.indexOf("{");
-			var responseObjString = response.substr(startPosition, response.lastIndexOf("}") - startPosition + 1);
-			
-			var newFileData = JSON.parse(responseObjString);
-			if(newFileData.status == "success"){
-				
-				if(newFileData.existCount >= newFileData.totalCount){
-					$('#createStatus').html(newFileData.totalCount  +  " PDF files successfully cached.");
-					creationInProcess = false;
-				}else{
-					$('#createStatus').html(newFileData.existCount + " out of " + newFileData.totalCount  +  " PDF files cached. Now building the next " +  newFileData.createCount + ".");
-					creationInProcess = true;
-					callCreateAll();
-				}
-			}else{
-				$('#createStatus').html(response);
-			}
-		});
-	}
-	
-});
-
-
 var app = angular.module('kalinsPDFAdminPage', []);
 
 app.controller("UIController",["$scope", function($scope) {
@@ -161,8 +115,43 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			  });
 		}
 	}
-	
 
+	self.createAll = function(){
+		var creationInProcess = false;
+		
+		var data = { action: 'kalins_pdf_create_all',
+			_ajax_nonce : createAllNonce
+		}
+		
+		if(!creationInProcess){
+			self.sCreateStatus = "Creating PDF files for all pages and posts.";
+		}
+
+		$http({method:"POST", url:ajaxurl, params: data}).
+		  success(function(data, status, headers, config) {
+
+				console.log(data);
+				
+				var startPosition = data.indexOf("{");
+				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
+				
+				var newFileData = JSON.parse(responseObjString);
+				if(newFileData.status == "success"){
+					
+					if(newFileData.existCount >= newFileData.totalCount){
+						self.sCreateStatus = newFileData.totalCount  +  " PDF files successfully cached.";
+						creationInProcess = false;
+					}else{
+						self.sCreateStatus = newFileData.existCount + " out of " + newFileData.totalCount  +  " PDF files cached. Now building the next " +  newFileData.createCount + ".";
+						creationInProcess = true;
+						self.createAll();
+					}
+				}
+		  }).
+		  error(function(data, status, headers, config) {
+		    self.sCreateStatus = "An error occurred: " + data;
+		  });
+	}
 }]);
 
 
@@ -245,7 +234,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	      <p><!--&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkIncludeTables' name='chkIncludeTables' if($adminOptions["includeTables"] == 'true'){echo "checked='yes' ";} ></input> Include Tables --></p>
 
 				<p align="center"><br />
-	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click="InputCtrl.resetToDefaults()">Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll'>Create All</button></p>
+	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click="InputCtrl.resetToDefaults()">Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll' ng-click="InputCtrl.createAll()">Create All</button></p>
 	        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 	  </div>
 	    
