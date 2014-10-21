@@ -23,99 +23,6 @@ jQuery(document).ready(function($){
 	var resetNonce = '<?php echo $reset_nonce; ?>'
 	var createAllNonce = '<?php echo $create_nonce; ?>'
 	
-	$('#btnReset').click(function(){
-		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form and your cache of PDF files will be cleared.")){
-			var data = { action: 'kalins_pdf_reset_admin_defaults', _ajax_nonce : resetNonce};
-			
-			jQuery.post(ajaxurl, data, function(response) {
-				
-				var newValues = JSON.parse(response.substr(0, response.lastIndexOf("}") + 1));
-				
-				$('#txtBeforePage').val(newValues["beforePage"]);
-				$('#txtBeforePost').val(newValues["beforePost"]);
-				$('#txtAfterPage').val(newValues["afterPage"]);
-				$('#txtAfterPost').val(newValues["afterPost"]);
-				$('#txtTitlePage').val(newValues["titlePage"]);
-				$('#txtFinalPage').val(newValues["finalPage"]);
-				
-				$('#txtHeaderTitle').val(newValues["headerTitle"]);
-				$('#txtHeaderSub').val(newValues["headerSub"]);
-				
-				$('#txtLinkText').val(newValues["linkText"]);
-				$('#txtBeforeLink').val(newValues["beforeLink"]);
-				$('#txtAfterLink').val(newValues["afterLink"]);
-				
-				$('#txtFontSize').val(newValues["fontSize"]);
-				$('#txtFilename').val(newValues["filename"]);
-				$('#txtWordCount').val(newValues["wordCount"]);
-				
-				if(newValues["includeImages"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkIncludeImages').attr('checked', true);
-				}else{
-					$('#chkIncludeImages').attr('checked', false);
-				}
-				
-				$("input[name='kalinsPDFLink']").val(newValues["showLink"]);//set link radio button option
-				$("#opt_" + newValues["showLink"]).attr("checked", "checked"); 
-				
-				if(newValues["filenameByTitle"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkFilenameByTitle').attr('checked', true);
-				}else{
-					$('#chkFilenameByTitle').attr('checked', false);
-				}
-				
-				if(newValues["showOnMulti"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkShowOnMulti').attr('checked', true);
-				}else{
-					$('#chkShowOnMulti').attr('checked', false);
-				}
-				
-				if(newValues["doCleanup"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkDoCleanup').attr('checked', true);
-				}else{
-					$('#chkDoCleanup').attr('checked', false);
-				}
-				
-				if(newValues["autoGenerate"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkAutoGenerate').attr('checked', true);
-				}else{
-					$('#chkAutoGenerate').attr('checked', false);
-				}
-				
-				if(newValues["runShortcodes"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkRunShortcodes').attr('checked', true);
-				}else{
-					$('#chkRunShortcodes').attr('checked', false);
-				}
-				
-				if(newValues["runFilters"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkRunFilters').attr('checked', true);
-				}else{
-					$('#chkRunFilters').attr('checked', false);
-				}
-				
-				if(newValues["convertYoutube"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertYoutube').attr('checked', true);
-				}else{
-					$('#chkConvertYoutube').attr('checked', false);
-				}
-				
-				if(newValues["convertVimeo"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertVimeo').attr('checked', true);
-				}else{
-					$('#chkConvertVimeo').attr('checked', false);
-				}
-				
-				if(newValues["convertTed"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertTed').attr('checked', true);
-				}else{
-					$('#chkConvertTed').attr('checked', false);
-				}
-				
-			});
-		}
-	});
-	
 	$('#btnCreateAll').click(function(){
 		callCreateAll();
 	});
@@ -225,6 +132,8 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		data.action = 'kalins_pdf_admin_save';//tell wordpress what to call
 		data._ajax_nonce = saveNonce;//authorize it
 
+		console.log(data);
+
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {				
 				if(data.indexOf("success") > -1){
@@ -238,6 +147,20 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		  });
 	}
 
+	self.resetToDefaults = function(){
+		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered and your cache of PDF files will be cleared.")){
+			var data = { action: 'kalins_pdf_reset_admin_defaults', _ajax_nonce : resetNonce};
+
+			$http({method:"POST", url:ajaxurl, params: data}).
+			  success(function(data, status, headers, config) {
+				  self.oOptions = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
+				  self.sCreateStatus = "Defaults reset successfully.";
+			  }).
+			  error(function(data, status, headers, config) {
+			    self.sCreateStatus = "An error occurred: " + data;
+			  });
+		}
+	}
 	
 
 }]);
@@ -322,7 +245,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	      <p><!--&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkIncludeTables' name='chkIncludeTables' if($adminOptions["includeTables"] == 'true'){echo "checked='yes' ";} ></input> Include Tables --></p>
 
 				<p align="center"><br />
-	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll'>Create All</button></p>
+	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click="InputCtrl.resetToDefaults()">Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll'>Create All</button></p>
 	        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 	  </div>
 	    
