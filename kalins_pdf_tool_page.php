@@ -73,10 +73,6 @@
 
 <script type='text/javascript'>
 
-
-
-
-
 var app = angular.module('kalinsPDFToolPage', []);
 
 //TODO: turn this into a module in separate file so we don't repeat this code on the settings page
@@ -123,22 +119,99 @@ app.controller("UIController",["$scope", function($scope) {
 		}else{
 			self.sToggleAll = self.sToggleAllFalse;
 		}
-	}
-		
+	}	
 }]);
-
-
 
 
 app.controller("InputController",["$scope", "$http", function($scope, $http) {
+	var self = this;
+
+	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
+	var pageList = <?php echo json_encode($pageList);?>;
+	var postList = <?php echo json_encode($postList); ?>;
+	var customList = <?php echo json_encode($customList); ?>;
+	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
+	var deleteNonce = '<?php echo $delete_nonce; ?>';
+	var resetNonce = '<?php echo $reset_nonce; ?>';
+		
+	self.oOptions = <?php echo json_encode($adminOptions); ?>;
+
+	console.log(self.oOptions);
+
+	self.deleteFile = function(){
+		var creationInProcess = false;
+		
+		var data = { action: 'kalins_pdf_create_all',
+			_ajax_nonce : createAllNonce
+		}
+		
+		if(!creationInProcess){
+			self.sCreateStatus = "Creating PDF files for all pages and posts.";
+		}
+
+		$http({method:"POST", url:ajaxurl, params: data}).
+		  success(function(data, status, headers, config) {
+
+				console.log(data);
+				
+				var startPosition = data.indexOf("{");
+				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
+				
+				var newFileData = JSON.parse(responseObjString);
+				if(newFileData.status == "success"){
+					
+					if(newFileData.existCount >= newFileData.totalCount){
+						self.sCreateStatus = newFileData.totalCount  +  " PDF files successfully cached.";
+						creationInProcess = false;
+					}else{
+						self.sCreateStatus = newFileData.existCount + " out of " + newFileData.totalCount  +  " PDF files cached. Now building the next " +  newFileData.createCount + ".";
+						creationInProcess = true;
+						self.createAll();
+					}
+				}
+		  }).
+		  error(function(data, status, headers, config) {
+		    self.sCreateStatus = "An error occurred: " + data;
+		  });
+	}
+
+
+
+
+
+/*
+	function deleteFile(fileName, indexToDelete){//takes a single fileName or "all"
+
+		var data = {action: 'kalins_pdf_tool_delete', filename: fileName, _ajax_nonce : deleteNonce};
+
+		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+		jQuery.post(ajaxurl, data, function(response) {
+			//alert('Got this from the server: ' + response.substr(0, response.lastIndexOf("}") + 1));
+			
+			//alert(response);
+			var newFileData = JSON.parse(response.substr(0, response.lastIndexOf("}") + 1));//parse response while removing strange trailing 0 from the response (anyone know why that 0 is being added by jquery or wordpress?)
+			if(newFileData.status == "success"){
+				if(fileName == "all"){
+					pdfList = new Array();
+					$('#createStatus').html("Files deleted successfully");
+				}else{
+					$('#createStatus').html("File deleted successfully");
+					pdfList.splice(indexToDelete, 1);
+				}
+				buildFileTable();
+			}else{
+				//if(newFileData.status == "exists"){
+				$('#createStatus').html(newFileData.status);
+				//}
+			}
+		});
+	}
+	
+*/
+
+	
 
 }]);
-
-
-
-
-
-
 
 
 
@@ -405,14 +478,6 @@ jQuery(document).ready(function($){
 		}
 	});
 	
-	/*function toggleWidgets() {//make menus collapsible
-		$('.collapse').addClass('plus');
-
-		$('.collapse').click(function() {
-			$(this).toggleClass('plus').toggleClass('minus').next().toggle(180);
-		});
-	}*/
-	
 	$('#btnCreateCancel').click(function(){
 		$('#sortDialog').dialog('close');									 
 	});
@@ -477,19 +542,9 @@ jQuery(document).ready(function($){
 	});
 
 	buildFileTable();
-	//toggleWidgets();
 });
 	
 </script>
-
-
-<!--<style>
-
-.ui-widget input, .ui-widget select {font-family: arial; padding: 0px 0px;}
-.ui-dialog-content {font-weight: normal; line-height: normal; font-family: arial; font-size: 8pt; }
-.ui-widget-content {font-weight: normal; line-height: normal; font-family: arial; font-size: 8pt;}
-
-</style> -->
 
 <div ng-app="kalinsPDFToolPage" ng-controller="UIController as UICtrl">
 	<div ng-controller="InputController as InputCtrl">
@@ -499,8 +554,6 @@ jQuery(document).ready(function($){
 		<h3>by Kalin Ringkvist - kalinbooks.com</h3>
 
 		<p>Create custom PDF files for any combination of posts and pages.</p>
-
-
 
 		<div class="collapse" ng-click="UICtrl.toggleAll()"><b>{{UICtrl.sToggleAll}}</b></div>
 		
@@ -517,8 +570,6 @@ jQuery(document).ready(function($){
 					
 		                $pageID = $pageList[$i]->ID;
 		                $parent = $pageList[$i]->post_parent;
-						
-						//echo "-----" .$parent ."----";
 		                
 		                if($parent == 0){//if this is a top level page, don't indent
 		                    $indent = '';
@@ -562,47 +613,47 @@ jQuery(document).ready(function($){
 		   <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[1]">
 		        <div class="textAreaDiv">
 		            <b>HTML to insert before every page:</b><br />
-		            <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8'><?php echo $adminOptions["beforePage"]; ?></textarea>
+		            <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
 		        </div>
 		        <div class="textAreaDiv">
 		            <b>HTML to insert before every post:</b><br />
-		            <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8'><?php echo $adminOptions["beforePost"]; ?></textarea>
+		            <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
 		        </div>
 		    </div>
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(2)"><b>Insert HTML after every page or post</b></div>
 		    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
 		        <div class="textAreaDiv">
 		            <b>HTML to insert after every page:</b><br />
-		            <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8'><?php echo $adminOptions["afterPage"]; ?></textarea>
+		            <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
 		        </div>
 		        <div class="textAreaDiv">
 		            <b>HTML to insert after every post:</b><br />
-		            <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8'><?php echo $adminOptions["afterPost"]; ?></textarea>
+		            <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
 		        </div>
 		    </div>
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(3)"><b>Insert HTML for title and final pages</b></div>
 		    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[3]">
 		        <div class="textAreaDiv">
 		            <b>HTML to insert for title page:</b><br />
-		            <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8'><?php echo $adminOptions["titlePage"]; ?></textarea>
+		            <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
 		        </div>
 		        <div class="textAreaDiv">
 		            <b>HTML to insert for final page:</b><br />
-		            <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ><?php echo $adminOptions["finalPage"]; ?></textarea>
+		            <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
 		        </div>
 		    </div>
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(4)"><b>CREATE PDF!</b></div>
 		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[4]">
-		        <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' value='<?php echo $adminOptions["headerTitle"]; ?>'></input></p>
-		        <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' value='<?php echo $adminOptions["headerSub"]; ?>'></input></p><br/>
+		        <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
+		        <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p><br/>
 		        
-		         <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' <?php if($adminOptions["includeImages"] == "true"){echo "checked='yes' ";} ?>></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" value='<?php echo $adminOptions["fontSize"]; ?>' /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' <?php if($adminOptions["runShortcodes"] == "true"){echo "checked='yes' ";} ?>></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' <?php if($adminOptions["runFilters"] == "true"){echo "checked='yes' ";} ?>></input> and content filters</p>
+		         <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
 		         
-		         <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' <?php if($adminOptions["convertYoutube"] == "true"){echo "checked='yes' ";} ?>></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' <?php if($adminOptions["convertVimeo"] == "true"){echo "checked='yes' ";} ?>></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' <?php if($adminOptions["convertTed"] == "true"){echo "checked='yes' ";} ?>></input> Ted Talks</p>
+		         <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
 		         
 		         <br/>
 		        
-		        File name: <input type="text" name='txtFileName' id='txtFileName' value='<?php echo $adminOptions["filename"]; ?>' ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' <?php if($adminOptions["autoPageBreak"] == "true"){echo "checked='yes' ";} ?>></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' <?php if($adminOptions["includeTOC"] == "true"){echo "checked='yes' ";} ?>></input> Include Table of Contents
+		        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
 		        </p>
 		        <p align="center"><br />
 		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>

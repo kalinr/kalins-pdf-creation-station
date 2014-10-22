@@ -635,13 +635,13 @@ function kalins_pdf_getDefaultOptions(){//simply returns all our default option 
 	$kalinsPDFAdminOptions['titlePage'] = '<p><font size="40">[blog_name]</font></p><p><font size="25">[blog_description]</font></p><p>PDF generated [current_time format="F d, Y"] by Kalin\'s PDF Creation Station WordPress plugin</p>';
 	$kalinsPDFAdminOptions['finalPage'] = '<b>[blog_name]</b><p><b>[blog_description]</b></p><p>PDF generated [current_time format="F d, Y \a\t g:i A"] by Kalin\'s PDF Creation Station WordPress plugin</p>';
 	$kalinsPDFAdminOptions['fontSize'] = 12;
-	$kalinsPDFAdminOptions["runShortcodes"] = "false";
-	$kalinsPDFAdminOptions["runFilters"] = "false";
-	$kalinsPDFAdminOptions["convertYoutube"] = "true";
-	$kalinsPDFAdminOptions["convertVimeo"] = "true";
-	$kalinsPDFAdminOptions["convertTed"] = "true";
-	$kalinsPDFAdminOptions["autoPageBreak"] = "true";
-	$kalinsPDFAdminOptions["includeTOC"] = "true";
+	$kalinsPDFAdminOptions["runShortcodes"] = false;
+	$kalinsPDFAdminOptions["runFilters"] = false;
+	$kalinsPDFAdminOptions["convertYoutube"] = true;
+	$kalinsPDFAdminOptions["convertVimeo"] = true;
+	$kalinsPDFAdminOptions["convertTed"] = true;
+	$kalinsPDFAdminOptions["autoPageBreak"] = true;
+	$kalinsPDFAdminOptions["includeTOC"] = true;
 	
 	
 	return $kalinsPDFAdminOptions;

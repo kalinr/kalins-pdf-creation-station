@@ -78,8 +78,6 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	//the text that shows under the create/reset/create all buttons indicating save status
 	self.sCreateStatus = "";
 
-	console.log(self.oOptions);
-
 	self.saveData = function(){
 		//copy our data into new object
 		var data = JSON.parse( JSON.stringify( self.oOptions ) );
