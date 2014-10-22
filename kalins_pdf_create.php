@@ -218,7 +218,6 @@ try{
 	//$lg['a_meta_dir'] = 'rtl';
 	//$lg['a_meta_language'] = 'fa';
 	
-	
 	/* to translate or otherwise change the word 'page', add the following code into your wp-config.php file. This will retain the setting even as I upgrade the plugin.
 	
 	define("KALINS_PDF_PAGE_TRANSLATION", "page translation string");
@@ -227,9 +226,8 @@ try{
 	
 	if(defined("KALINS_PDF_PAGE_TRANSLATION")){//if someone defined a new 'page' translation in wp-config, set its value
 		$l['w_page'] = KALINS_PDF_PAGE_TRANSLATION;
+		$objTcpdf->setLanguageArray($l);
 	}
-	
-	$objTcpdf->setLanguageArray($l); 
 	
 	//initialize document
 	$objTcpdf->getAliasNbPages();

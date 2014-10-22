@@ -169,11 +169,11 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[0]">
 	    <div class="textAreaDiv">
 	      <b>HTML to insert before page:</b><br />
-	      <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
+	      <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
 	    </div>
 	    <div class="textAreaDiv">
-	      <b>HTML to insert before post:</b><br />
-	      <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
+	      <b>HTML to insert before post:asdf</b><br />
+	      <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
 	    </div>
 	  </div>
 	  
@@ -181,11 +181,11 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[1]">
 	      <div class="textAreaDiv">
 	          <b>HTML to insert after page:</b><br />
-	          <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
+	          <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
 	      </div>
 	      <div class="textAreaDiv">
 	          <b>HTML to insert after post:</b><br />
-	          <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
+	          <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
 	      </div>
 	  </div>
 	  
@@ -193,48 +193,48 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	  <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
 	      <div class="textAreaDiv">
 	          <b>HTML to insert for title page:</b><br />
-	          <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
+	          <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
 	      </div>
 	      <div class="textAreaDiv">
 	          <b>HTML to insert for final page:</b><br />
-	          <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
+	          <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
 	      </div>
 	  </div>
 	  
 	  <div class='collapse' ng-click="UICtrl.toggleCollapsed(3)"><b>Options</b></div>
 	  <div class="generalHolder" ng-hide="UICtrl.aCollapsed[3]">
-	      <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
-	      <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p>
+	      <p>Header title: <input type='text' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
+	      <p>Header sub title: <input type='text' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p>
 	      <br/>
-	      <p>Link text: <input type="text" id='txtLinkText' class='txtHeader' ng-model="InputCtrl.oOptions.linkText"></input></p>
-	      <p>Before Link: <input type="text" id='txtBeforeLink' class='txtHeader' ng-model="InputCtrl.oOptions.beforeLink"></input></p>
-	      <p>After Link: <input type="text" id='txtAfterLink' class='txtHeader' ng-model="InputCtrl.oOptions.afterLink"></input></p>
+	      <p>Link text: <input type="text" class='txtHeader' ng-model="InputCtrl.oOptions.linkText"></input></p>
+	      <p>Before Link: <input type="text" class='txtHeader' ng-model="InputCtrl.oOptions.beforeLink"></input></p>
+	      <p>After Link: <input type="text" class='txtHeader' ng-model="InputCtrl.oOptions.afterLink"></input></p>
 	      <br/>
-	      <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' ng-model="InputCtrl.oOptions.includeImages" ></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
-	      <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
+	      <p><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages" ></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
+	      <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
 	      <br/>
 	      
 	      <p>Default Link Placement (can be overwritten in page/post edit page):</p>
 			
 			  <p>
-			    <input type="radio" name="kalinsPDFLink" value="top" id="opt_top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page<br />
-			    <input type="radio" name="kalinsPDFLink" value="bottom" id="opt_bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page<br />
-			    <input type="radio" name="kalinsPDFLink" value="none" id="opt_none" ng-model="InputCtrl.oOptions.showLink" /> Do not generate PDF
+			    <input type="radio" value="top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page<br />
+			    <input type="radio" value="bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page<br />
+			    <input type="radio" value="none" ng-model="InputCtrl.oOptions.showLink" /> Do not generate PDF
 			  </p>
 			
-	      <p><input type="text" id="txtWordCount" size="3" maxlength="5" ng-model="InputCtrl.oOptions.wordCount" /> Minimum post word count
+	      <p><input type="text" size="3" maxlength="5" ng-model="InputCtrl.oOptions.wordCount" /> Minimum post word count
 	      </p>
 	      <br/>
-	      <p><input type='checkbox' id='chkFilenameByTitle' name='chkFilenameByTitle' ng-model="InputCtrl.oOptions.filenameByTitle"></input> Use post slug for PDF filename instead of ID</p>
+	      <p><input type='checkbox' ng-model="InputCtrl.oOptions.filenameByTitle"></input> Use post slug for PDF filename instead of ID</p>
 	      
-	      <p><input type='checkbox' id='chkShowOnMulti' name='chkShowOnMulti' ng-model="InputCtrl.oOptions.showOnMulti"></input> Show on home, category, tag and search pages (does not work if you use excerpts on any of these pages)</p>
+	      <p><input type='checkbox' ng-model="InputCtrl.oOptions.showOnMulti"></input> Show on home, category, tag and search pages (does not work if you use excerpts on any of these pages)</p>
 	        
-	      <p><input type='checkbox' id='chkAutoGenerate' name='chkAutoGenerate' ng-model="InputCtrl.oOptions.autoGenerate"></input> Automatically generate PDFs on publish and update</p><br/>
+	      <p><input type='checkbox' ng-model="InputCtrl.oOptions.autoGenerate"></input> Automatically generate PDFs on publish and update</p><br/>
 	        
 	      <p><!--&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkIncludeTables' name='chkIncludeTables' if($adminOptions["includeTables"] == 'true'){echo "checked='yes' ";} ></input> Include Tables --></p>
 
 				<p align="center"><br />
-	        <button id="btnSave" ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click="InputCtrl.resetToDefaults()">Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnCreateAll' ng-click="InputCtrl.createAll()">Create All</button></p>
+	        <button ng-click="InputCtrl.saveData()">Save Settings</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click="InputCtrl.resetToDefaults()">Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click="InputCtrl.createAll()">Create All</button></p>
 	        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 	  </div>
 	    
@@ -291,7 +291,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			
 			<br/>
 	      
-	    <p><input type='checkbox' id='chkDoCleanup' name='chkDoCleanup' ng-model="InputCtrl.oOptions.doCleanup"></input> Upon plugin deactivation clean up all database entries</p>
+	    <p><input type='checkbox' ng-model="InputCtrl.oOptions.doCleanup"></input> Upon plugin deactivation clean up all database entries</p>
 	
 	    <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
 	         
