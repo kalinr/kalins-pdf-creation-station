@@ -151,27 +151,24 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		}
 	}
 
-	self.createDocument = function(){
+	self.createDocument = function(sortString){
 		angular.element('#sortDialog').dialog('close');
 		
 		var data = JSON.parse( JSON.stringify( self.oOptions ) );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
 		data._ajax_nonce = createNonce;//authorize it
-		data.pageIDs = angular.element("#sortable").sortable('toArray').join(",");
 
+		if(sortString){
+			data.pageIDs = sortString;
+		}else{
+			data.pageIDs = angular.element("#sortable").sortable('toArray').join(",");
+		}
 		self.sCreateStatus = "Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.";
 		
-
-		console.log(data);
-
 		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {
-
-				console.log(data);
-			  			
+		  success(function(data, status, headers, config) {			  			
 			  var startPosition = data.indexOf("{")
 				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
-				
 				var newFileData = JSON.parse(responseObjString);
 				if(newFileData.status == "success"){
 					self.sCreateStatus = "File created successfully";
@@ -185,6 +182,47 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		    self.sCreateStatus = "An error occurred: " + data;
 		  });
 	}
+
+
+	self.createNow = function() {
+		
+		var sortString = '';
+
+		//TODO: pageCount var isn't necessary here. can use sortString.length
+		//TODO: angular.element is basically jQuery. We should be binding these values with angular
+		var pageCount = 0;
+		var l = pageList.length;		   
+		for(var i=0; i<l; i++){
+			if(angular.element('#chk' + pageList[i]['ID']).is(':checked')){
+				sortString += 'pg_' + pageList[i]['ID'] + ",";
+				pageCount++;
+			}
+		}
+		
+		var l = customList.length;		   
+		for(var i=0; i<l; i++){
+			if(angular.element('#chk' + customList[i]['ID']).is(':checked')){
+				sortString += 'po_' + customList[i]['ID'] + ",";
+				pageCount++;
+			}
+		}
+
+		var l = postList.length;		   
+		for(var i=0; i<l; i++){
+			if(angular.element('#chk' + postList[i]['ID']).is(':checked')){
+				sortString += 'po_' + postList[i]['ID'] + ",";
+				pageCount++;
+			}
+		}
+		
+		if(pageCount == 0){
+			self.sCreateStatus = "Error: you must select at least one page or post to create a PDF.";
+			return;
+		}
+		
+		sortString = sortString.substr(0, sortString.length - 1);
+		self.createDocument(sortString);
+	};
 
 	self.deleteFile = function(fileName){
 		console.log("self.deleteFile!");
@@ -265,7 +303,6 @@ jQuery(document).ready(function($){
 	var customList = <?php echo json_encode($customList); ?>;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
-	var resetNonce = '<?php echo $reset_nonce; ?>';
 	
 	function buildFileTable(){//build the file table - we build it all in javascript so we can simply rebuild it whenever an entry is added through ajax
 	
@@ -358,98 +395,6 @@ jQuery(document).ready(function($){
 		});
 	}
 	
-	/*$('#btnCreate').click(function() {
-		$('#sortDialog').dialog('close');
-								   
-		var sortString = $("#sortable").sortable('toArray').join(",");
-		
-		createDocument(sortString);
-	});*/
-	
-	$('#createNow').click(function() {
-		
-		var sortString = '';
-		var pageCount = 0;
-		var l = pageList.length;		   
-		for(var i=0; i<l; i++){
-			if($('#chk' + pageList[i]['ID']).is(':checked')){
-				//pageIDList += "," + pageList[i].ID;
-				sortString += 'pg_' + pageList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-		
-		var l = customList.length;		   
-		for(var i=0; i<l; i++){
-			if($('#chk' + customList[i]['ID']).is(':checked')){
-				sortString += 'po_' + customList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-
-		var l = postList.length;		   
-		for(var i=0; i<l; i++){
-			if($('#chk' + postList[i]['ID']).is(':checked')){
-				sortString += 'po_' + postList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-		
-		if(pageCount == 0){
-			$('#createStatus').html("Error: you must select at least one page or post to create a PDF.");
-			return;
-		}
-		
-		sortString = sortString.substr(0, sortString.length - 1);
-		createDocument(sortString);
-	});
-	
-	function createDocument(sortString){
-		
-		var data = { action: 'kalins_pdf_tool_create',
-			pageIDs : sortString,
-			_ajax_nonce : createNonce
-		}
-
-		data.titlePage = $("#txtTitlePage").val();
-		data.beforePage = $("#txtBeforePage").val();
-		data.beforePost = $("#txtBeforePost").val();
-		data.afterPage = $("#txtAfterPage").val();
-		data.afterPost = $("#txtAfterPost").val();
-		data.fileNameCont = $("#txtFileName").val();
-		data.includeImages = $("#chkIncludeImages").is(':checked');
-		data.runShortcodes = $("#chkRunShortcodes").is(':checked');
-		data.runFilters = $("#chkRunFilters").is(':checked');
-		data.convertYoutube = $("#chkConvertYoutube").is(':checked');
-		data.convertVimeo = $("#chkConvertVimeo").is(':checked');
-		data.convertTed = $("#chkConvertTed").is(':checked');
-		//data.includeTables = $("#chkIncludeTables").is(':checked');
-		data.headerTitle = $("#txtHeaderTitle").val();
-		data.headerSub = $("#txtHeaderSub").val();
-		data.finalPage = $("#txtFinalPage").val();
-		data.fontSize = $("#txtFontSize").val();
-		data.autoPageBreak = $("#chkAutoPageBreak").is(':checked');
-		data.includeTOC = $("#chkIncludeTOC").is(':checked');
-		
-		$('#createStatus').html("Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.");
-
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-		jQuery.post(ajaxurl, data, function(response) {
-			
-			var startPosition = response.indexOf("{")
-			var responseObjString = response.substr(startPosition, response.lastIndexOf("}") - startPosition + 1);
-			
-			var newFileData = JSON.parse(responseObjString);
-			if(newFileData.status == "success"){
-				$('#createStatus').html("File created successfully");
-				pdfList.push(newFileData);
-				buildFileTable();
-			}else{
-				$('#createStatus').html("Error: " + newFileData.status);
-			}
-		});
-	}
-	
 	$('#btnCreateCancel').click(function(){
 		$('#sortDialog').dialog('close');									 
 	});
@@ -499,10 +444,7 @@ jQuery(document).ready(function($){
 			
 			sortHTML += '</ul>';
 			$('#sortHolder').html(sortHTML);
-			
-			
-			//$('#sortHolder').html("Hello this is my HTML Crap-------------------------------------------------------");
-			
+						
 			$(function() {//set the div as sortable every time we open the dialog (doing this earlier and just calling refresh didn't work)
 				$("#sortable").sortable();
 				$("#sortable").disableSelection();
@@ -628,7 +570,7 @@ jQuery(document).ready(function($){
 		        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
 		        </p>
 		        <p align="center"><br />
-		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
+		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" ng-click="InputCtrl.createNow();" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
 		        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 		        
 		    </div>
@@ -696,7 +638,7 @@ jQuery(document).ready(function($){
 		        
 		    </div>
 		    
-		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button id="btnCreate" ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
+		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
 	</div>
 </div>
 </html>
