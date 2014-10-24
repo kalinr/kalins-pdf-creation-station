@@ -133,20 +133,65 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
 	var resetNonce = '<?php echo $reset_nonce; ?>';
-		
+
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 
-	console.log(self.oOptions);
+	self.resetToDefaults = function(){		
+		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form. (This will NOT delete or change your existing PDF documents.)")){
+			var data = { action: 'kalins_pdf_tool_defaults', _ajax_nonce : resetNonce};
 
-	self.deleteFile = function(){
-		var creationInProcess = false;
-		
-		var data = { action: 'kalins_pdf_create_all',
-			_ajax_nonce : createAllNonce
+			$http({method:"POST", url:ajaxurl, params: data}).
+			  success(function(data, status, headers, config) {
+				  self.oOptions = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
+				  self.sCreateStatus = "Defaults reset successfully.";
+			  }).
+			  error(function(data, status, headers, config) {
+			    self.sCreateStatus = "An error occurred: " + data;
+			  });
 		}
+	}
+
+	self.createDocument = function(){
+		angular.element('#sortDialog').dialog('close');
 		
-		if(!creationInProcess){
-			self.sCreateStatus = "Creating PDF files for all pages and posts.";
+		var data = JSON.parse( JSON.stringify( self.oOptions ) );
+		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
+		data._ajax_nonce = createNonce;//authorize it
+		data.pageIDs = angular.element("#sortable").sortable('toArray').join(",");
+
+		self.sCreateStatus = "Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.";
+		
+
+		console.log(data);
+
+		$http({method:"POST", url:ajaxurl, params: data}).
+		  success(function(data, status, headers, config) {
+
+				console.log(data);
+			  			
+			  var startPosition = data.indexOf("{")
+				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
+				
+				var newFileData = JSON.parse(responseObjString);
+				if(newFileData.status == "success"){
+					self.sCreateStatus = "File created successfully";
+					pdfList.push(newFileData);
+					//angular.element().buildFileTable();
+				}else{
+					self.sCreateStatus = "Error: " + newFileData.status;
+				}
+		  }).
+		  error(function(data, status, headers, config) {
+		    self.sCreateStatus = "An error occurred: " + data;
+		  });
+	}
+
+	self.deleteFile = function(fileName){
+		console.log("self.deleteFile!");
+		
+		var data = { action: 'kalins_pdf_tool_delete',
+			filename: fileName, 
+			_ajax_nonce : deleteNonce
 		}
 
 		$http({method:"POST", url:ajaxurl, params: data}).
@@ -154,7 +199,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 
 				console.log(data);
 				
-				var startPosition = data.indexOf("{");
+				/*var startPosition = data.indexOf("{");
 				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
 				
 				var newFileData = JSON.parse(responseObjString);
@@ -168,16 +213,12 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 						creationInProcess = true;
 						self.createAll();
 					}
-				}
+				}*/
 		  }).
 		  error(function(data, status, headers, config) {
 		    self.sCreateStatus = "An error occurred: " + data;
 		  });
 	}
-
-
-
-
 
 /*
 	function deleteFile(fileName, indexToDelete){//takes a single fileName or "all"
@@ -237,7 +278,7 @@ jQuery(document).ready(function($){
 			return "<td>" + str + "</td>";
 		}
 		
-		var tableHTML = "<table width='%100' border='1' cellspacing='1' cellpadding='3'><tr><th scope='col'>#</th><th scope='col'>File Name</th><th scope='col'>Creation Date</th><th scope='col'>Delete&nbsp;&nbsp;<button name='btnDeleteAll' id='btnDeleteAll'>Delete All</button></th></tr>";
+		var tableHTML = "<table width='%100' border='1' cellspacing='1' cellpadding='3'><tr><th scope='col'>#</th><th scope='col'>File Name</th><th scope='col'>Creation Date</th><th scope='col'>Delete&nbsp;&nbsp;<button name='btnDeleteAll' id='btnDeleteAll' >Delete All</button></th></tr>";
 			
 		var l = pdfList.length;
 		for(var i=0; i<l; i++){
@@ -317,13 +358,13 @@ jQuery(document).ready(function($){
 		});
 	}
 	
-	$('#btnCreate').click(function() {
+	/*$('#btnCreate').click(function() {
 		$('#sortDialog').dialog('close');
 								   
 		var sortString = $("#sortable").sortable('toArray').join(",");
 		
 		createDocument(sortString);
-	});
+	});*/
 	
 	$('#createNow').click(function() {
 		
@@ -408,75 +449,6 @@ jQuery(document).ready(function($){
 			}
 		});
 	}
-	
-	$('#btnReset').click(function(){
-		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form. (This will NOT delete or change your existing PDF documents.)")){
-			var data = { action: 'kalins_pdf_tool_defaults', _ajax_nonce : resetNonce};
-			
-			jQuery.post(ajaxurl, data, function(response) {
-				var newValues = JSON.parse(response.substr(0, response.lastIndexOf("}") + 1));
-				$('#txtBeforePage').val(newValues["beforePage"]);
-				$('#txtBeforePost').val(newValues["beforePost"]);
-				$('#txtAfterPage').val(newValues["afterPage"]);
-				$('#txtAfterPost').val(newValues["afterPost"]);
-				$('#txtTitlePage').val(newValues["titlePage"]);
-				$('#txtFinalPage').val(newValues["finalPage"]);
-				$('#txtFontSize').val(newValues["fontSize"]);
-				$('#txtHeaderTitle').val(newValues["headerTitle"]);
-				$('#txtHeaderSub').val(newValues["headerSub"]);
-				$('#txtFileName').val(newValues["filename"]);
-				
-				if(newValues["includeImages"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkIncludeImages').attr('checked', true);
-				}else{
-					$('#chkIncludeImages').attr('checked', false);
-				}
-				
-				if(newValues["runShortcodes"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkRunShortcodes').attr('checked', true);
-				}else{
-					$('#chkRunShortcodes').attr('checked', false);
-				}
-				
-				if(newValues["runFilters"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkRunFilters').attr('checked', true);
-				}else{
-					$('#chkRunFilters').attr('checked', false);
-				}
-				
-				if(newValues["convertYoutube"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertYoutube').attr('checked', true);
-				}else{
-					$('#chkConvertYoutube').attr('checked', false);
-				}
-				
-				if(newValues["convertVimeo"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertVimeo').attr('checked', true);
-				}else{
-					$('#chkConvertVimeo').attr('checked', false);
-				}
-				
-				if(newValues["convertTed"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkConvertTed').attr('checked', true);
-				}else{
-					$('#chkConvertTed').attr('checked', false);
-				}
-				
-				if(newValues["autoPageBreak"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkAutoPageBreak').attr('checked', true);
-				}else{
-					$('#chkAutoPageBreak').attr('checked', false);
-				}
-				
-				if(newValues["includeTOC"] == 'true'){//hmmm, maybe there's a way to get an actual boolean to be passed through instead of the string
-					$('#chkIncludeTOC').attr('checked', true);
-				}else{
-					$('#chkIncludeTOC').attr('checked', false);
-				}
-				
-			});
-		}
-	});
 	
 	$('#btnCreateCancel').click(function(){
 		$('#sortDialog').dialog('close');									 
@@ -656,8 +628,8 @@ jQuery(document).ready(function($){
 		        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
 		        </p>
 		        <p align="center"><br />
-		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
-		        <p align="center"><span id="createStatus">&nbsp;</span></p>
+		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' id='btnReset' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
+		        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 		        
 		    </div>
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>Existing PDF Files</b></div>
@@ -724,7 +696,7 @@ jQuery(document).ready(function($){
 		        
 		    </div>
 		    
-		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button id="btnCreate">Create PDF!</button></p></div>
+		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button id="btnCreate" ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
 	</div>
 </div>
 </html>

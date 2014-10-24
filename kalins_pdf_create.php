@@ -54,19 +54,19 @@ if($isSingle){
 			$singlePost = get_page($singleID);
 		}
 		
-		$fileName = $singlePost->post_name .'.pdf'; 
+		$filename = $singlePost->post_name .'.pdf';
 		
 	}else{
-		$fileName = $singleID .'.pdf';
+		$filename = $singleID .'.pdf';
 	}
 	
-	if(file_exists($pdfDir .$fileName)){//if the file already exists, simply redirect to that file and we're done
+	if(file_exists($pdfDir .$filename)){//if the file already exists, simply redirect to that file and we're done
 		if(!isset($skipReturn)){
-			header("Location: " .$pdfURL .$fileName);
+			header("Location: " .$pdfURL .$filename);
 		}
 		return;
 	}else{
-		$outputVar->fileName = $fileName;
+		$outputVar->fileName = $filename;
 		$outputVar->date = date("Y-m-d H:i:s", time());
 		
 		$adminOptions = kalins_pdf_get_admin_options();//for individual pages/posts we grab all the PDF options from the options page instead of the POST
@@ -92,52 +92,56 @@ if($isSingle){
 		$includeTOC = "false";//singles don't get no Table of contents
 	}
 }else{
-	try{
-		//$pdfDir = $uploadDir .'/kalins-pdf/';
-		
+	try{		
 		$pdfDir = KALINS_PDF_DIR;
 		
-		//echo $pdfDir ." pdf dir!!" .KALINS_PDF_DIR;
-		
-		if($_POST["fileNameCont"] != ""){
-			$fileName = kalins_pdf_global_shortcode_replace($_POST["fileNameCont"]) .".pdf";
+		if($_REQUEST["filename"] != ""){
+			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]) .".pdf";
 		}else{
-			$fileName = time() .".pdf";
+			$filename = time() .".pdf";
 		}
 		
 		//$documentType = "html";
-		$pageIDs = stripslashes($_POST["pageIDs"]);
-		$titlePage = stripslashes($_POST['titlePage']);
-		$finalPage = stripslashes($_POST['finalPage']);
-		$beforePage = stripslashes($_POST['beforePage']);
-		$beforePost = stripslashes($_POST['beforePost']);
-		$afterPage = stripslashes($_POST['afterPage']);
-		$afterPost = stripslashes($_POST['afterPost']);
-		$headerTitle = stripslashes($_POST['headerTitle']);
-		$headerSub = stripslashes($_POST['headerSub']);
+		$pageIDs = stripslashes($_REQUEST["pageIDs"]);
+		
+		$titlePage = stripslashes($_REQUEST['titlePage']);
+		$finalPage = stripslashes($_REQUEST['finalPage']);
+		$beforePage = stripslashes($_REQUEST['beforePage']);
+		$beforePost = stripslashes($_REQUEST['beforePost']);
+		$afterPage = stripslashes($_REQUEST['afterPage']);
+		$afterPost = stripslashes($_REQUEST['afterPost']);
+		$headerTitle = stripslashes($_REQUEST['headerTitle']);
+		$headerSub = stripslashes($_REQUEST['headerSub']);
 		//$headerKeyWords = "list, of, keywords,";
-		$includeImages = stripslashes($_POST['includeImages']);
-		$runShortcodes = stripslashes($_POST["runShortcodes"]);
-		$runFilters = stripslashes($_POST["runFilters"]);
-		$convertYoutube = stripslashes($_POST["convertYoutube"]);
-		$convertVimeo = stripslashes($_POST["convertVimeo"]);
-		$convertTed = stripslashes($_POST["convertTed"]);
-		//$includeTables = stripslashes($_POST['includeTables']);
-		$autoPageBreak = stripslashes($_POST["autoPageBreak"]);
-		$includeTOC = stripslashes($_POST["includeTOC"]);
-		$fontSize = (int) $_POST['fontSize'];
+		
+		//booleans
+		$includeImages = ($_REQUEST['includeImages'] === "true");
+		$runShortcodes = ($_REQUEST["runShortcodes"] === "true");
+		$runFilters = ($_REQUEST["runFilters"] === "true");
+		$convertYoutube = ($_REQUEST["convertYoutube"] === "true");
+		$convertVimeo = ($_REQUEST["convertVimeo"] === "true");
+		$convertTed = ($_REQUEST["convertTed"] === "true");
+		//$includeTables = ($_REQUEST['includeTables'] === "true");
+		$autoPageBreak = ($_REQUEST["autoPageBreak"] === "true");
+		$includeTOC = ($_REQUEST["includeTOC"] === "true");
+		
+		$fontSize = (int) $_REQUEST['fontSize'];
 		
 		$kalinsPDFToolOptions = array();//collect our passed in values so we can save them for next time
 			
 		$kalinsPDFToolOptions["headerTitle"] = $headerTitle;
 		$kalinsPDFToolOptions["headerSub"] = $headerSub;
-		$kalinsPDFToolOptions["filename"] = $_POST["fileNameCont"];
+		$kalinsPDFToolOptions["filename"] = $_REQUEST["filename"];
+		
+		//booleans
 		$kalinsPDFToolOptions["includeImages"] = $includeImages;
 		$kalinsPDFToolOptions["runShortcodes"] = $runShortcodes;
 		$kalinsPDFToolOptions["runFilters"] = $runFilters;
 		$kalinsPDFToolOptions["convertYoutube"] = $convertYoutube;
 		$kalinsPDFToolOptions["convertVimeo"] = $convertVimeo;
 		$kalinsPDFToolOptions["convertTed"] = $convertTed;
+		$kalinsPDFToolOptions["autoPageBreak"] = $autoPageBreak;
+		$kalinsPDFToolOptions["includeTOC"] = $includeTOC;
 		
 		//$convertVimeo
 		//$kalinsPDFToolOptions["includeTables"] = $includeTables;
@@ -148,21 +152,19 @@ if($isSingle){
 		$kalinsPDFToolOptions["titlePage"] = $titlePage;
 		$kalinsPDFToolOptions["finalPage"] = $finalPage;
 		$kalinsPDFToolOptions["fontSize"] = $fontSize;
-		$kalinsPDFToolOptions["autoPageBreak"] = $autoPageBreak;
-		$kalinsPDFToolOptions["includeTOC"] = $includeTOC;
-		
+				
 		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFToolOptions);//save options to database
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
 		echo json_encode($outputVar);
 	}	
 	
-	if(file_exists($pdfDir .$fileName)){//if the file already exists, echo an error and quit
+	if(file_exists($pdfDir .$filename)){//if the file already exists, echo an error and quit
 		$outputVar->status = "file already exists.";
 		echo json_encode($outputVar);
 		return;
 	}else{
-		$outputVar->fileName = $fileName;
+		$outputVar->fileName = $filename;
 		$outputVar->date = date("Y-m-d H:i:s", time());
 	}
 }
@@ -416,7 +418,7 @@ try{
 	
 	
 	//create and save the PDF document
-	$objTcpdf->Output( $pdfDir .$fileName, 'F' );
+	$objTcpdf->Output( $pdfDir .$filename, 'F' );
 } catch (Exception $e) {
 	$outputVar->status = "problem outputting the final PDF file.";
 	echo json_encode($outputVar);
@@ -427,7 +429,7 @@ $outputVar->status = "success";//set success status for output to AJAX
 
 if(!isset($skipReturn)){
 	if($isSingle){//if this is called from a page/post we redirect so that user can download pdf directly
-		header("Location: " .$pdfURL .$fileName);
+		header("Location: " .$pdfURL .$filename);
 	}else{
 		echo json_encode($outputVar);//if it's called from the creation station admin panel we output the result object to AJAX
 	}

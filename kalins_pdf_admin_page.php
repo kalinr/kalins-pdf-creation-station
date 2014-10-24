@@ -84,8 +84,6 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		data.action = 'kalins_pdf_admin_save';//tell wordpress what to call
 		data._ajax_nonce = saveNonce;//authorize it
 
-		console.log(data);
-
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {				
 				if(data.indexOf("success") > -1){
@@ -126,16 +124,11 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		}
 
 		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {
-
-				console.log(data);
-				
+		  success(function(data, status, headers, config) {				
 				var startPosition = data.indexOf("{");
 				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
-				
 				var newFileData = JSON.parse(responseObjString);
 				if(newFileData.status == "success"){
-					
 					if(newFileData.existCount >= newFileData.totalCount){
 						self.sCreateStatus = newFileData.totalCount  +  " PDF files successfully cached.";
 						creationInProcess = false;
