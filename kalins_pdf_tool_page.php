@@ -127,33 +127,29 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	var self = this;
 
 	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;            
+  $scope.tableParams = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,          // count per page
+    filter: {
+      fileName: ''       // initial filter
+    },
+    sorting: {
+      fileName: 'asc'     // initial sorting
+    }
+  }, {
+    total: pdfList.length, // length of pdfList
+    getData: function($defer, params) {
+      var filteredData = params.filter() ?
+          $filter('filter')(pdfList, params.filter()) :
+          pdfList;
+      var orderedData = params.sorting() ?
+          $filter('orderBy')(filteredData, params.orderBy()) :
+          pdfList;
 
-    $scope.tableParams = new ngTableParams({
-        page: 1,            // show first page
-        count: 10,          // count per page
-        filter: {
-            fileName: ''       // initial filter
-        },
-        sorting: {
-            fileName: 'asc'     // initial sorting
-        }
-    }, {
-        total: pdfList.length, // length of pdfList
-        getData: function($defer, params) {
-            // use build-in angular filter
-            var filteredData = params.filter() ?
-                    $filter('filter')(pdfList, params.filter()) :
-                    pdfList;
-            var orderedData = params.sorting() ?
-                    $filter('orderBy')(filteredData, params.orderBy()) :
-                    pdfList;
-
-            params.total(orderedData.length); // set total for recalc pagination
-            $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-        }
-    });
-
-
+      params.total(orderedData.length); // set total for recalc pagination
+      $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+    }
+  });
 	
 	var pageList = <?php echo json_encode($pageList);?>;
 	var postList = <?php echo json_encode($postList); ?>;
@@ -198,10 +194,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			  var startPosition = data.indexOf("{")
 				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
 				var newFileData = JSON.parse(responseObjString);
-				if(newFileData.status == "success"){
-					self.sCreateStatus = "File created successfully";
-					$scope.tableParams.data.push(newFileData);
-					//$scope.tableParams.reload();
+				if(newFileData.status == "success"){		
+					pdfList.push(newFileData);
+					$scope.tableParams.reload();
+					self.sCreateStatus = "File created successfully";	
 				}else{
 					self.sCreateStatus = "Error: " + newFileData.status;
 				}
@@ -210,7 +206,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    self.sCreateStatus = "An error occurred: " + data;
 		  });
 	}
-
 
 	self.createNow = function() {
 		
@@ -251,21 +246,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		sortString = sortString.substr(0, sortString.length - 1);
 		self.createDocument(sortString);
 	};
-
-
-
-
-//TODO: need to change indexToDelete to something internal to deleteFile() that figures out which item to delete since the index is incorrect
-//if the table is on anything above page 1.
-
-//TODO: pagination is not updating properly when we add/delete to the table. Look into wrapping $scope.tableParams = new ngTableParams({ into
-	//it's own function that gets called whenever there's an update
-
-
-
-
 	
-	self.deleteFile = function(filename, indexToDelete){
+	self.deleteFile = function(filename){
+		var indexToDelete = 0;
+		
 		var data = { action: 'kalins_pdf_tool_delete',
 			filename: filename, 
 			_ajax_nonce : deleteNonce
@@ -276,13 +260,30 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
 				if(newFileData.status == "success"){
 					if(filename == "all"){
-						$scope.tableParams.data.splice(0, $scope.tableParams.data.length);
+						pdfList.splice(0, $scope.tableParams.data.length);
+						$scope.tableParams.reload();
 						self.sCreateStatus = "Files deleted successfully";
 					}else{
+
+						//figure out which item to delete out of our array
+						for(var i =0; i<pdfList.length; i++){
+							if(filename === pdfList[i]['fileName']){
+								indexToDelete = i;
+								break;
+							}
+						}
+						
+						pdfList.splice(indexToDelete, 1);
+
+						var currentPage = $scope.tableParams.page();
+						//check if our current page data is empty and if so, go to previous page
+						//(even if we call reload() before this, we still check for 1.)
+						if($scope.tableParams.data.length === 1 && currentPage > 1){
+							$scope.tableParams.page(currentPage - 1);
+						}
+						$scope.tableParams.reload();
 						self.sCreateStatus = "File deleted successfully";
-						$scope.tableParams.data.splice(indexToDelete, 1);
 					}
-					//$scope.tableParams.reload();
 				}else{
 					self.sCreateStatus = newFileData.status;
 				}
@@ -326,21 +327,6 @@ jQuery(document).ready(function($){
 	
 		tableHTML += "</table>";
 		$('#pdfListDiv').html(tableHTML);
-		
-		for(i=0; i<l; i++){
-			$('#btnDelete_' + i).click(function(){
-				var fileIndex = parseInt($(this).attr('name').substr(10));		
-				if(confirm("Are you sure you want to delete " + pdfList[fileIndex].fileName + "?")){						
-					deleteFile(pdfList[fileIndex].fileName, fileIndex);
-				}
-			});
-		}
-		
-		$('#btnDeleteAll').click(function(){
-			if(confirm("Are you sure you want to delete all your custom created PDF files?")){
-				deleteFile("all");
-			}
-		});
 	}
 	
 	var selectAllPageState = true;
@@ -368,33 +354,6 @@ jQuery(document).ready(function($){
 		
 		selectAllPostState = !selectAllPostState;
 	});
-	
-	function deleteFile(fileName, indexToDelete){//takes a single fileName or "all"
-
-		var data = {action: 'kalins_pdf_tool_delete', filename: fileName, _ajax_nonce : deleteNonce};
-
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-		jQuery.post(ajaxurl, data, function(response) {
-			//alert('Got this from the server: ' + response.substr(0, response.lastIndexOf("}") + 1));
-			
-			//alert(response);
-			var newFileData = JSON.parse(response.substr(0, response.lastIndexOf("}") + 1));//parse response while removing strange trailing 0 from the response (anyone know why that 0 is being added by jquery or wordpress?)
-			if(newFileData.status == "success"){
-				if(fileName == "all"){
-					pdfList = new Array();
-					$('#createStatus').html("Files deleted successfully");
-				}else{
-					$('#createStatus').html("File deleted successfully");
-					pdfList.splice(indexToDelete, 1);
-				}
-				buildFileTable();
-			}else{
-				//if(newFileData.status == "exists"){
-				$('#createStatus').html(newFileData.status);
-				//}
-			}
-		});
-	}
 	
 	$('#btnCreateCancel').click(function(){
 		$('#sortDialog').dialog('close');									 
