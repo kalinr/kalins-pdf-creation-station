@@ -73,7 +73,7 @@
 
 <script type='text/javascript'>
 
-var app = angular.module('kalinsPDFToolPage', []);
+var app = angular.module('kalinsPDFToolPage', ['ngTable']);
 
 //TODO: turn this into a module in separate file so we don't repeat this code on the settings page
 app.controller("UIController",["$scope", function($scope) {
@@ -123,8 +123,57 @@ app.controller("UIController",["$scope", function($scope) {
 }]);
 
 
-app.controller("InputController",["$scope", "$http", function($scope, $http) {
+app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", function($scope, $http, $filter, ngTableParams) {
 	var self = this;
+
+    var data = [{name: "Moroni", age: 50, money: -10},
+                {name: "Tiancum", age: 43,money: 120},
+                {name: "Jacob", age: 27, money: 5.5},
+                {name: "Nephi", age: 29,money: -54},
+                {name: "Enos", age: 34,money: 110},
+                {name: "Tiancum", age: 43, money: 1000},
+                {name: "Jacob", age: 27,money: -201},
+                {name: "Nephi", age: 29, money: 100},
+                {name: "Enos", age: 34, money: -52.5},
+                {name: "Tiancum", age: 43, money: 52.1},
+                {name: "Jacob", age: 27, money: 110},
+                {name: "Nephi", age: 29, money: -55},
+                {name: "Enos", age: 34, money: 551},
+                {name: "Tiancum", age: 43, money: -1410},
+                {name: "Jacob", age: 27, money: 410},
+                {name: "Nephi", age: 29, money: 100},
+                {name: "Enos", age: 34, money: -100}];
+
+    $scope.tableParams = new ngTableParams({
+        page: 1,            // show first page
+        count: 10,          // count per page
+        filter: {
+            name: ''       // initial filter
+        },
+        sorting: {
+            name: 'asc'     // initial sorting
+        }
+    }, {
+        total: data.length, // length of data
+        getData: function($defer, params) {
+            // use build-in angular filter
+            var filteredData = params.filter() ?
+                    $filter('filter')(data, params.filter()) :
+                    data;
+            var orderedData = params.sorting() ?
+                    $filter('orderBy')(filteredData, params.orderBy()) :
+                    data;
+
+            params.total(orderedData.length); // set total for recalc pagination
+            $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+        }
+    });
+
+
+
+
+
+	
 
 	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
 	var pageList = <?php echo json_encode($pageList);?>;
@@ -287,9 +336,6 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	}
 	
 */
-
-	
-
 }]);
 
 
@@ -577,6 +623,8 @@ jQuery(document).ready(function($){
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>Existing PDF Files</b></div>
 		    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[5]"><p>List of compiled documents goes here</p></div>
 		    
+	
+		    
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(6)"><b>Shortcodes</b></div>
 		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[6]">
 		    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
@@ -639,6 +687,41 @@ jQuery(document).ready(function($){
 		    </div>
 		    
 		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
+	
+	
+	
+	
+	
+	
+					    <div>
+		    
+				<input type="text" ng-chan='tableParams.filter()' ></input>
+
+				
+
+        <button ng-click="tableParams.sorting({})" class="btn btn-default pull-right">Clear sorting</button>
+        <button ng-click="tableParams.filter({})" class="btn btn-default pull-right">Clear filter</button>
+        <p><strong>Sorting:</strong> {{tableParams.sorting()|json}}
+        <p><strong>Filter:</strong> {{tableParams.filter()|json}}
+    
+    
+        <table ng-table="tableParams" show-filter="true" class="table">
+            <tr ng-repeat="user in $data">
+                <td data-title="'Name'" sortable="'name'" filter="{ 'name': 'text' }">
+                    {{user.name}}
+                </td>
+                <td data-title="'Age'" sortable="'age'">
+                    {{user.age}}
+                </td>
+            </tr>
+        </table>
+		    
+		    </div>
+	
+	
+	
+	
+	
 	</div>
 </div>
 </html>
