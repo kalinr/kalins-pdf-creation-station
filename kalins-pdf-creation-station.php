@@ -44,6 +44,17 @@ use ProgressBar.class.php in a new php file in an iframe on tool page for pdf ge
 
 */
 
+
+
+
+//TODO: https://wordpress.org/support/topic/problem-with-admin-ajaxphp-adding-0-to-the-end-of-json-response
+//put die(); at end of every ajax call to prevent the 0 from printing so we can get pure JSON as a response 
+//so we don't need to parse the string on the client side
+
+
+
+
+
 if ( !function_exists( 'add_action' ) ) {
 	echo "Hi there!  I'm just a plugin, not much I can do when called directly.";
 	exit;
@@ -465,11 +476,11 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 	
 	check_ajax_referer( "kalins_pdf_tool_delete" );
 	$outputVar = new stdClass();
-	$fileName = $_POST["filename"];
+	$filename = $_REQUEST["filename"];
 	
 	$pdfDir = KALINS_PDF_DIR;
 		
-	if($fileName == "all"){//if we're deleting all of them
+	if($filename == "all"){//if we're deleting all of them
 		if ($handle = opendir($pdfDir)) {//open pdf directory
 			while (false !== ($file = readdir($handle))) {
 				if ($file != "." && $file != ".." && substr($file, stripos($file, ".")+1, 3) == "pdf") {//loop to find all relevant files 
@@ -482,9 +493,9 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 			$outputVar->status = "fail";
 		}
 	}else{
-		$fileName = $pdfDir .$fileName;
-		if(file_exists($fileName)){
-			unlink($fileName);//delete only the file passed in
+		$filename = $pdfDir .$filename;
+		if(file_exists($filename)){
+			unlink($filename);//delete only the file passed in
 			$outputVar->status = "success";
 		}else{
 			$outputVar->status = "fail";

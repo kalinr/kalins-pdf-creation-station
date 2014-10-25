@@ -34,11 +34,11 @@
 	$pdfList = array();
 	$count = 0;
 	
-	$uploads = wp_upload_dir();
+	//$uploads = wp_upload_dir();
 	//$pdfDir = $uploads['basedir'] .'/kalins-pdf/';
 	$pdfDir = KALINS_PDF_DIR;
 	
-	$pdfURL = $uploads['baseurl'] .'/kalins-pdf/';
+	//$pdfURL = $uploads['baseurl'] .'/kalins-pdf/';
 	
 	$pdfURL = KALINS_PDF_URL;
 	
@@ -126,43 +126,27 @@ app.controller("UIController",["$scope", function($scope) {
 app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", function($scope, $http, $filter, ngTableParams) {
 	var self = this;
 
-    var data = [{name: "Moroni", age: 50, money: -10},
-                {name: "Tiancum", age: 43,money: 120},
-                {name: "Jacob", age: 27, money: 5.5},
-                {name: "Nephi", age: 29,money: -54},
-                {name: "Enos", age: 34,money: 110},
-                {name: "Tiancum", age: 43, money: 1000},
-                {name: "Jacob", age: 27,money: -201},
-                {name: "Nephi", age: 29, money: 100},
-                {name: "Enos", age: 34, money: -52.5},
-                {name: "Tiancum", age: 43, money: 52.1},
-                {name: "Jacob", age: 27, money: 110},
-                {name: "Nephi", age: 29, money: -55},
-                {name: "Enos", age: 34, money: 551},
-                {name: "Tiancum", age: 43, money: -1410},
-                {name: "Jacob", age: 27, money: 410},
-                {name: "Nephi", age: 29, money: 100},
-                {name: "Enos", age: 34, money: -100}];
+	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;            
 
     $scope.tableParams = new ngTableParams({
         page: 1,            // show first page
         count: 10,          // count per page
         filter: {
-            name: ''       // initial filter
+            fileName: ''       // initial filter
         },
         sorting: {
-            name: 'asc'     // initial sorting
+            fileName: 'asc'     // initial sorting
         }
     }, {
-        total: data.length, // length of data
+        total: pdfList.length, // length of pdfList
         getData: function($defer, params) {
             // use build-in angular filter
             var filteredData = params.filter() ?
-                    $filter('filter')(data, params.filter()) :
-                    data;
+                    $filter('filter')(pdfList, params.filter()) :
+                    pdfList;
             var orderedData = params.sorting() ?
                     $filter('orderBy')(filteredData, params.orderBy()) :
-                    data;
+                    pdfList;
 
             params.total(orderedData.length); // set total for recalc pagination
             $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
@@ -170,12 +154,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
     });
 
 
-
-
-
 	
-
-	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
 	var pageList = <?php echo json_encode($pageList);?>;
 	var postList = <?php echo json_encode($postList); ?>;
 	var customList = <?php echo json_encode($customList); ?>;
@@ -221,8 +200,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var newFileData = JSON.parse(responseObjString);
 				if(newFileData.status == "success"){
 					self.sCreateStatus = "File created successfully";
-					pdfList.push(newFileData);
-					//angular.element().buildFileTable();
+					$scope.tableParams.data.push(newFileData);
+					//$scope.tableParams.reload();
 				}else{
 					self.sCreateStatus = "Error: " + newFileData.status;
 				}
@@ -273,69 +252,45 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		self.createDocument(sortString);
 	};
 
-	self.deleteFile = function(fileName){
-		console.log("self.deleteFile!");
-		
+
+
+
+//TODO: need to change indexToDelete to something internal to deleteFile() that figures out which item to delete since the index is incorrect
+//if the table is on anything above page 1.
+
+//TODO: pagination is not updating properly when we add/delete to the table. Look into wrapping $scope.tableParams = new ngTableParams({ into
+	//it's own function that gets called whenever there's an update
+
+
+
+
+	
+	self.deleteFile = function(filename, indexToDelete){
 		var data = { action: 'kalins_pdf_tool_delete',
-			filename: fileName, 
+			filename: filename, 
 			_ajax_nonce : deleteNonce
 		}
 
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {
-
-				console.log(data);
-				
-				/*var startPosition = data.indexOf("{");
-				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
-				
-				var newFileData = JSON.parse(responseObjString);
+				var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
 				if(newFileData.status == "success"){
-					
-					if(newFileData.existCount >= newFileData.totalCount){
-						self.sCreateStatus = newFileData.totalCount  +  " PDF files successfully cached.";
-						creationInProcess = false;
+					if(filename == "all"){
+						$scope.tableParams.data.splice(0, $scope.tableParams.data.length);
+						self.sCreateStatus = "Files deleted successfully";
 					}else{
-						self.sCreateStatus = newFileData.existCount + " out of " + newFileData.totalCount  +  " PDF files cached. Now building the next " +  newFileData.createCount + ".";
-						creationInProcess = true;
-						self.createAll();
+						self.sCreateStatus = "File deleted successfully";
+						$scope.tableParams.data.splice(indexToDelete, 1);
 					}
-				}*/
+					//$scope.tableParams.reload();
+				}else{
+					self.sCreateStatus = newFileData.status;
+				}
 		  }).
 		  error(function(data, status, headers, config) {
 		    self.sCreateStatus = "An error occurred: " + data;
 		  });
 	}
-
-/*
-	function deleteFile(fileName, indexToDelete){//takes a single fileName or "all"
-
-		var data = {action: 'kalins_pdf_tool_delete', filename: fileName, _ajax_nonce : deleteNonce};
-
-		// since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-		jQuery.post(ajaxurl, data, function(response) {
-			//alert('Got this from the server: ' + response.substr(0, response.lastIndexOf("}") + 1));
-			
-			//alert(response);
-			var newFileData = JSON.parse(response.substr(0, response.lastIndexOf("}") + 1));//parse response while removing strange trailing 0 from the response (anyone know why that 0 is being added by jquery or wordpress?)
-			if(newFileData.status == "success"){
-				if(fileName == "all"){
-					pdfList = new Array();
-					$('#createStatus').html("Files deleted successfully");
-				}else{
-					$('#createStatus').html("File deleted successfully");
-					pdfList.splice(indexToDelete, 1);
-				}
-				buildFileTable();
-			}else{
-				//if(newFileData.status == "exists"){
-				$('#createStatus').html(newFileData.status);
-				//}
-			}
-		});
-	}
-	
-*/
 }]);
 
 
@@ -671,51 +626,38 @@ jQuery(document).ready(function($){
 		    
 		    	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 		
-		<p>
-		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-		<input type="hidden" name="cmd" value="_s-xclick">
-		<input type="hidden" name="hosted_button_id" value="C6KPVS6HQRZJS">
-		<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate to Kalin Ringkvist's WordPress plugin development.">
-		<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
-		</form>
-		</p><br/>
+					<p>
+						<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+						<input type="hidden" name="cmd" value="_s-xclick">
+						<input type="hidden" name="hosted_button_id" value="C6KPVS6HQRZJS">
+						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate to Kalin Ringkvist's WordPress plugin development.">
+						<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+						</form>
+					</p><br/>
 		        
-		         <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
+		      <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
 		         
-		         <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
+		      <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
 		        
 		    </div>
 		    
 		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
 	
-	
-	
-	
-	
-	
-					    <div>
-		    
-				<input type="text" ng-chan='tableParams.filter()' ></input>
-
-				
-
-        <button ng-click="tableParams.sorting({})" class="btn btn-default pull-right">Clear sorting</button>
-        <button ng-click="tableParams.filter({})" class="btn btn-default pull-right">Clear filter</button>
-        <p><strong>Sorting:</strong> {{tableParams.sorting()|json}}
-        <p><strong>Filter:</strong> {{tableParams.filter()|json}}
-    
-    
-        <table ng-table="tableParams" show-filter="true" class="table">
-            <tr ng-repeat="user in $data">
-                <td data-title="'Name'" sortable="'name'" filter="{ 'name': 'text' }">
-                    {{user.name}}
-                </td>
-                <td data-title="'Age'" sortable="'age'">
-                    {{user.age}}
-                </td>
-            </tr>
-        </table>
-		    
+				<div>
+					<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
+	        <table ng-table="tableParams" show-filter="true" class="table">
+	          <tr ng-repeat="user in $data">
+	            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
+	            	<a href="<?php echo $pdfURL; ?>{{user.fileName}}">{{user.fileName}}</a>
+	            </td>
+	            <td data-title="'Date'" sortable="'date'">
+	              {{user.date}}
+	            </td>
+	            <td data-title="'Delete'">
+	             	<button ng-click="InputCtrl.deleteFile(user.fileName, $index);">Delete</button>
+	            </td>
+	          </tr>
+	        </table>
 		    </div>
 	
 	
