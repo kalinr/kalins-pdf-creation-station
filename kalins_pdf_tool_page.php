@@ -126,7 +126,7 @@ app.controller("UIController",["$scope", function($scope) {
 app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", function($scope, $http, $filter, ngTableParams) {
 	var self = this;
 
-	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;            
+	self.pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;            
   $scope.tableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
@@ -137,14 +137,14 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
       fileName: 'asc'     // initial sorting
     }
   }, {
-    total: pdfList.length, // length of pdfList
+    total: self.pdfList.length, // length of pdfList
     getData: function($defer, params) {
       var filteredData = params.filter() ?
-          $filter('filter')(pdfList, params.filter()) :
-          pdfList;
+          $filter('filter')(self.pdfList, params.filter()) :
+          self.pdfList;
       var orderedData = params.sorting() ?
           $filter('orderBy')(filteredData, params.orderBy()) :
-          pdfList;
+          self.pdfList;
 
       params.total(orderedData.length); // set total for recalc pagination
       $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
@@ -195,7 +195,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
 				var newFileData = JSON.parse(responseObjString);
 				if(newFileData.status == "success"){		
-					pdfList.push(newFileData);
+					self.pdfList.push(newFileData);
 					$scope.tableParams.reload();
 					self.sCreateStatus = "File created successfully";	
 				}else{
@@ -260,20 +260,20 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
 				if(newFileData.status == "success"){
 					if(filename == "all"){
-						pdfList.splice(0, $scope.tableParams.data.length);
+						self.pdfList.splice(0, $scope.tableParams.data.length);
 						$scope.tableParams.reload();
 						self.sCreateStatus = "Files deleted successfully";
 					}else{
 
 						//figure out which item to delete out of our array
-						for(var i =0; i<pdfList.length; i++){
-							if(filename === pdfList[i]['fileName']){
+						for(var i =0; i<self.pdfList.length; i++){
+							if(filename === self.pdfList[i]['fileName']){
 								indexToDelete = i;
 								break;
 							}
 						}
 						
-						pdfList.splice(indexToDelete, 1);
+						self.pdfList.splice(indexToDelete, 1);
 
 						var currentPage = $scope.tableParams.page();
 						//check if our current page data is empty and if so, go to previous page
@@ -299,35 +299,12 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 
 jQuery(document).ready(function($){
-	var pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
+	var pdfList = <?php echo json_encode($pdfList);//hand self.pdfListe objects and vars that javascript will need?>;
 	var pageList = <?php echo json_encode($pageList);?>;
 	var postList = <?php echo json_encode($postList); ?>;
 	var customList = <?php echo json_encode($customList); ?>;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
-	
-	function buildFileTable(){//build the file table - we build it all in javascript so we can simply rebuild it whenever an entry is added through ajax
-	
-		if(pdfList.length == 0){
-			$('#pdfListDiv').html("You do not have any custom PDF files.");
-			return;
-		}
-		
-		function tc(str){
-			return "<td>" + str + "</td>";
-		}
-		
-		var tableHTML = "<table width='%100' border='1' cellspacing='1' cellpadding='3'><tr><th scope='col'>#</th><th scope='col'>File Name</th><th scope='col'>Creation Date</th><th scope='col'>Delete&nbsp;&nbsp;<button name='btnDeleteAll' id='btnDeleteAll' >Delete All</button></th></tr>";
-			
-		var l = pdfList.length;
-		for(var i=0; i<l; i++){
-			var fileLink = tc("<a href='<?php echo $pdfURL; ?>" + pdfList[i].fileName + "' target='_blank'>" + pdfList[i].fileName + "</a>");
-			tableHTML += "<tr>" + tc(i) + fileLink + tc(pdfList[i].date) + tc("<button name='btnDelete_" + i + "' id='btnDelete_" + i + "'>Delete</button>") + "</tr>";
-		}
-	
-		tableHTML += "</table>";
-		$('#pdfListDiv').html(tableHTML);
-	}
 	
 	var selectAllPageState = true;
 	var selectAllPostState = true;
@@ -414,8 +391,6 @@ jQuery(document).ready(function($){
 			return false;
 		});
 	});
-
-	buildFileTable();
 });
 	
 </script>
@@ -535,10 +510,26 @@ jQuery(document).ready(function($){
 		        
 		    </div>
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>Existing PDF Files</b></div>
-		    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[5]"><p>List of compiled documents goes here</p></div>
-		    
-	
-		    
+		    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[5]">
+		    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
+			    <div ng-show="InputCtrl.pdfList.length > 0">
+			    	<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
+		        <table ng-table="tableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
+		          <tr ng-repeat="user in $data">
+		            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
+		            	<a href="<?php echo $pdfURL; ?>{{user.fileName}}">{{user.fileName}}</a>
+		            </td>
+		            <td data-title="'Date'" sortable="'date'">
+		              {{user.date}}
+		            </td>
+		            <td data-title="'Delete'">
+		             	<button ng-click="InputCtrl.deleteFile(user.fileName, $index);">Delete</button>
+		            </td>
+		          </tr>
+		        </table>
+			    </div>
+		    </div>
+
 		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(6)"><b>Shortcodes</b></div>
 		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[6]">
 		    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
@@ -600,29 +591,7 @@ jQuery(document).ready(function($){
 		        
 		    </div>
 		    
-		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>
-	
-				<div>
-					<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
-	        <table ng-table="tableParams" show-filter="true" class="table">
-	          <tr ng-repeat="user in $data">
-	            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
-	            	<a href="<?php echo $pdfURL; ?>{{user.fileName}}">{{user.fileName}}</a>
-	            </td>
-	            <td data-title="'Date'" sortable="'date'">
-	              {{user.date}}
-	            </td>
-	            <td data-title="'Delete'">
-	             	<button ng-click="InputCtrl.deleteFile(user.fileName, $index);">Delete</button>
-	            </td>
-	          </tr>
-	        </table>
-		    </div>
-	
-	
-	
-	
-	
+		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>	
 	</div>
 </div>
 </html>
