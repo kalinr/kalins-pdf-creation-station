@@ -29,6 +29,7 @@
 	//TODO: cleanup customList2 vs customList var names
 	//TODO: make this loop go forward instead of backward
 	//TODO: get rid of postList and pageList since it's all in one list now
+	//TODO: add post_id to use as a unique identifier when we try to add and move this around the angular draggable list
 	$l = count($customList);
 	for($i=$l - 1; $i >= 0; $i--){
 		if($customList[$i]->post_type === "nav_menu_item" || $customList[$i]->post_type === "attachment" || $customList[$i]->post_type === "revision"){
@@ -39,7 +40,7 @@
 		
 		$newItem->title = $customList[$i]->post_title;
 		$newItem->type = $customList[$i]->post_type;
-		$newItem->date = $customList[$i]->post_date;
+		$newItem->date = substr($customList[$i]->post_date, 0, strpos($customList[$i]->post_date, " "));
 		$newItem->status = $customList[$i]->post_status;
 		
 		$customList2[$i] = $newItem;
@@ -53,7 +54,8 @@
 	$pdfURL = KALINS_PDF_URL;
 	
 	if ($handle = opendir($pdfDir)) {
-
+		
+		//TODO: fix the substr check so that it's for simply .pdf so that people can use a . in the middle of their filename and still have it show up in the list
 		while (false !== ($file = readdir($handle))) {
 			if ($file != "." && $file != ".." && substr($file, stripos($file, ".")+1, 3) == "pdf") {//loop to find all relevant files 
 				$fileObj = new stdClass();
@@ -78,12 +80,14 @@
  	$elements = 100; //total number of elements to process
 	*/
 	
+	//echo phpinfo();
+	
 ?>
 
 
 <script type='text/javascript'>
 
-var app = angular.module('kalinsPDFToolPage', ['ngTable']);
+var app = angular.module('kalinsPDFToolPage', ['ngTable', 'ui.sortable']);
 
 //TODO: turn this into a module in separate file so we don't repeat this code on the settings page
 app.controller("UIController",["$scope", function($scope) {
@@ -144,6 +148,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
 	var resetNonce = '<?php echo $reset_nonce; ?>';
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
+	self.buildPostList = [];
 	
   $scope.postListTableParams = new ngTableParams({
     page: 1,            // show first page
@@ -238,6 +243,12 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  error(function(data, status, headers, config) {
 		    self.sCreateStatus = "An error occurred: " + data;
 		  });
+	}
+
+	//TODO: index is not matching up properly because it appears to be the index in the sorted array, not the original array (self.postList)
+	//need to pass in some kind of unique identifier and find the item
+	self.addPost = function(index){
+		self.buildPostList.push(self.postList[index]);
 	}
 
 	self.createNow = function() {
@@ -442,15 +453,14 @@ jQuery(document).ready(function($){
 		<div class="collapse" ng-click="UICtrl.toggleAll()"><b>{{UICtrl.sToggleAll}}</b></div>
 		
 		<div class="collapse" ng-click="UICtrl.toggleCollapsed(0)"><b>Select Pages and Posts</b></div>
-		<div class="wideHolder" ng-hide="UICtrl.aCollapsed[0]">
-		
+		<div class="generalHolder" ng-hide="UICtrl.aCollapsed[0]">
 			<div>
-			  <table ng-table="postListTableParams" class="table">
+			  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 	        <tr ng-repeat="user in $data">
-	          <td data-title="'Titleb'" sortable="'title'">
+	          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
 	          	{{user.title}}
 	          </td>
-	            <td data-title="'Date'" sortable="'date'">
+	          <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
 	            {{user.date}}
 	          </td>
 	          <td data-title="'Type'" sortable="'type'">
@@ -459,194 +469,165 @@ jQuery(document).ready(function($){
 	          <td data-title="'Status'" sortable="'status'">
 	            {{user.status}}
 	          </td>
+	          <td data-title="'Add'" ng-click="InputCtrl.addPost(user.listIndex);">
+	            <button>Add</button>
+	          </td>
 	        </tr>
-	      </table>      
+	      </table>
 			</div>
-		
-	    <div class='formDiv'>
-	        <button id="btnSelectAllPages">Select All</button> Pages:<br/><br/>
-	        <?php
-	            $l = count($pageList);
-				$indent = '';
-	            $previousIndent = '';
-	            $previousID = 0;
-	            for($i=0; $i<$l; $i++){//build our list of pages with checkboxes
-				
-	                $pageID = $pageList[$i]->ID;
-	                $parent = $pageList[$i]->post_parent;
-	                
-	                if($parent == 0){//if this is a top level page, don't indent
-	                    $indent = '';
-	                }else{
-	                    if($parent == $previousID){//if the parent is the previous page, add another three spaces of indentation (if pages are not returned by wordpress in proper order, indentation will fail)"
-	                        $indent = $previousIndent .'&nbsp;&nbsp;&nbsp;';
-	                    }
-	                }
-	                $previousID = $pageID;
-	                $previousIndent = $indent;
-	                echo($indent .'<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$pageList[$i]->post_title .'<br />');//create each checkbox and label
-	            }
-				
-	        ?>
-	    </div>
-	
-	    <div class="formDiv">
-	    	<button id="btnSelectAllPosts">Select All</button> Posts:<br/><br/>	
-	        <?php
-	            $l = count($postList);
-	            for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
-	                $pageID = $postList[$i]->ID;
-	                //echo $postList[$i]->post_parent;
-	                echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$postList[$i]->post_title .'<br />');
-	            }
-				
-				$l = count($customList);
-				
-				if($l > 0){//if we have something in our list of custom pages, echo the section then loop to add each one
-					echo "<hr/> Custom types: <br/>";
-					for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
-						$pageID = $customList[$i]->ID;
-						echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$customList[$i]->post_title .'<br />');
-					}
-				}
-	        ?>
-	    </div>
 		</div>
 		
-		<div class="collapse" ng-click="UICtrl.toggleCollapsed(1)"><b>Insert HTML before every page or post</b></div>
-		   <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[1]">
-		        <div class="textAreaDiv">
-		            <b>HTML to insert before every page:</b><br />
-		            <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
-		        </div>
-		        <div class="textAreaDiv">
-		            <b>HTML to insert before every post:</b><br />
-		            <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
-		        </div>
-		    </div>
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(2)"><b>Insert HTML after every page or post</b></div>
-		    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
-		        <div class="textAreaDiv">
-		            <b>HTML to insert after every page:</b><br />
-		            <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
-		        </div>
-		        <div class="textAreaDiv">
-		            <b>HTML to insert after every post:</b><br />
-		            <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
-		        </div>
-		    </div>
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(3)"><b>Insert HTML for title and final pages</b></div>
-		    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[3]">
-		        <div class="textAreaDiv">
-		            <b>HTML to insert for title page:</b><br />
-		            <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
-		        </div>
-		        <div class="textAreaDiv">
-		            <b>HTML to insert for final page:</b><br />
-		            <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
-		        </div>
-		    </div>
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(4)"><b>CREATE PDF!</b></div>
-		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[4]">
-		        <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
-		        <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p><br/>
-		        
-		         <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
-		         
-		         <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
-		         
-		         <br/>
-		        
-		        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
-		        </p>
-		        <p align="center"><br />
-		        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" ng-click="InputCtrl.createNow();" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
-		        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
-		        
-		    </div>
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>Existing PDF Files</b></div>
-		    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[5]">
-		    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
-			    <div ng-show="InputCtrl.pdfList.length > 0">
-			    	<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
-		        <table ng-table="pdfListTableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
-		          <tr ng-repeat="file in $data">
-		            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
-		            	<a href="<?php echo $pdfURL; ?>{{file.fileName}}">{{file.fileName}}</a>
-		            </td>
-		            <td data-title="'Date'" sortable="'date'">
-		              {{file.date}}
-		            </td>
-		            <td data-title="'Delete'">
-		             	<button ng-click="InputCtrl.deleteFile(file.fileName, $index);">Delete</button>
-		            </td>
-		          </tr>
-		        </table>
-			    </div>
-		    </div>
-
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(6)"><b>Shortcodes</b></div>
-		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[6]">
-		    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
-		    	<p><ul>
-		        <li><b>[current_time format="m-d-Y"]</b> -  PDF creation date/time <b>*</b></li>
-		        <li><b>[blog_name]</b> -  the name of the blog</li>
-		        <li><b>[blog_description]</b> - description of the blog</li>
-		        <li><b>[blog_url]</b> - blog base url</li>
-		        </ul>
-		        </p><br />
-		        
-		        <b>Page/post Shortcodes:</b> Use these codes before and after posts and pages<br />
-		        <p>
-		        <ul>
-		        <li><b>[ID]</b> - the ID number of the page/post</li>
-		        <li><b>[post_author type="display_name"]</b> - post author information. Possible types: ID, user_login, user_pass, user_nicename, user_email, user_url, display_name, user_firstname, user_lastname, nickname, description, primary_blog</li>
-		        <li><b>[post_permalink]</b> - the page permalink</li>
-		        <li><b>[post_date format="m-d-Y"]</b> - date page/post was created <b>*</b></li>
-		        <li><b>[post_date_gmt format="m-d-Y"]</b> - date page/post was created in gmt time <b>*</b></li>
-		        <li><b>[post_title]</b> - page/post title</li>
-		        <li><b>[post_excerpt length="250"]</b> - page/post excerpt (note the optional character 'length' parameter)</li>
-		        <li><b>[post_name]</b> - page/post slug name</li>
-		        <li><b>[post_modified format="m-d-Y"]</b> - date page/post was last modified <b>*</b></li>
-		        <li><b>[post_modified_gmt format="m-d-Y"]</b> - date page/post was last modified in gmt time <b>*</b></li>
-		        <li><b>[guid]</b> - url of the page/post</li>
-		        <li><b>[comment_count]</b> - number of comments posted for this post/page</li>
-		        <li><b>[post_meta name="custom_field_name"]</b> - page/post custom field value. Correct 'name' parameter required</li>
-		        <li><b>[post_tags delimeter=", " links="true"]</b> - post tags list. Optional 'delimiter' parameter sets separator text. Use optional 'links' parameter to turn off links to tag pages</li>
-		        <li><b>[post_categories delimeter=", " links="true"]</b> - post categories list. Parameters work like tag shortcode.</li>
-		        <li><b>[post_parent link="true"]</b> - post parent. Use optional 'link' parameter to turn off link</li>
-		        <li><b>[post_comments before="" after=""]</b> - post comments. Parameters represent text/HTML that will be inserted before and after comment list but will not be displayed if there are no comments. PHP coders: <a href="http://kalinbooks.com/2011/customize-comments-pdf-creation-station">learn how to customize comment display.</a></li>
-		        <li><b>[post_thumb size="full" extract="none"]</b> - URL to the page/post's featured image (requires theme support). Possible size paramaters: "thumbnail", "medium", "large" or "full". Possible extract prameters: "on" or "force". Setting extract to "on" will cause the shortcode to attempt to pull the first image from within the post if it cannot find a featured image. Using "force" will cause it to ignore the featured image altogether. Extracted images always return at the same size they appear in the post.</li>
-		        </ul></p>
-		        <p><b>*</b> Time shortcodes have an optional format parameter. Format your dates using these possible tokens: m=month, M=text month, F=full text month, d=day, D=short text Day Y=4 digit year, y=2 digit year, H=hour, i=minute, s=seconds. More tokens listed here: <a href="http://codex.wordpress.org/Formatting_Date_and_Time" target="_blank">http://codex.wordpress.org/Formatting_Date_and_Time.</a> </p>
-		        
-		        <p><b>Note: these shortcodes only work on this page.</b></p>
-		        <hr/>
-		        <p><b>The following tags are supported wherever HTML is allowed (according to TCPDF documentation):</b><br /> a, b, blockquote, br, dd, del, div, dl, dt, em, font, h1, h2, h3, h4, h5, h6, hr, i, img, li, ol, p, pre, small, span, strong, sub, sup, table, tcpdf, td, th, thead, tr, tt, u, ul. Also supports some XHTML, CSS, JavaScript and forms.</p>
-		        <p>Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.</p>
-		    
-		    </div>
-		    <div class="collapse" ng-click="UICtrl.toggleCollapsed(7)"><b>About</b></div>
-		    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[7]">
-		    
-		    	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
+		<div class="collapse" ng-click="UICtrl.toggleCollapsed(1)"><b>Select Pages and Posts</b></div>
+		<div class="generalHolder" ng-hide="UICtrl.aCollapsed[1]">
+			<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
+			<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
+				<tbody ui:sortable>
+	        <tr ng-repeat="user in InputCtrl.buildPostList">
+	          <td>
+	          	{{user.title}}
+	          </td>
+	          <td>
+	            {{user.date}}
+	          </td>
+	        </tr>
+	      </tbody>
+      </table>
+		</div>
 		
-					<p>
-						<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-						<input type="hidden" name="cmd" value="_s-xclick">
-						<input type="hidden" name="hosted_button_id" value="C6KPVS6HQRZJS">
-						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate to Kalin Ringkvist's WordPress plugin development.">
-						<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
-						</form>
-					</p><br/>
-		        
-		      <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
-		         
-		      <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
-		        
-		    </div>
-		    
-		    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>	
+		<div class="collapse" ng-click="UICtrl.toggleCollapsed(2)"><b>Insert HTML before every page or post</b></div>
+   <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
+        <div class="textAreaDiv">
+            <b>HTML to insert before every page:</b><br />
+            <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
+        </div>
+        <div class="textAreaDiv">
+            <b>HTML to insert before every post:</b><br />
+            <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
+        </div>
+    </div>
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(3)"><b>Insert HTML after every page or post</b></div>
+    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[3]">
+        <div class="textAreaDiv">
+            <b>HTML to insert after every page:</b><br />
+            <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
+        </div>
+        <div class="textAreaDiv">
+            <b>HTML to insert after every post:</b><br />
+            <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
+        </div>
+    </div>
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(4)"><b>Insert HTML for title and final pages</b></div>
+    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[4]">
+        <div class="textAreaDiv">
+            <b>HTML to insert for title page:</b><br />
+            <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
+        </div>
+        <div class="textAreaDiv">
+            <b>HTML to insert for final page:</b><br />
+            <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
+        </div>
+    </div>
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>CREATE PDF!</b></div>
+    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[5]">
+        <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
+        <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p><br/>
+        
+         <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
+         
+         <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
+         
+         <br/>
+        
+        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
+        </p>
+        <p align="center"><br />
+        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" ng-click="InputCtrl.createNow();" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
+        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
+        
+    </div>
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(6)"><b>Existing PDF Files</b></div>
+    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[6]">
+    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
+	    <div ng-show="InputCtrl.pdfList.length > 0">
+	    	<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
+        <table ng-table="pdfListTableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
+          <tr ng-repeat="file in $data">
+            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
+            	<a href="<?php echo $pdfURL; ?>{{file.fileName}}">{{file.fileName}}</a>
+            </td>
+            <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
+              {{file.date}}
+            </td>
+            <td data-title="'Delete'">
+             	<button ng-click="InputCtrl.deleteFile(file.fileName);">Delete</button>
+            </td>
+          </tr>
+        </table>
+	    </div>
+    </div>
+
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(7)"><b>Shortcodes</b></div>
+    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[7]">
+    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
+    	<p><ul>
+        <li><b>[current_time format="m-d-Y"]</b> -  PDF creation date/time <b>*</b></li>
+        <li><b>[blog_name]</b> -  the name of the blog</li>
+        <li><b>[blog_description]</b> - description of the blog</li>
+        <li><b>[blog_url]</b> - blog base url</li>
+        </ul>
+        </p><br />
+        
+        <b>Page/post Shortcodes:</b> Use these codes before and after posts and pages<br />
+        <p>
+        <ul>
+        <li><b>[ID]</b> - the ID number of the page/post</li>
+        <li><b>[post_author type="display_name"]</b> - post author information. Possible types: ID, user_login, user_pass, user_nicename, user_email, user_url, display_name, user_firstname, user_lastname, nickname, description, primary_blog</li>
+        <li><b>[post_permalink]</b> - the page permalink</li>
+        <li><b>[post_date format="m-d-Y"]</b> - date page/post was created <b>*</b></li>
+        <li><b>[post_date_gmt format="m-d-Y"]</b> - date page/post was created in gmt time <b>*</b></li>
+        <li><b>[post_title]</b> - page/post title</li>
+        <li><b>[post_excerpt length="250"]</b> - page/post excerpt (note the optional character 'length' parameter)</li>
+        <li><b>[post_name]</b> - page/post slug name</li>
+        <li><b>[post_modified format="m-d-Y"]</b> - date page/post was last modified <b>*</b></li>
+        <li><b>[post_modified_gmt format="m-d-Y"]</b> - date page/post was last modified in gmt time <b>*</b></li>
+        <li><b>[guid]</b> - url of the page/post</li>
+        <li><b>[comment_count]</b> - number of comments posted for this post/page</li>
+        <li><b>[post_meta name="custom_field_name"]</b> - page/post custom field value. Correct 'name' parameter required</li>
+        <li><b>[post_tags delimeter=", " links="true"]</b> - post tags list. Optional 'delimiter' parameter sets separator text. Use optional 'links' parameter to turn off links to tag pages</li>
+        <li><b>[post_categories delimeter=", " links="true"]</b> - post categories list. Parameters work like tag shortcode.</li>
+        <li><b>[post_parent link="true"]</b> - post parent. Use optional 'link' parameter to turn off link</li>
+        <li><b>[post_comments before="" after=""]</b> - post comments. Parameters represent text/HTML that will be inserted before and after comment list but will not be displayed if there are no comments. PHP coders: <a href="http://kalinbooks.com/2011/customize-comments-pdf-creation-station">learn how to customize comment display.</a></li>
+        <li><b>[post_thumb size="full" extract="none"]</b> - URL to the page/post's featured image (requires theme support). Possible size paramaters: "thumbnail", "medium", "large" or "full". Possible extract prameters: "on" or "force". Setting extract to "on" will cause the shortcode to attempt to pull the first image from within the post if it cannot find a featured image. Using "force" will cause it to ignore the featured image altogether. Extracted images always return at the same size they appear in the post.</li>
+        </ul></p>
+        <p><b>*</b> Time shortcodes have an optional format parameter. Format your dates using these possible tokens: m=month, M=text month, F=full text month, d=day, D=short text Day Y=4 digit year, y=2 digit year, H=hour, i=minute, s=seconds. More tokens listed here: <a href="http://codex.wordpress.org/Formatting_Date_and_Time" target="_blank">http://codex.wordpress.org/Formatting_Date_and_Time.</a> </p>
+        
+        <p><b>Note: these shortcodes only work on this page.</b></p>
+        <hr/>
+        <p><b>The following tags are supported wherever HTML is allowed (according to TCPDF documentation):</b><br /> a, b, blockquote, br, dd, del, div, dl, dt, em, font, h1, h2, h3, h4, h5, h6, hr, i, img, li, ol, p, pre, small, span, strong, sub, sup, table, tcpdf, td, th, thead, tr, tt, u, ul. Also supports some XHTML, CSS, JavaScript and forms.</p>
+        <p>Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.</p>
+    
+    </div>
+    <div class="collapse" ng-click="UICtrl.toggleCollapsed(8)"><b>About</b></div>
+    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[8]">
+    
+    	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
+
+			<p>
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+				<input type="hidden" name="cmd" value="_s-xclick">
+				<input type="hidden" name="hosted_button_id" value="C6KPVS6HQRZJS">
+				<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate to Kalin Ringkvist's WordPress plugin development.">
+				<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+				</form>
+			</p><br/>
+        
+      <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
+         
+      <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
+        
+    </div>
+    
+    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>	
 	</div>
 </div>
 </html>
