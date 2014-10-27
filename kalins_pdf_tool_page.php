@@ -17,29 +17,39 @@
 		$customList = get_posts('numberposts=-1&post_type=any&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);
 		$postList = get_posts('numberposts=-1&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);
 	}else{
-		$customList = get_posts('numberposts=-1&post_type=any');
+		$customList = get_posts('numberposts=-1&post_type=any&post_status=any');
 		$postList = get_posts('numberposts=-1');
 	}
 	
 	$pageList = get_pages();
 	
+	$customList2 = array();
+	
+	
+	//TODO: cleanup customList2 vs customList var names
+	//TODO: make this loop go forward instead of backward
+	//TODO: get rid of postList and pageList since it's all in one list now
 	$l = count($customList);
-	for($i=$l - 1; $i >= 0; $i--){//loop to remove all posts, pages and attachments from our custom list so we can have all custom types in the same array
-		if($customList[$i]->post_type == "post" || $customList[$i]->post_type == "attachment" || $customList[$i]->post_type == "page"){
-			unset($customList[$i]);
+	for($i=$l - 1; $i >= 0; $i--){
+		if($customList[$i]->post_type === "nav_menu_item" || $customList[$i]->post_type === "attachment" || $customList[$i]->post_type === "revision"){
+			continue;
 		}
-	}
-	$customList = array_values($customList);//recreate the array because somehow unset() doesn't re-index the array
+		
+		$newItem = new stdClass();
+		
+		$newItem->title = $customList[$i]->post_title;
+		$newItem->type = $customList[$i]->post_type;
+		$newItem->date = $customList[$i]->post_date;
+		$newItem->status = $customList[$i]->post_status;
+		
+		$customList2[$i] = $newItem;
+		
+	}	
+	$customList = array_values($customList2);
 	
 	$pdfList = array();
 	$count = 0;
-	
-	//$uploads = wp_upload_dir();
-	//$pdfDir = $uploads['basedir'] .'/kalins-pdf/';
 	$pdfDir = KALINS_PDF_DIR;
-	
-	//$pdfURL = $uploads['baseurl'] .'/kalins-pdf/';
-	
 	$pdfURL = KALINS_PDF_URL;
 	
 	if ($handle = opendir($pdfDir)) {
@@ -49,7 +59,7 @@
 				$fileObj = new stdClass();
 				$fileObj->fileName = $file;
 				$fileObj->date = date("Y-m-d H:i:s", filemtime($pdfDir .$file));
-				$pdfList[$count] = $fileObj;//compile array of file information simply to pass to javascript
+				$pdfList[$count] = $fileObj;//compile array of file information simply to pass to javascript				
 				$count++;
 			}
 		}
@@ -126,8 +136,40 @@ app.controller("UIController",["$scope", function($scope) {
 app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", function($scope, $http, $filter, ngTableParams) {
 	var self = this;
 
-	self.pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;            
-  $scope.tableParams = new ngTableParams({
+	self.pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
+	var pageList = <?php echo json_encode($pageList);?>;
+	var postList = <?php echo json_encode($postList); ?>;
+	self.postList = <?php echo json_encode($customList); ?>;
+	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
+	var deleteNonce = '<?php echo $delete_nonce; ?>';
+	var resetNonce = '<?php echo $reset_nonce; ?>';
+	self.oOptions = <?php echo json_encode($adminOptions); ?>;
+	
+  $scope.postListTableParams = new ngTableParams({
+    page: 1,            // show first page
+    count: 10,          // count per page
+    filter: {
+      title: ''       // initial filter
+    },
+    sorting: {
+      title: 'asc'     // initial sorting
+    }
+  }, {
+    total: self.postList.length, // length of postList
+    getData: function($defer, params) {
+      var filteredData = params.filter() ?
+          $filter('filter')(self.postList, params.filter()) :
+          self.postList;
+      var orderedData = params.sorting() ?
+          $filter('orderBy')(filteredData, params.orderBy()) :
+          self.postList;
+
+      params.total(orderedData.length); // set total for recalc pagination
+      $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));	      
+    }
+  });
+
+  $scope.pdfListTableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
     filter: {
@@ -150,15 +192,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
       $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
     }
   });
-	
-	var pageList = <?php echo json_encode($pageList);?>;
-	var postList = <?php echo json_encode($postList); ?>;
-	var customList = <?php echo json_encode($customList); ?>;
-	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
-	var deleteNonce = '<?php echo $delete_nonce; ?>';
-	var resetNonce = '<?php echo $reset_nonce; ?>';
-
-	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 
 	self.resetToDefaults = function(){		
 		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form. (This will NOT delete or change your existing PDF documents.)")){
@@ -196,7 +229,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var newFileData = JSON.parse(responseObjString);
 				if(newFileData.status == "success"){		
 					self.pdfList.push(newFileData);
-					$scope.tableParams.reload();
+					$scope.pdfListTableParams.reload();
 					self.sCreateStatus = "File created successfully";	
 				}else{
 					self.sCreateStatus = "Error: " + newFileData.status;
@@ -246,7 +279,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		sortString = sortString.substr(0, sortString.length - 1);
 		self.createDocument(sortString);
 	};
-	
+
+	//TODO: fix bug when delete all is called with a filter entered
+	//TODO: add a confirmation popup
 	self.deleteFile = function(filename){
 		var indexToDelete = 0;
 		
@@ -260,8 +295,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
 				if(newFileData.status == "success"){
 					if(filename == "all"){
-						self.pdfList.splice(0, $scope.tableParams.data.length);
-						$scope.tableParams.reload();
+						self.pdfList.splice(0, $scope.pdfListTableParams.data.length);
+						$scope.pdfListTableParams.reload();
 						self.sCreateStatus = "Files deleted successfully";
 					}else{
 
@@ -275,13 +310,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 						
 						self.pdfList.splice(indexToDelete, 1);
 
-						var currentPage = $scope.tableParams.page();
+						var currentPage = $scope.pdfListTableParams.page();
 						//check if our current page data is empty and if so, go to previous page
 						//(even if we call reload() before this, we still check for 1.)
-						if($scope.tableParams.data.length === 1 && currentPage > 1){
-							$scope.tableParams.page(currentPage - 1);
+						if($scope.pdfListTableParams.data.length === 1 && currentPage > 1){
+							$scope.pdfListTableParams.page(currentPage - 1);
 						}
-						$scope.tableParams.reload();
+						$scope.pdfListTableParams.reload();
 						self.sCreateStatus = "File deleted successfully";
 					}
 				}else{
@@ -408,54 +443,74 @@ jQuery(document).ready(function($){
 		
 		<div class="collapse" ng-click="UICtrl.toggleCollapsed(0)"><b>Select Pages and Posts</b></div>
 		<div class="wideHolder" ng-hide="UICtrl.aCollapsed[0]">
-		    <div class='formDiv'>
-		        <button id="btnSelectAllPages">Select All</button> Pages:<br/><br/>
-		        <?php
-		            $l = count($pageList);
-					$indent = '';
-		            $previousIndent = '';
-		            $previousID = 0;
-		            for($i=0; $i<$l; $i++){//build our list of pages with checkboxes
-					
-		                $pageID = $pageList[$i]->ID;
-		                $parent = $pageList[$i]->post_parent;
-		                
-		                if($parent == 0){//if this is a top level page, don't indent
-		                    $indent = '';
-		                }else{
-		                    if($parent == $previousID){//if the parent is the previous page, add another three spaces of indentation (if pages are not returned by wordpress in proper order, indentation will fail)"
-		                        $indent = $previousIndent .'&nbsp;&nbsp;&nbsp;';
-		                    }
-		                }
-		                $previousID = $pageID;
-		                $previousIndent = $indent;
-		                echo($indent .'<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$pageList[$i]->post_title .'<br />');//create each checkbox and label
-		            }
-					
-		        ?>
-		    </div>
 		
-		    <div class="formDiv">
-		    	<button id="btnSelectAllPosts">Select All</button> Posts:<br/><br/>	
-		        <?php
-		            $l = count($postList);
-		            for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
-		                $pageID = $postList[$i]->ID;
-		                //echo $postList[$i]->post_parent;
-		                echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$postList[$i]->post_title .'<br />');
-		            }
-					
-					$l = count($customList);
-					
-					if($l > 0){//if we have something in our list of custom pages, echo the section then loop to add each one
-						echo "<hr/> Custom types: <br/>";
-						for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
-							$pageID = $customList[$i]->ID;
-							echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$customList[$i]->post_title .'<br />');
-						}
+			<div>
+			  <table ng-table="postListTableParams" class="table">
+	        <tr ng-repeat="user in $data">
+	          <td data-title="'Titleb'" sortable="'title'">
+	          	{{user.title}}
+	          </td>
+	            <td data-title="'Date'" sortable="'date'">
+	            {{user.date}}
+	          </td>
+	          <td data-title="'Type'" sortable="'type'">
+	            {{user.type}}
+	          </td>
+	          <td data-title="'Status'" sortable="'status'">
+	            {{user.status}}
+	          </td>
+	        </tr>
+	      </table>      
+			</div>
+		
+	    <div class='formDiv'>
+	        <button id="btnSelectAllPages">Select All</button> Pages:<br/><br/>
+	        <?php
+	            $l = count($pageList);
+				$indent = '';
+	            $previousIndent = '';
+	            $previousID = 0;
+	            for($i=0; $i<$l; $i++){//build our list of pages with checkboxes
+				
+	                $pageID = $pageList[$i]->ID;
+	                $parent = $pageList[$i]->post_parent;
+	                
+	                if($parent == 0){//if this is a top level page, don't indent
+	                    $indent = '';
+	                }else{
+	                    if($parent == $previousID){//if the parent is the previous page, add another three spaces of indentation (if pages are not returned by wordpress in proper order, indentation will fail)"
+	                        $indent = $previousIndent .'&nbsp;&nbsp;&nbsp;';
+	                    }
+	                }
+	                $previousID = $pageID;
+	                $previousIndent = $indent;
+	                echo($indent .'<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$pageList[$i]->post_title .'<br />');//create each checkbox and label
+	            }
+				
+	        ?>
+	    </div>
+	
+	    <div class="formDiv">
+	    	<button id="btnSelectAllPosts">Select All</button> Posts:<br/><br/>	
+	        <?php
+	            $l = count($postList);
+	            for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
+	                $pageID = $postList[$i]->ID;
+	                //echo $postList[$i]->post_parent;
+	                echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$postList[$i]->post_title .'<br />');
+	            }
+				
+				$l = count($customList);
+				
+				if($l > 0){//if we have something in our list of custom pages, echo the section then loop to add each one
+					echo "<hr/> Custom types: <br/>";
+					for($i=0; $i<$l; $i++){//build our list of posts with checkboxes
+						$pageID = $customList[$i]->ID;
+						echo('<input type=checkbox id="chk' .$pageID .'" name="chk' .$pageID .'"></ input> ' .$customList[$i]->post_title .'<br />');
 					}
-		        ?>
-		    </div>
+				}
+	        ?>
+	    </div>
 		</div>
 		
 		<div class="collapse" ng-click="UICtrl.toggleCollapsed(1)"><b>Insert HTML before every page or post</b></div>
@@ -514,16 +569,16 @@ jQuery(document).ready(function($){
 		    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
 			    <div ng-show="InputCtrl.pdfList.length > 0">
 			    	<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
-		        <table ng-table="tableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
-		          <tr ng-repeat="user in $data">
+		        <table ng-table="pdfListTableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
+		          <tr ng-repeat="file in $data">
 		            <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
-		            	<a href="<?php echo $pdfURL; ?>{{user.fileName}}">{{user.fileName}}</a>
+		            	<a href="<?php echo $pdfURL; ?>{{file.fileName}}">{{file.fileName}}</a>
 		            </td>
 		            <td data-title="'Date'" sortable="'date'">
-		              {{user.date}}
+		              {{file.date}}
 		            </td>
 		            <td data-title="'Delete'">
-		             	<button ng-click="InputCtrl.deleteFile(user.fileName, $index);">Delete</button>
+		             	<button ng-click="InputCtrl.deleteFile(file.fileName, $index);">Delete</button>
 		            </td>
 		          </tr>
 		        </table>
