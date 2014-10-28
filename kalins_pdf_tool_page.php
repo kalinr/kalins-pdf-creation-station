@@ -15,49 +15,35 @@
 
 	if(defined("KALINS_PDF_POST_ORDER")){
 		$customList = get_posts('numberposts=-1&post_type=any&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);
-		$postList = get_posts('numberposts=-1&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);
 	}else{
-		$customList = get_posts('numberposts=-1&post_type=any&post_status=any');
-		$postList = get_posts('numberposts=-1');
+		$allPostList = get_posts('numberposts=-1&post_type=any&post_status=any');
 	}
 	
-	$pageList = get_pages();
-	
-	$customList2 = array();
-	
-	
-	//TODO: cleanup customList2 vs customList var names
-	//TODO: make this loop go forward instead of backward
-	//TODO: get rid of postList and pageList since it's all in one list now
-	//TODO: add post_id to use as a unique identifier when we try to add and move this around the angular draggable list
-	$l = count($customList);
-	for($i=$l - 1; $i >= 0; $i--){
-		if($customList[$i]->post_type === "nav_menu_item" || $customList[$i]->post_type === "attachment" || $customList[$i]->post_type === "revision"){
+	$customList = array();
+		
+	$l = count($allPostList);
+	for($i=0; $i<$l; $i++){
+		if($allPostList[$i]->post_type === "nav_menu_item" || $allPostList[$i]->post_type === "attachment" || $allPostList[$i]->post_type === "revision"){
 			continue;
 		}
 		
 		$newItem = new stdClass();
+		$newItem->ID = $allPostList[$i]->ID;
+		$newItem->title = $allPostList[$i]->post_title;
+		$newItem->type = $allPostList[$i]->post_type;
+		$newItem->date = substr($allPostList[$i]->post_date, 0, strpos($allPostList[$i]->post_date, " "));
+		$newItem->status = $allPostList[$i]->post_status;
 		
-		$newItem->title = $customList[$i]->post_title;
-		$newItem->type = $customList[$i]->post_type;
-		$newItem->date = substr($customList[$i]->post_date, 0, strpos($customList[$i]->post_date, " "));
-		$newItem->status = $customList[$i]->post_status;
-		
-		$customList2[$i] = $newItem;
-		
+		array_push($customList, $newItem);		
 	}	
-	$customList = array_values($customList2);
 	
 	$pdfList = array();
 	$count = 0;
 	$pdfDir = KALINS_PDF_DIR;
-	$pdfURL = KALINS_PDF_URL;
 	
-	if ($handle = opendir($pdfDir)) {
-		
-		//TODO: fix the substr check so that it's for simply .pdf so that people can use a . in the middle of their filename and still have it show up in the list
+	if ($handle = opendir($pdfDir)) {		
 		while (false !== ($file = readdir($handle))) {
-			if ($file != "." && $file != ".." && substr($file, stripos($file, ".")+1, 3) == "pdf") {//loop to find all relevant files 
+			if ($file != "." && $file != ".." && stripos($file, ".pdf") > 0) {//loop to find all relevant files (stripos is not case sensitive so it finds .PDF)
 				$fileObj = new stdClass();
 				$fileObj->fileName = $file;
 				$fileObj->date = date("Y-m-d H:i:s", filemtime($pdfDir .$file));
@@ -78,12 +64,8 @@
  	//$proBar->setForegroundColor('#ff0000');
 
  	$elements = 100; //total number of elements to process
-	*/
-	
-	//echo phpinfo();
-	
+	*/	
 ?>
-
 
 <script type='text/javascript'>
 
@@ -92,7 +74,7 @@ var app = angular.module('kalinsPDFToolPage', ['ngTable', 'ui.sortable']);
 //TODO: turn this into a module in separate file so we don't repeat this code on the settings page
 app.controller("UIController",["$scope", function($scope) {
 	var self = this;
-	self.aCollapsed = [false, false, false, false, false, false, false, false];//list of states for the main divs
+	self.aCollapsed = [false, false, false, false, false, false, false, false, false];//list of states for the main divs
 	self.bAllCollapsed = false;//state for close/open all button
 	self.sToggleAllTrue = "Open All";
 	self.sToggleAllFalse = "Close All";
@@ -111,7 +93,7 @@ app.controller("UIController",["$scope", function($scope) {
 		}
 
 		//if we have opened/closed more than half, set the open/close all button text appropriately
-		if(nStateCount > 4){
+		if(nStateCount > 5){
 			self.bAllCollapsed = !self.bAllCollapsed;
 			self.setToggleAllText();
 		}
@@ -139,14 +121,13 @@ app.controller("UIController",["$scope", function($scope) {
 
 app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", function($scope, $http, $filter, ngTableParams) {
 	var self = this;
-
-	self.pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
-	var pageList = <?php echo json_encode($pageList);?>;
-	var postList = <?php echo json_encode($postList); ?>;
-	self.postList = <?php echo json_encode($customList); ?>;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
 	var resetNonce = '<?php echo $reset_nonce; ?>';
+	
+	self.pdfUrl = "<?php echo KALINS_PDF_URL; ?>";
+	self.pdfList = <?php echo json_encode($pdfList);//hand over the objects and vars that javascript will need?>;
+	self.postList = <?php echo json_encode($customList); ?>;
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 	self.buildPostList = [];
 	
@@ -213,17 +194,22 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 	}
 
-	self.createDocument = function(sortString){
-		angular.element('#sortDialog').dialog('close');
-		
+	self.createDocument = function(){
 		var data = JSON.parse( JSON.stringify( self.oOptions ) );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
 		data._ajax_nonce = createNonce;//authorize it
-
-		if(sortString){
-			data.pageIDs = sortString;
-		}else{
-			data.pageIDs = angular.element("#sortable").sortable('toArray').join(",");
+		data.pageIDs = "";
+		
+		//loop to compile a string of pa_ and po_ that tells php which pages/posts to compile and whether to treat them as a page or post
+		for(var i = 0; i < self.buildPostList.length; i++){
+			if(self.buildPostList[i].type === "page"){
+				data.pageIDs = data.pageIDs + "pa_" + self.buildPostList[i].ID;
+			}else{
+				data.pageIDs = data.pageIDs + "po_" + self.buildPostList[i].ID;
+			}
+			if(i < self.buildPostList.length - 1){
+				data.pageIDs += ",";
+			}
 		}
 		self.sCreateStatus = "Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.";
 		
@@ -245,200 +231,72 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  });
 	}
 
-	//TODO: index is not matching up properly because it appears to be the index in the sorted array, not the original array (self.postList)
-	//need to pass in some kind of unique identifier and find the item
-	self.addPost = function(index){
-		self.buildPostList.push(self.postList[index]);
+	self.addPost = function(postID){
+		//loop to find the correct ID in our main postList
+		for(var i = 0; i<self.postList.length; i++){
+			if(self.postList[i].ID === postID){
+				//copy object in case user wants to add multipes of the same page. angular won't allow duplicates. Must use angular json filter
+				//to avoid copying angular's internal $$haskey that it uses to uniquely identify array elements
+				var newObj = JSON.parse($filter('json')(self.postList[i]));
+				self.buildPostList.push(newObj);
+				break;
+			}
+		}
 	}
 
-	self.createNow = function() {
-		
-		var sortString = '';
-
-		//TODO: pageCount var isn't necessary here. can use sortString.length
-		//TODO: angular.element is basically jQuery. We should be binding these values with angular
-		var pageCount = 0;
-		var l = pageList.length;		   
-		for(var i=0; i<l; i++){
-			if(angular.element('#chk' + pageList[i]['ID']).is(':checked')){
-				sortString += 'pg_' + pageList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-		
-		var l = customList.length;		   
-		for(var i=0; i<l; i++){
-			if(angular.element('#chk' + customList[i]['ID']).is(':checked')){
-				sortString += 'po_' + customList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-
-		var l = postList.length;		   
-		for(var i=0; i<l; i++){
-			if(angular.element('#chk' + postList[i]['ID']).is(':checked')){
-				sortString += 'po_' + postList[i]['ID'] + ",";
-				pageCount++;
-			}
-		}
-		
-		if(pageCount == 0){
-			self.sCreateStatus = "Error: you must select at least one page or post to create a PDF.";
-			return;
-		}
-		
-		sortString = sortString.substr(0, sortString.length - 1);
-		self.createDocument(sortString);
-	};
-
-	//TODO: fix bug when delete all is called with a filter entered
-	//TODO: add a confirmation popup
 	self.deleteFile = function(filename){
-		var indexToDelete = 0;
-		
-		var data = { action: 'kalins_pdf_tool_delete',
-			filename: filename, 
-			_ajax_nonce : deleteNonce
+		var confirmText = "Are you sure you want to delete " + filename + "?";
+		if(filename === "all"){
+			confirmText = "Are you sure you want to delete every file you have created?";
 		}
-
-		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {
-				var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
-				if(newFileData.status == "success"){
-					if(filename == "all"){
-						self.pdfList.splice(0, $scope.pdfListTableParams.data.length);
-						$scope.pdfListTableParams.reload();
-						self.sCreateStatus = "Files deleted successfully";
-					}else{
-
-						//figure out which item to delete out of our array
-						for(var i =0; i<self.pdfList.length; i++){
-							if(filename === self.pdfList[i]['fileName']){
-								indexToDelete = i;
-								break;
+		
+		if(confirm(confirmText)){
+			var indexToDelete = 0;
+			
+			var data = { action: 'kalins_pdf_tool_delete',
+				filename: filename, 
+				_ajax_nonce : deleteNonce
+			}
+	
+			$http({method:"POST", url:ajaxurl, params: data}).
+			  success(function(data, status, headers, config) {
+					var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
+					if(newFileData.status == "success"){
+						if(filename == "all"){
+							self.pdfList.splice(0, self.pdfList.length);
+							$scope.pdfListTableParams.reload();
+							self.sCreateStatus = "Files deleted successfully";
+						}else{
+	
+							//figure out which item to delete out of our array
+							for(var i =0; i<self.pdfList.length; i++){
+								if(filename === self.pdfList[i]['fileName']){
+									indexToDelete = i;
+									break;
+								}
 							}
+							
+							self.pdfList.splice(indexToDelete, 1);
+	
+							var currentPage = $scope.pdfListTableParams.page();
+							//check if our current page data is empty and if so, go to previous page
+							//(even if we call reload() before this, we still check for 1.)
+							if($scope.pdfListTableParams.data.length === 1 && currentPage > 1){
+								$scope.pdfListTableParams.page(currentPage - 1);
+							}
+							$scope.pdfListTableParams.reload();
+							self.sCreateStatus = "File deleted successfully";
 						}
-						
-						self.pdfList.splice(indexToDelete, 1);
-
-						var currentPage = $scope.pdfListTableParams.page();
-						//check if our current page data is empty and if so, go to previous page
-						//(even if we call reload() before this, we still check for 1.)
-						if($scope.pdfListTableParams.data.length === 1 && currentPage > 1){
-							$scope.pdfListTableParams.page(currentPage - 1);
-						}
-						$scope.pdfListTableParams.reload();
-						self.sCreateStatus = "File deleted successfully";
+					}else{
+						self.sCreateStatus = newFileData.status;
 					}
-				}else{
-					self.sCreateStatus = newFileData.status;
-				}
-		  }).
-		  error(function(data, status, headers, config) {
-		    self.sCreateStatus = "An error occurred: " + data;
-		  });
+			  }).
+			  error(function(data, status, headers, config) {
+			    self.sCreateStatus = "An error occurred: " + data;
+			  });
+		}
 	}
-}]);
-
-
-
-
-
-jQuery(document).ready(function($){
-	var pdfList = <?php echo json_encode($pdfList);//hand self.pdfListe objects and vars that javascript will need?>;
-	var pageList = <?php echo json_encode($pageList);?>;
-	var postList = <?php echo json_encode($postList); ?>;
-	var customList = <?php echo json_encode($customList); ?>;
-	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
-	var deleteNonce = '<?php echo $delete_nonce; ?>';
-	
-	var selectAllPageState = true;
-	var selectAllPostState = true;
-	
-	$('#btnSelectAllPages').click(function() {
-		var l = pageList.length;
-		for(var i=0; i<l; i++){
-			$('#chk' + pageList[i]['ID']).attr('checked', selectAllPageState);	
-		}
-		
-		selectAllPageState = !selectAllPageState;
-	});
-	
-	$('#btnSelectAllPosts').click(function() {
-		var l = postList.length; 
-		for(var i=0; i<l; i++){
-			$('#chk' + postList[i]['ID']).attr('checked', selectAllPostState);
-		}
-		
-		l = customList.length;
-		for(var i=0; i<l; i++){
-			$('#chk' + customList[i]['ID']).attr('checked', selectAllPostState);	
-		}
-		
-		selectAllPostState = !selectAllPostState;
-	});
-	
-	$('#btnCreateCancel').click(function(){
-		$('#sortDialog').dialog('close');									 
-	});
-	
-	$(function() {
-		
-		$('#sortDialog').dialog({
-			autoOpen: false,
-			hide: 'explode',
-			width: 370,
-			resizable:false,
-			modal: true
-		});
-			
-		$('#btnOpenDialog').click(function() {
-			
-			var sortHTML = '<ul id="sortable">';
-			var pageCount = 0;
-			var l = pageList.length;		   
-			for(var i=0; i<l; i++){
-				if($('#chk' + pageList[i]['ID']).is(':checked')){
-					sortHTML += '<li class="ui-state-default" id="pg_' + pageList[i]['ID'] + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>' + pageList[i].post_title + '</li>';
-					pageCount++;
-				}
-			}
-	
-			var l = customList.length;		   
-			for(var i=0; i<l; i++){
-				if($('#chk' + customList[i]['ID']).is(':checked')){
-					sortHTML += '<li class="ui-state-default" id="po_' + customList[i]['ID'] + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>' + customList[i].post_title + '</li>';
-					pageCount++;
-				}
-			}
-	
-			var l = postList.length;		   
-			for(var i=0; i<l; i++){
-				if($('#chk' + postList[i]['ID']).is(':checked')){
-					sortHTML += '<li class="ui-state-default" id="po_' + postList[i]['ID'] + '"><span class="ui-icon ui-icon-arrowthick-2-n-s"></span>' + postList[i].post_title + '</li>';
-					pageCount++;
-				}
-			}
-			
-			if(pageCount == 0){
-				$('#createStatus').html("Error: you must select at least one page or post to create a PDF.");
-				return;
-			}
-			
-			sortHTML += '</ul>';
-			$('#sortHolder').html(sortHTML);
-						
-			$(function() {//set the div as sortable every time we open the dialog (doing this earlier and just calling refresh didn't work)
-				$("#sortable").sortable();
-				$("#sortable").disableSelection();
-			});
-		
-			$('#sortDialog').dialog('open');
-			return false;
-		});
-	});
-});
-	
+}]);	
 </script>
 
 <div ng-app="kalinsPDFToolPage" ng-controller="UIController as UICtrl">
@@ -456,20 +314,20 @@ jQuery(document).ready(function($){
 		<div class="generalHolder" ng-hide="UICtrl.aCollapsed[0]">
 			<div>
 			  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
-	        <tr ng-repeat="user in $data">
+	        <tr ng-repeat="post in $data">
 	          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
-	          	{{user.title}}
+	          	{{post.title}}
 	          </td>
 	          <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
-	            {{user.date}}
+	            {{post.date}}
 	          </td>
 	          <td data-title="'Type'" sortable="'type'">
-	            {{user.type}}
+	            {{post.type}}
 	          </td>
 	          <td data-title="'Status'" sortable="'status'">
-	            {{user.status}}
+	            {{post.status}}
 	          </td>
-	          <td data-title="'Add'" ng-click="InputCtrl.addPost(user.listIndex);">
+	          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
 	            <button>Add</button>
 	          </td>
 	        </tr>
@@ -481,7 +339,7 @@ jQuery(document).ready(function($){
 		<div class="generalHolder" ng-hide="UICtrl.aCollapsed[1]">
 			<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 			<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
-				<tbody ui:sortable>
+				<tbody ui:sortable ng-model="InputCtrl.buildPostList">
 	        <tr ng-repeat="user in InputCtrl.buildPostList">
 	          <td>
 	          	{{user.title}}
@@ -498,62 +356,71 @@ jQuery(document).ready(function($){
    <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[2]">
         <div class="textAreaDiv">
             <b>HTML to insert before every page:</b><br />
-            <textarea class="txtArea" name='txtBeforePage' id='txtBeforePage' rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.beforePage"></textarea>
         </div>
         <div class="textAreaDiv">
             <b>HTML to insert before every post:</b><br />
-            <textarea class="txtArea" name='txtBeforePost' id='txtBeforePost' rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.beforePost"></textarea>
         </div>
     </div>
     <div class="collapse" ng-click="UICtrl.toggleCollapsed(3)"><b>Insert HTML after every page or post</b></div>
     <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[3]">
         <div class="textAreaDiv">
             <b>HTML to insert after every page:</b><br />
-            <textarea class="txtArea" name='txtAfterPage' id='txtAfterPage' rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.afterPage"></textarea>
         </div>
         <div class="textAreaDiv">
             <b>HTML to insert after every post:</b><br />
-            <textarea class="txtArea" name='txtAfterPost' id='txtAfterPost' rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.afterPost"></textarea>
         </div>
     </div>
     <div class="collapse" ng-click="UICtrl.toggleCollapsed(4)"><b>Insert HTML for title and final pages</b></div>
     <div class="txtfieldHolder" ng-hide="UICtrl.aCollapsed[4]">
         <div class="textAreaDiv">
             <b>HTML to insert for title page:</b><br />
-            <textarea class="txtArea" name='txtTitlePage' id='txtTitlePage' rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.titlePage"></textarea>
         </div>
         <div class="textAreaDiv">
             <b>HTML to insert for final page:</b><br />
-            <textarea class="txtArea" name='txtFinalPage' id='txtFinalPage' rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
+            <textarea class="txtArea" rows='8' ng-model="InputCtrl.oOptions.finalPage"></textarea>
         </div>
     </div>
     <div class="collapse" ng-click="UICtrl.toggleCollapsed(5)"><b>CREATE PDF!</b></div>
     <div class="generalHolder" ng-hide="UICtrl.aCollapsed[5]">
-        <p>Header title: <input type='text' name='txtHeaderTitle' id='txtHeaderTitle' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
-        <p>Header sub title: <input type='text' name='txtHeaderSub' id='txtHeaderSub' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p><br/>
+      <p>Header title: <input type='text' class='txtHeader' ng-model="InputCtrl.oOptions.headerTitle"></input></p>
+      <p>Header sub title: <input type='text' class='txtHeader' ng-model="InputCtrl.oOptions.headerSub"></input></p><br/>
         
-         <p><input type='checkbox' id='chkIncludeImages' name='chkIncludeImages' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" id="txtFontSize" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' id='chkRunShortcodes' name='chkRunShortcodes' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, &nbsp;<input type='checkbox' id='chkRunFilters' name='chkRunFilters' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</p>
+      <p><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images 
+      	  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type="text" size="2" maxlength="3" ng-model="InputCtrl.oOptions.fontSize" /> Content font size 
+       		&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes, 
+       		&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters
+      </p>
          
-         <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' id='chkConvertYoutube' name='chkConvertYoutube' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, &nbsp;<input type='checkbox' id='chkConvertVimeo' name='chkConvertVimeo' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, &nbsp;<input type='checkbox' id='chkConvertTed' name='chkConvertTed' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</p>
-         
-         <br/>
-        
-        File name: <input type="text" name='txtFileName' id='txtFileName' ng-model="InputCtrl.oOptions.filename" ></input>.pdf  &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkAutoPageBreak' name='chkAutoPageBreak' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' id='chkIncludeTOC' name='chkIncludeTOC' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
-        </p>
-        <p align="center"><br />
-        <button id="btnOpenDialog">Create PDF!</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type='button' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a name="createNow" id="createNow" href="javascript:void(0);" ng-click="InputCtrl.createNow();" title="Use this if the 'Create PDF!' button won't properly show the popup. You won't be able to re-order your pages, but at least you can create a document.">create now!</a></p>
-        <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
-        
+      <p>Convert videos to links: &nbsp;&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube, 
+       		&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo, 
+       		&nbsp;<input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks
+      </p>  
+      <br/>
+      File name: <input type="text" ng-model="InputCtrl.oOptions.filename" ></input>.pdf  
+      		&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks 
+      		&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; <input type='checkbox' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
+      </p>
+      <p align="center"><br />
+       		<button ng-click="InputCtrl.createDocument();")>Create PDF!</button>
+       		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+       		<button type='button' ng-click='InputCtrl.resetToDefaults();'>Reset Defaults</button>
+      </p>
+      <p align="center">{{InputCtrl.sCreateStatus}}</p>    
     </div>
     <div class="collapse" ng-click="UICtrl.toggleCollapsed(6)"><b>Existing PDF Files</b></div>
-    <div class="generalHolder" id="pdfListDiv" ng-hide="UICtrl.aCollapsed[6]">
+    <div class="generalHolder" ng-hide="UICtrl.aCollapsed[6]">
     	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
 	    <div ng-show="InputCtrl.pdfList.length > 0">
 	    	<button ng-click="InputCtrl.deleteFile('all');">Delete all</button>
         <table ng-table="pdfListTableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
           <tr ng-repeat="file in $data">
             <td data-title="'Name'" sortable="'fileName'" filter="{ 'fileName': 'text' }">
-            	<a href="<?php echo $pdfURL; ?>{{file.fileName}}">{{file.fileName}}</a>
+            	<a href="{{InputCtrl.pdfUrl + file.fileName}}" target="_blank">{{file.fileName}}</a>
             </td>
             <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
               {{file.date}}
@@ -624,10 +491,8 @@ jQuery(document).ready(function($){
       <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
          
       <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
-        
-    </div>
-    
-    <div id="sortDialog" title="Adjust Order and Create"><div id="sortHolder" class="sortHolder"></div><p align="center"><br /><button id="btnCreateCancel">Cancel</button>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<button ng-click="InputCtrl.createDocument();">Create PDF!</button></p></div>	
+   
+    </div>    
 	</div>
 </div>
 </html>
