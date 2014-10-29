@@ -119,16 +119,20 @@ function kalins_pdf_admin_init(){
 	register_deactivation_hook( __FILE__, 'kalins_pdf_cleanup' );
 	
 	
-	//wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/bootstrap.css');
-	//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css
+//	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
 	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
-	wp_register_style('kalinPDF_ng-tableStyle', 'http://bazalt-cms.com/assets/ng-table/0.3.0/ng-table.css');
+	//wp_register_style('kalinPDF_ng-tableStyle', 'http://bazalt-cms.com/assets/ng-table/0.3.0/ng-table.css');
 	
 	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
 	
-	wp_register_script( 'kalinPDFAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/angular.js' );
-	wp_register_script( 'kalinPDF_ng-table', WP_PLUGIN_URL . '/kalins-pdf-creation-station/ng-table.js' );
-	wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/angular-ui-sortable.js' );
+	wp_register_script( 'kalinPDFAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular.js' );
+	wp_register_script( 'kalinPDF_ng-table', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ng-table.js' );
+	wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular-ui-sortable.js' );
+	
+	wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
+	
+	//TODO: move this into our vendor folder if it's needed. delete it if it's not.
+	//wp_register_script( 'kalinPDF_bootstrapJS', 'http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js');
 
 	//--------------you may comment-out the foreach loop if you are using hard-coded PDF links in your theme. This will make your admin panels run slightly more efficiently.-------------
 	
@@ -163,18 +167,20 @@ function kalins_pdf_configure_pages() {
 function kalins_pdf_admin_head() {
 	
 	//echo "My plugin admin head";
-	wp_enqueue_script("jquery");
+	//wp_enqueue_script("jquery");
 	wp_enqueue_script("jquery-ui-sortable");
-	wp_enqueue_script("jquery-ui-dialog");
+	//wp_enqueue_script("jquery-ui-dialog");
 	wp_enqueue_script( 'kalinPDFAngularJS' );
 	wp_enqueue_script( 'kalinPDF_ng-table' );
 	wp_enqueue_script( 'kalinPDF_angular-ui' );
+	//wp_enqueue_script( 'kalinPDF_bootstrapJS' );
+	wp_enqueue_script( 'kalinPDF_angular-bootstrap' );
 }
 
 function kalins_pdf_admin_styles(){//not sure why this didn't work if called from pdf_admin_head	
 	//wp_enqueue_style('kalinPDF_ng-tableStyle');
 	
-	//wp_enqueue_style('kalinPDFBootstrapStyle');
+	wp_enqueue_style('kalinPDFBootstrapStyle');
 	wp_enqueue_style('kalinPDFStyle');
 }
 
