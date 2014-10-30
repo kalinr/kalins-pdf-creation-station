@@ -316,7 +316,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<accordion close-others="false">
 	    <accordion-group is-open="groupOpen[0]">
 		    <accordion-heading>
-		      <div>Add pages and posts<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[0], 'glyphicon-chevron-right': !groupOpen[0]}"></i></div>
+		      <div><strong>Add pages and posts</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[0], 'glyphicon-chevron-right': !groupOpen[0]}"></i></div>
 	      </accordion-heading>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 		        <tr ng-repeat="post in $data">
@@ -341,7 +341,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			
 	    <accordion-group is-open="groupOpen[1]">
 		    <accordion-heading>
-		      <div>My document<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[1], 'glyphicon-chevron-right': !groupOpen[1]}"></i></div>
+		      <div><strong>My document</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[1], 'glyphicon-chevron-right': !groupOpen[1]}"></i></div>
 	      </accordion-heading>
 				<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 				<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
@@ -359,105 +359,105 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			</accordion-group>
 			
 			
-		    <accordion-group is-open="groupOpen[2]">
-			    <accordion-heading>
-			      <div>Insert HTML before every page or post<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[2], 'glyphicon-chevron-right': !groupOpen[2]}"></i></div>
-		      </accordion-heading>
-	        <b>HTML to insert before every page:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
-	        <b>HTML to insert before every post:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePost"></textarea>
-		    </accordion-group>
-	
-		    <accordion-group is-open="groupOpen[3]">
-			    <accordion-heading>
-			      <div>Insert HTML after every page or post<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[3], 'glyphicon-chevron-right': !groupOpen[3]}"></i></div>
-		      </accordion-heading>
-	        <b>HTML to insert after every page:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
-	        <b>HTML to insert after every post:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPost"></textarea>
-		    </accordion-group>
-	
-		    <accordion-group is-open="groupOpen[4]">
-			    <accordion-heading>
-			      <div>Insert HTML for title and final pages<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[4], 'glyphicon-chevron-right': !groupOpen[4]}"></i></div>
-		      </accordion-heading>
-	        <b>HTML to insert for title page:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
-	        <b>HTML to insert for final page:</b><br />
-	        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.finalPage"></textarea>
-		    </accordion-group>
-		    
-		    <accordion-group is-open="groupOpen[5]">
-			    <accordion-heading>
-			      <div>CREATE PDF!<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[5], 'glyphicon-chevron-right': !groupOpen[5]}"></i></div>
-		      </accordion-heading>
-		      <form class="form-horizontal" role="form">
-			      <div class="form-group">
-				      <label for="txtHeaderTitle" class="control-label col-xs-2">Header title:</label>
-				      <div class="col-xs-10">
-				      	<input id="txtHeaderTitle" type='text' class="form-control" ng-model="InputCtrl.oOptions.headerTitle"></input>
-				      </div>
-				    </div>
-				    <div class="form-group">
-				      <label for="txtHeaderSub" class="control-label col-xs-2">Header sub title:</label>
-				      <div class="col-xs-10">
-				      	<input id="txtHeaderSub" type='text' class="form-control" ng-model="InputCtrl.oOptions.headerSub"></input>
-				      </div>
-				    </div>
-				    <div class="form-group">
-				    	<label for="numFontSize" class="control-label col-xs-2">Content font size:</label>
-				    	<div class="col-xs-4 col-sm-2">
-				    		<input type="number" ng-model="InputCtrl.oOptions.fontSize" id="numFontSize" class="form-control" /> 
-				    	</div>
-				    </div>
-				    <div class="form-group col-md-6 col-xs-12" >
-					    <div class="checkbox">
-					      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
-					    </div>
-					    <div class="checkbox"> 	  
-					      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
-					    </div>
-					    <div class="checkbox">
-					      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
-					    </div>
-				    </div>
-				 		<div class="form-group col-md-6 col-xs-12" >
-				      <b>Convert videos to links:</b>
-				      <div class="checkbox">
-				      	<input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube,
-				      	</div>
-					    <div class="checkbox"> 
-				       	<input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo,
-				      </div>
-					    <div class="checkbox"> 
-				       	<input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks
-				      </div>
-				    </div>
-					  <div class="form-group col-md-6 col-xs-12" >
-				      File name: <input type="text" ng-model="InputCtrl.oOptions.filename" ></input>.pdf
-						</div>
-						<div class="form-group col-md-6 col-xs-12" >
-							<div class="checkbox">
-				    		<input type='checkbox' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks
-				    	</div>
-				    	<div class="checkbox">
-				      	<input type='checkbox' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents
-				      </div>
-				    </div>
-				    <div class="form-group text-center">
-				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
-				      <button type='button' ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
-				    </div>
-			    </form>
-		      <p align="center">{{InputCtrl.sCreateStatus}}</p>    
-		    </accordion-group>
-	   
+	    <accordion-group is-open="groupOpen[2]">
+		    <accordion-heading>
+		      <div><strong>Insert HTML before every page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[2], 'glyphicon-chevron-right': !groupOpen[2]}"></i></div>
+	      </accordion-heading>
+        <b>HTML to insert before every page:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
+        <b>HTML to insert before every post:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePost"></textarea>
+	    </accordion-group>
+
+	    <accordion-group is-open="groupOpen[3]">
+		    <accordion-heading>
+		      <div><strong>Insert HTML after every page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[3], 'glyphicon-chevron-right': !groupOpen[3]}"></i></div>
+	      </accordion-heading>
+        <b>HTML to insert after every page:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
+        <b>HTML to insert after every post:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPost"></textarea>
+	    </accordion-group>
+
+	    <accordion-group is-open="groupOpen[4]">
+		    <accordion-heading>
+		      <div><strong>Insert HTML for title and final pages</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[4], 'glyphicon-chevron-right': !groupOpen[4]}"></i></div>
+	      </accordion-heading>
+        <b>HTML to insert for title page:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
+        <b>HTML to insert for final page:</b><br />
+        <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.finalPage"></textarea>
+	    </accordion-group>
 	    
+	    <accordion-group is-open="groupOpen[5]">
+		    <accordion-heading>
+		      <div><strong>CREATE PDF!</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[5], 'glyphicon-chevron-right': !groupOpen[5]}"></i></div>
+	      </accordion-heading>
+	      <form class="form-horizontal" role="form">
+		      <div class="form-group">
+			      <label for="txtHeaderTitle" class="control-label col-xs-2">Header title:</label>
+			      <div class="col-xs-10">
+			      	<input id="txtHeaderTitle" type='text' class="form-control" ng-model="InputCtrl.oOptions.headerTitle"></input>
+			      </div>
+			    </div>
+			    <div class="form-group">
+			      <label for="txtHeaderSub" class="control-label col-xs-2">Header sub title:</label>
+			      <div class="col-xs-10">
+			      	<input id="txtHeaderSub" type='text' class="form-control" ng-model="InputCtrl.oOptions.headerSub"></input>
+			      </div>
+			    </div>
+			    <div class="form-group">
+			    	<label for="numFontSize" class="control-label col-xs-2">Content font size:</label>
+			    	<div class="col-xs-4 col-sm-2">
+			    		<input type="number" ng-model="InputCtrl.oOptions.fontSize" id="numFontSize" class="form-control" /> 
+			    	</div>
+			    </div>
+			    <div class="form-group col-md-6 col-xs-12" >
+				    <div class="checkbox">
+				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
+				    </div>
+				    <div class="checkbox"> 	  
+				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
+				    </div>
+				    <div class="checkbox">
+				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
+				    </div>
+			    </div>
+			 		<div class="form-group col-md-6 col-xs-12" >
+			      <b>Convert videos to links:</b>
+			      <div class="checkbox">
+			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
+			      </div>
+				    <div class="checkbox"> 
+			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
+			      </div>
+				    <div class="checkbox"> 
+			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
+			      </div>
+			    </div>
+				  <div class="form-group col-md-6 col-xs-12" >
+			      <label>File name: <input type="text" ng-model="InputCtrl.oOptions.filename" ></input>.pdf</label>
+					</div>
+					<div class="form-group col-md-6 col-xs-12" >
+						<div class="checkbox">
+			    		<label><input type='checkbox' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
+			    	</div>
+			    	<div class="checkbox">
+			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents</label>
+			      </div>
+			    </div>
+			    <div class="form-group text-center">
+			      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
+			      <button type='button' ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
+			    </div>
+		    </form>
+	      <p align="center">{{InputCtrl.sCreateStatus}}</p>    
+	    </accordion-group>
+   
+    
 	    <accordion-group is-open="groupOpen[6]">
 		    <accordion-heading>
-		      <div>Existing PDF Files<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[6], 'glyphicon-chevron-right': !groupOpen[6]}"></i></div>
+		      <div><strong>Existing PDF Files</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[6], 'glyphicon-chevron-right': !groupOpen[6]}"></i></div>
 	      </accordion-heading>
 	    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
 		    <div ng-show="InputCtrl.pdfList.length > 0">
@@ -480,7 +480,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	
 	    <accordion-group is-open="groupOpen[7]">
 		    <accordion-heading>
-		      <div>Shortcodes<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[7], 'glyphicon-chevron-right': !groupOpen[7]}"></i></div>
+		      <div><strong>Shortcodes</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[7], 'glyphicon-chevron-right': !groupOpen[7]}"></i></div>
 	      </accordion-heading>
 	    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
 	    	<p><ul>
@@ -523,7 +523,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    
 	    <accordion-group is-open="groupOpen[8]">
 		    <accordion-heading>
-		      <div>About<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[8], 'glyphicon-chevron-right': !groupOpen[8]}"></i></div>
+		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[8], 'glyphicon-chevron-right': !groupOpen[8]}"></i></div>
 	      </accordion-heading>
 	    	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 				<p>
