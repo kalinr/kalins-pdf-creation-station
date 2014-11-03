@@ -285,8 +285,8 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 
 					<div class="form-group text-center">
 		        <button ng-click="InputCtrl.saveData()" class="btn btn-success">Save Settings</button>
-		        <button type='button' ng-click="InputCtrl.resetToDefaults()" class="btn btn-warning">Reset Defaults</button>
-		        <button type='button' ng-click="InputCtrl.createAll()" class="btn btn-success">Create All</button>
+		        <button ng-click="InputCtrl.resetToDefaults()" class="btn btn-warning">Reset Defaults</button>
+		        <button ng-click="InputCtrl.createAll()" class="btn btn-success">Create All</button>
 		      </div>
 		      <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 			  </form>

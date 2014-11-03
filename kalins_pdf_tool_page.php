@@ -326,10 +326,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		          <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
 		            {{post.date}}
 		          </td>
-		          <td data-title="'Type'" sortable="'type'">
+		          <td data-title="'Type'" sortable="'type'" filter="{ 'type': 'text' }">
 		            {{post.type}}
 		          </td>
-		          <td data-title="'Status'" sortable="'status'">
+		          <td data-title="'Status'" sortable="'status'" filter="{ 'status': 'text' }">
 		            {{post.status}}
 		          </td>
 		          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
@@ -352,6 +352,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		          </td>
 		          <td>
 		            {{user.date}}
+		          </td>
+		          <td>
+		            <button class="btn btn-warning btn-xs">Remove</button>
 		          </td>
 		        </tr>
 		      </tbody>
@@ -423,11 +426,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
 				    </div>
 			    </div>
+			    
 			 		<div class="form-group col-md-6 col-xs-12" >
 			      <b>Convert videos to links:</b>
 			      <div class="checkbox">
 			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
 			      </div>
+			      
 				    <div class="checkbox"> 
 			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
 			      </div>
@@ -435,9 +440,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
 			      </div>
 			    </div>
+			    
 				  <div class="form-group col-md-6 col-xs-12" >
-			      <label>File name: <input type="text" class="form-control" ng-model="InputCtrl.oOptions.filename" ></input>.pdf</label>
+			      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input>&nbsp;.pdf</label>
 					</div>
+					
 					<div class="form-group col-md-6 col-xs-12" >
 						<div class="checkbox">
 			    		<label><input type='checkbox' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
@@ -448,10 +455,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			    </div>
 			    <div class="form-group text-center">
 			      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
-			      <button type='button' ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
+			      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
 			    </div>
+			    <p align="center">{{InputCtrl.sCreateStatus}}</p> 
 		    </form>
-	      <p align="center">{{InputCtrl.sCreateStatus}}</p>    
 	    </accordion-group>
 
 	    <accordion-group is-open="groupOpen[6]">

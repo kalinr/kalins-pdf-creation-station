@@ -1,5 +1,17 @@
 @CHARSET "ISO-8859-1";
 
+/*main page container; prevents accordion headers from bumping against the browser's scrollbar*/
 .kContainer{
-  margin-right:15px;
+  margin-right:10px;
+}
+
+/*overrides wordpress' filter class that makes my ng-table filter inputs all funky*/
+.filter{
+  float:none;
+}
+
+/*overrides bootstrap's block, forcing our label to be inline with our text element*/
+.k-inline-text-input{
+  display:inline;
+  width:auto; 
 }
