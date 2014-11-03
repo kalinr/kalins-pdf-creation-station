@@ -10,7 +10,7 @@
   float:none;
 }
 
-/*overrides bootstrap's block, forcing our label to be inline with our text element*/
+/*overrides bootstrap's block, so now our label can be inline with our text element*/
 .k-inline-text-input{
   display:inline;
   width:auto; 

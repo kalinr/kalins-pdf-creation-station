@@ -136,7 +136,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.pdfList = <?php echo json_encode($pdfList); ?>;
 	self.postList = <?php echo json_encode($customList); ?>;
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
-	self.buildPostList = [];
+	self.buildPostList = [];//the post list that will eventually be compiled into the pdf
+	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
 	
   $scope.postListTableParams = new ngTableParams({
     page: 1,            // show first page
@@ -238,9 +239,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  });
 	}
 
-	//TODO: add removePost function to call from sortable list
-	//TODO: highlight rows in post table that have been added to the sortable list
 	self.addPost = function(postID){
+		if(self.buildPostListByID[postID]){
+			if(!confirm("This post has already been added at least once. Are you sure you want to add it again?")){
+				return;
+			}	
+		}
+		
 		//loop to find the correct ID in our main postList
 		for(var i = 0; i<self.postList.length; i++){
 			if(self.postList[i].ID === postID){
@@ -248,6 +253,24 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				//to avoid copying angular's internal $$haskey that it uses to uniquely identify array elements
 				var newObj = JSON.parse($filter('json')(self.postList[i]));
 				self.buildPostList.push(newObj);
+				
+				//add count to the tracking array to support adding same post multiple times
+				if(!self.buildPostListByID[postID]){
+					self.buildPostListByID[postID] = 1;
+				}else{
+					self.buildPostListByID[postID]++;
+				}
+				break;
+			}
+		}
+	}
+
+	self.removePost = function(postID){
+		//loop to find the correct ID in our main postList
+		for(var i = 0; i<self.buildPostList.length; i++){
+			if(self.buildPostList[i].ID === postID){
+				self.buildPostList.splice(i,1);
+				self.buildPostListByID[postID]--;
 				break;
 			}
 		}
@@ -319,7 +342,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		      <div><strong>Add pages and posts</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[0], 'glyphicon-chevron-right': !groupOpen[0]}"></i></div>
 	      </accordion-heading>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
-		        <tr ng-repeat="post in $data">
+		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
 		          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
 		          	{{post.title}}
 		          </td>
@@ -346,22 +369,21 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 				<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
 					<tbody ui:sortable ng-model="InputCtrl.buildPostList">
-		        <tr ng-repeat="user in InputCtrl.buildPostList">
+		        <tr ng-repeat="post in InputCtrl.buildPostList">
 		          <td>
-		          	{{user.title}}
+		          	{{post.title}}
 		          </td>
 		          <td>
-		            {{user.date}}
+		            {{post.date}}
 		          </td>
 		          <td>
-		            <button class="btn btn-warning btn-xs">Remove</button>
+		            <button class="btn btn-warning btn-xs" ng-click="InputCtrl.removePost(post.ID);">Remove</button>
 		          </td>
 		        </tr>
 		      </tbody>
 	      </table>
 			</accordion-group>
-			
-			
+
 	    <accordion-group is-open="groupOpen[2]">
 		    <accordion-heading>
 		      <div><strong>Insert HTML before every page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[2], 'glyphicon-chevron-right': !groupOpen[2]}"></i></div>
