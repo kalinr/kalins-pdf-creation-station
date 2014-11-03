@@ -147,9 +147,8 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		  });
 	}
 }]);
-
-
 </script>
+
 <div ng-app="kalinsPDFAdminPage" ng-controller="UIController as UICtrl" class="kContainer">
 	<div ng-controller="InputController as InputCtrl">
 	
@@ -212,13 +211,13 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			    	</div>
 			    </div>
 			    <div class="form-group col-md-6 col-xs-12" >
-				    <div class="checkbox">
+				    <div class="checkbox col-md-offset-2">
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
 				    </div>
-				    <div class="checkbox"> 	  
+				    <div class="checkbox col-md-offset-2"> 	  
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
 				    </div>
-				    <div class="checkbox">
+				    <div class="checkbox col-md-offset-2">
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
 				    </div>
 			    </div>
@@ -254,32 +253,36 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			      	<input type="text" id="txtAfterLink" class="form-control" ng-model="InputCtrl.oOptions.afterLink"></input>
 			      </div>
 			    </div>
-
-			      
-			      <p>Default Link Placement (can be overwritten in page/post edit page):</p>
 					
-					  <div class="form-group col-xs-12" >
-					    <input type="radio" value="top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page<br />
-					    <input type="radio" value="bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page<br />
-					    <input type="radio" value="none" ng-model="InputCtrl.oOptions.showLink" /> Do not generate PDF
+			    <div class="form-group">
+			      
+					<p class="col-md-offset-1"><b>Default Link Placement</b> (can be overwritten in page/post edit page):</p>
+					  <div class="btn-group col-md-offset-1" data-toggle="buttons" >
+					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'top'}"><input type="radio" value="top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page </label>
+					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'bottom'}"><input type="radio" value="bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page </label>
+					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'none'}"><input type="radio" value="none" ng-model="InputCtrl.oOptions.showLink" /> Do not generate PDF </label>
 					  </div>
+					</div>
 					
-			      <p><input type="text" size="3" maxlength="5" ng-model="InputCtrl.oOptions.wordCount" /> Minimum post word count
-			      </p>
-			      <br/>
-			      
+			    <div class="form-group">
+			    	<label for="numWordCount" class="control-label col-xs-2">Minimum post word count:</label>
+			    	<div class="col-xs-4 col-sm-2">
+			    		<input type="number" ng-model="InputCtrl.oOptions.wordCount" id="numWordCount" class="form-control" /> 
+			    	</div>
+			    </div>
+
 		      <div class="form-group col-xs-12" >
-		      	<div class="checkbox">
+		      	<div class="checkbox col-md-offset-1">
 		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.filenameByTitle"></input> Use post slug for PDF filename instead of ID</label>
 		      	</div>
-		      	<div class="checkbox">
+		      	<div class="checkbox col-md-offset-1">
 		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.showOnMulti"></input> Show on home, category, tag and search pages (does not work if you use excerpts on any of these pages)</label>
 		        </div>
-		        <div class="checkbox">
+		        <div class="checkbox col-md-offset-1">
 		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.autoGenerate"></input> Automatically generate PDFs on publish and update</label>
 		      	</div>
 					</div>
-						
+
 					<div class="form-group text-center">
 		        <button ng-click="InputCtrl.saveData()" class="btn btn-success">Save Settings</button>
 		        <button type='button' ng-click="InputCtrl.resetToDefaults()" class="btn btn-warning">Reset Defaults</button>

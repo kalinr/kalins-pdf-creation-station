@@ -413,13 +413,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			    	</div>
 			    </div>
 			    <div class="form-group col-md-6 col-xs-12" >
-				    <div class="checkbox">
+				    <div class="checkbox col-md-offset-2">
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
 				    </div>
-				    <div class="checkbox"> 	  
+				    <div class="checkbox col-md-offset-2"> 	  
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
 				    </div>
-				    <div class="checkbox">
+				    <div class="checkbox col-md-offset-2">
 				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
 				    </div>
 			    </div>
@@ -436,7 +436,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			      </div>
 			    </div>
 				  <div class="form-group col-md-6 col-xs-12" >
-			      <label>File name: <input type="text" ng-model="InputCtrl.oOptions.filename" ></input>.pdf</label>
+			      <label>File name: <input type="text" class="form-control" ng-model="InputCtrl.oOptions.filename" ></input>.pdf</label>
 					</div>
 					<div class="form-group col-md-6 col-xs-12" >
 						<div class="checkbox">
@@ -453,8 +453,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    </form>
 	      <p align="center">{{InputCtrl.sCreateStatus}}</p>    
 	    </accordion-group>
-   
-    
+
 	    <accordion-group is-open="groupOpen[6]">
 		    <accordion-heading>
 		      <div><strong>Existing PDF Files</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[6], 'glyphicon-chevron-right': !groupOpen[6]}"></i></div>
