@@ -89,7 +89,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {				
-				if(data.indexOf("success") > -1){
+				if(data === "success"){
 					self.sCreateStatus = "Settings saved successfully.";
 				}else{
 					self.sCreateStatus = data;
@@ -106,7 +106,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
-				  self.oOptions = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
+				  self.oOptions = data;
 				  self.sCreateStatus = "Defaults reset successfully.";
 			  }).
 			  error(function(data, status, headers, config) {
@@ -127,16 +127,13 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		}
 
 		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {				
-				var startPosition = data.indexOf("{");
-				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
-				var newFileData = JSON.parse(responseObjString);
-				if(newFileData.status == "success"){
-					if(newFileData.existCount >= newFileData.totalCount){
-						self.sCreateStatus = newFileData.totalCount  +  " PDF files successfully cached.";
+		  success(function(data, status, headers, config) {
+				if(data.status == "success"){
+					if(data.existCount >= data.totalCount){
+						self.sCreateStatus = data.totalCount  +  " PDF files successfully cached.";
 						creationInProcess = false;
 					}else{
-						self.sCreateStatus = newFileData.existCount + " out of " + newFileData.totalCount  +  " PDF files cached. Now building the next " +  newFileData.createCount + ".";
+						self.sCreateStatus = data.existCount + " out of " + data.totalCount  +  " PDF files cached. Now building the next " +  data.createCount + ".";
 						creationInProcess = true;
 						self.createAll();
 					}

@@ -193,7 +193,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
-				  self.oOptions = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
+				  self.oOptions = data;
 				  self.sCreateStatus = "Defaults reset successfully.";
 			  }).
 			  error(function(data, status, headers, config) {
@@ -202,6 +202,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 	}
 
+	//TODO: refuse to create if user hasn't added any posts
 	self.createDocument = function(){
 		var data = JSON.parse( JSON.stringify( self.oOptions ) );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
@@ -222,16 +223,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		self.sCreateStatus = "Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.";
 		
 		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {			  			
-			  var startPosition = data.indexOf("{")
-				var responseObjString = data.substr(startPosition, data.lastIndexOf("}") - startPosition + 1);
-				var newFileData = JSON.parse(responseObjString);
-				if(newFileData.status == "success"){		
-					self.pdfList.push(newFileData);
+		  success(function(data, status, headers, config) {
+				if(data.status == "success"){		
+					self.pdfList.push(data);
 					$scope.pdfListTableParams.reload();
 					self.sCreateStatus = "File created successfully";	
 				}else{
-					self.sCreateStatus = "Error: " + newFileData.status;
+					self.sCreateStatus = "Error: " + data.status;
 				}
 		  }).
 		  error(function(data, status, headers, config) {
@@ -292,8 +290,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
-					var newFileData = JSON.parse(data.substr(0, data.lastIndexOf("}") + 1));
-					if(newFileData.status == "success"){
+					if(data.status == "success"){
 						if(filename == "all"){
 							self.pdfList.splice(0, self.pdfList.length);
 							$scope.pdfListTableParams.reload();
@@ -319,7 +316,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							self.sCreateStatus = "File deleted successfully";
 						}
 					}else{
-						self.sCreateStatus = newFileData.status;
+						self.sCreateStatus = data.status;
 					}
 			  }).
 			  error(function(data, status, headers, config) {

@@ -113,11 +113,8 @@ function kalins_pdf_admin_init(){
 	add_action('wp_ajax_kalins_pdf_reset_admin_defaults', 'kalins_pdf_reset_admin_defaults');//kalins_pdf_admin_save
 	add_action('wp_ajax_kalins_pdf_admin_save', 'kalins_pdf_admin_save');
 	add_action('wp_ajax_kalins_pdf_create_all', 'kalins_pdf_create_all');
-	
-	//add_action('contextual_help', 'kalins_pdf_contextual_help', 10, 2);
-	
+		
 	register_deactivation_hook( __FILE__, 'kalins_pdf_cleanup' );
-	
 	
 //	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
 	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
@@ -386,13 +383,7 @@ function kalins_pdf_reset_admin_defaults(){//called when user clicks the reset b
 	$kalinsPDFAdminOptions = kalins_pdf_getAdminSettings();
 	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);
 	
-	//$pdfDir = WP_PLUGIN_DIR . '/kalins-pdf-creation-station/pdf/singles/';//we delete all cached single pdf files since the defaults have probably changed
-	//$pdfDir = $pdfDirBase .'singles/';
-	//$uploads = wp_upload_dir();
-	//$pdfDir = $uploads['basedir'].'/kalins-pdf/singles/';
-	
 	$pdfDir = KALINS_PDF_SINGLES_DIR;
-	
 	
 	if ($handle = opendir($pdfDir)) {//open pdf directory
 		while (false !== ($file = readdir($handle))) {
@@ -402,7 +393,7 @@ function kalins_pdf_reset_admin_defaults(){//called when user clicks the reset b
 		}
 		closedir($handle);
 	}
-	echo json_encode($kalinsPDFAdminOptions);
+	die(json_encode($kalinsPDFAdminOptions));
 }
 
 function kalins_pdf_admin_save(){
@@ -444,14 +435,9 @@ function kalins_pdf_admin_save(){
 	//$kalinsPDFAdminOptions["includeTables"] = ($_REQUEST['includeTables'] === "true");
 	
 	$kalinsPDFAdminOptions["doCleanup"] =       ($_REQUEST['doCleanup'] === "true");
-	
-	
+		
 	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);//save options to database
-	
-	//$pdfDir = WP_PLUGIN_DIR . '/kalins-pdf-creation-station/pdf/singles/';
-	//$pdfDir = $pdfDirBase .'singles/';
-	//$uploads = wp_upload_dir();
-	//$pdfDir = $uploads['basedir'].'/kalins-pdf/singles/';
+
 	$pdfDir = KALINS_PDF_SINGLES_DIR;
 	
 	if ($handle = opendir($pdfDir)) {//open pdf directory
@@ -461,9 +447,9 @@ function kalins_pdf_admin_save(){
 			}
 		}
 		closedir($handle);
-		echo "success";
+		die("success");
 	}else{
-		echo "Save failed for unknown reason.";
+		die("Save failed for unknown reason.");
 	}
 }
 
@@ -471,7 +457,7 @@ function kalins_pdf_tool_defaults(){//called when user clicks the reset button
 	check_ajax_referer( "kalins_pdf_tool_reset" );
 	$kalinsPDFAdminOptions = kalins_pdf_getDefaultOptions();
 	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFAdminOptions);
-	echo json_encode($kalinsPDFAdminOptions);
+	die(json_encode($kalinsPDFAdminOptions));
 }
 
 function kalins_pdf_tool_create(){//called from create button
@@ -508,7 +494,7 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 			$outputVar->status = "fail";
 		}
 	}
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 }
 
 function kalins_pdf_create_all(){
@@ -550,7 +536,7 @@ function kalins_pdf_create_all(){
 	$outputVar->existCount = $existCount;
 	
 	$outputVar->status = "success";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 }
 
 function kalinsPDF_build_pdf( $post ){

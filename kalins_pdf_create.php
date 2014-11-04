@@ -18,7 +18,7 @@ try{
 	require_once('tcpdf/tcpdf.php');
 } catch (Exception $e) {
 	$outputVar->status = "problem loading wp-config or TCPDF library.";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 }
 
 kalinsPDF_createPDFDir();
@@ -45,9 +45,7 @@ if($isSingle){
 	if($adminOptions["filenameByTitle"] == "true"){
 		
 		$singlePost = "";
-		
-		//echo "My page ids " .$pageIDs;
-		
+				
 		if(substr($pageIDs, 0, 2) == "po"){
 			$singlePost = get_post($singleID);
 		}else{
@@ -156,12 +154,12 @@ if($isSingle){
 		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFToolOptions);//save options to database
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
-		echo json_encode($outputVar);
+		die(json_encode($outputVar));
 	}	
 	
 	if(file_exists($pdfDir .$filename)){//if the file already exists, echo an error and quit
 		$outputVar->status = "file already exists.";
-		echo json_encode($outputVar);
+		die(json_encode($outputVar));
 		return;
 	}else{
 		$outputVar->fileName = $filename;
@@ -185,8 +183,7 @@ try{
 	}
 } catch (Exception $e) {
 	$outputVar->status = "problem getting pages and posts.";
-	echo json_encode($outputVar);
-	return;
+	die(json_encode($outputVar));
 }
 
 try{
@@ -236,11 +233,13 @@ try{
 
 } catch (Exception $e) {
 	$outputVar->status = "problem setting TCPDF options. Double check header titles and font size";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 	return;
 }
 
 $objTcpdf->SetFont( 'Times', '', $fontSize );
+
+$totalHTML = "";
 
 try{
 	if($titlePage != ""){
@@ -254,13 +253,15 @@ try{
 		$strHtml = wpautop($titlePage, true );
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
 		
+		$totalHTML = $totalHTML .$strHtml;
+		
 		if($autoPageBreak != "true" && $includeTOC == "true"){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
 			$objTcpdf->AddPage();
 		}
 	}
 } catch (Exception $e) {
 	$outputVar->status = "problem creating title page.";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 	return;
 }
 
@@ -279,9 +280,7 @@ try{
 		}
 		
 		$objPost = $result[$i];
-		
-		//global $post;
-		
+				
 		$content = $objPost->post_content;
 		
 		$post = $objPost;//set global post object so if other plugins run their shortcodes they'll have access to it. Not sure why query_posts doesn't take care of this
@@ -358,6 +357,7 @@ try{
 		//$content = apply_filters('the_content', $content);
 	
 		$strHtml = wpautop($content, true );
+		$totalHTML = $totalHTML .$strHtml;
 		
 		// output the HTML content
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
@@ -367,7 +367,7 @@ try{
 	
 } catch (Exception $e) {
 	$outputVar->status = "problem creating pages and posts. Perhaps there's a problem with one of the pages you've selected or with the before or after HTML.";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 	return;
 }
 
@@ -384,11 +384,13 @@ try{
 		}
 		
 		$strHtml = wpautop($finalPage, true );
+		$totalHTML = $totalHTML .$strHtml;
+				
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
 	}
 } catch (Exception $e) {
 	$outputVar->status = "problem creating final page.";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 	return;
 }
 
@@ -413,25 +415,27 @@ try{
 		// end of TOC page
 		$objTcpdf->endTOCPage();
 	}
-	
-	
-	
-	
+		
 	//create and save the PDF document
 	$objTcpdf->Output( $pdfDir .$filename, 'F' );
+	
+	//file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
+	
 } catch (Exception $e) {
 	$outputVar->status = "problem outputting the final PDF file.";
-	echo json_encode($outputVar);
+	die(json_encode($outputVar));
 	return;
 }
 
+//$outputVar->totalHTML = $totalHTML;
 $outputVar->status = "success";//set success status for output to AJAX
 
 if(!isset($skipReturn)){
 	if($isSingle){//if this is called from a page/post we redirect so that user can download pdf directly
 		header("Location: " .$pdfURL .$filename);
+		die();
 	}else{
-		echo json_encode($outputVar);//if it's called from the creation station admin panel we output the result object to AJAX
+		die(json_encode($outputVar));//if it's called from the creation station admin panel we output the result object to AJAX
 	}
 }
 
