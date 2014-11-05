@@ -43,7 +43,8 @@
 	
 	if ($handle = opendir($pdfDir)) {		
 		while (false !== ($file = readdir($handle))) {
-			if ($file != "." && $file != ".." && stripos($file, ".pdf") > 0) {//loop to find all relevant files (stripos is not case sensitive so it finds .PDF)
+			//loop to find all relevant files (stripos is not case sensitive so it finds .PDF, .HTML, .TXT)
+			if ($file != "." && $file != ".." && (stripos($file, ".pdf") > 0 || stripos($file, ".html") > 0 || stripos($file, ".txt") > 0  )) {
 				$fileObj = new stdClass();
 				$fileObj->fileName = $file;
 				$fileObj->date = date("Y-m-d H:i:s", filemtime($pdfDir .$file));
@@ -202,8 +203,17 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 	}
 
-	//TODO: refuse to create if user hasn't added any posts
 	self.createDocument = function(){
+		if(self.buildPostList.length === 0){
+			self.sCreateStatus = "Error: You need to add at least one page or post.";
+			return;
+		}
+
+		if(!self.oOptions.bCreatePDF && !self.oOptions.bCreateHTML && !self.oOptions.bCreateTXT){
+			self.sCreateStatus = "Error: You need to select at least one filetype: .pdf, .html or .txt.";
+			return;
+		}
+
 		var data = JSON.parse( JSON.stringify( self.oOptions ) );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
 		data._ajax_nonce = createNonce;//authorize it
@@ -224,10 +234,15 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {
-				if(data.status == "success"){		
-					self.pdfList.push(data);
+				if(data.status == "success"){
+
+					var l = data.aFiles.length;
+					//loop to add all our new files (up to three, .html, .pdf and .txt)
+					for(var i = 0; i<l; i++){
+						self.pdfList.push(data.aFiles[i]);
+					}
 					$scope.pdfListTableParams.reload();
-					self.sCreateStatus = "File created successfully";	
+					self.sCreateStatus = "File created successfully";
 				}else{
 					self.sCreateStatus = "Error: " + data.status;
 				}
@@ -435,43 +450,50 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			    	</div>
 			    </div>
 			    <div class="form-group col-md-6 col-xs-12" >
+			    	<div class="checkbox col-md-offset-2">
+			    		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
+			    	</div>
+			    	<div class="checkbox col-md-offset-2">
+			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents</label>
+			      </div>
 				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
 				    </div>
 				    <div class="checkbox col-md-offset-2"> 	  
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
 				    </div>
 				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
 				    </div>
 			    </div>
 			    
-			 		<div class="form-group col-md-6 col-xs-12" >
+			 		<div class="form-group col-xs-12" >
 			      <b>Convert videos to links:</b>
 			      <div class="checkbox">
-			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
+			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
 			      </div>
 			      
 				    <div class="checkbox"> 
-			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
 			      </div>
 				    <div class="checkbox"> 
-			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
 			      </div>
 			    </div>
 			    
-				  <div class="form-group col-md-6 col-xs-12" >
+				  <div class="form-group col-xs-12" >
 			      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input>&nbsp;.pdf</label>
+						<div class="checkbox col-md-offset-1">
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input>.pdf</label>
+			      </div>
+			      <div class="checkbox col-md-offset-1">
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input>.html</label>
+			      </div>
+			      <div class="checkbox col-md-offset-1">
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input>.txt</label>
+			      </div>
 					</div>
 					
-					<div class="form-group col-md-6 col-xs-12" >
-						<div class="checkbox">
-			    		<label><input type='checkbox' ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
-			    	</div>
-			    	<div class="checkbox">
-			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents</label>
-			      </div>
-			    </div>
 			    <div class="form-group text-center">
 			      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
 			      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>

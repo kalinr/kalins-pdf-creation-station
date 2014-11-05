@@ -52,19 +52,19 @@ if($isSingle){
 			$singlePost = get_page($singleID);
 		}
 		
-		$filename = $singlePost->post_name .'.pdf';
+		$filename = $singlePost->post_name;
 		
 	}else{
-		$filename = $singleID .'.pdf';
+		$filename = $singleID;
 	}
 	
-	if(file_exists($pdfDir .$filename)){//if the file already exists, simply redirect to that file and we're done
+	if(file_exists($pdfDir .$filename .".pdf")){//if the file already exists, simply redirect to that file and we're done
 		if(!isset($skipReturn)){
-			header("Location: " .$pdfURL .$filename);
+			header("Location: " .$pdfURL .$filename .".pdf");
 		}
-		return;
+		die();
 	}else{
-		$outputVar->fileName = $filename;
+		$outputVar->fileName = $filename .".pdf";
 		$outputVar->date = date("Y-m-d H:i:s", time());
 		
 		$adminOptions = kalins_pdf_get_admin_options();//for individual pages/posts we grab all the PDF options from the options page instead of the POST
@@ -94,13 +94,15 @@ if($isSingle){
 		$pdfDir = KALINS_PDF_DIR;
 		
 		if($_REQUEST["filename"] != ""){
-			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]) .".pdf";
+			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]);
 		}else{
-			$filename = time() .".pdf";
+			//if user did not enter a filename, we use the current timestamp as a filename (mostly just to streamline testing) 
+			$filename = time();
 		}
 		
-		//$documentType = "html";
 		$pageIDs = stripslashes($_REQUEST["pageIDs"]);
+		
+		//TODO: lets see if there's an easier way to compile all these params, like simple JSON
 		
 		$titlePage = stripslashes($_REQUEST['titlePage']);
 		$finalPage = stripslashes($_REQUEST['finalPage']);
@@ -123,6 +125,10 @@ if($isSingle){
 		$autoPageBreak = ($_REQUEST["autoPageBreak"] === "true");
 		$includeTOC = ($_REQUEST["includeTOC"] === "true");
 		
+		$bCreatePDF = ($_REQUEST["bCreatePDF"] === "true");
+		$bCreateHTML = ($_REQUEST["bCreateHTML"] === "true");
+		$bCreateTXT = ($_REQUEST["bCreateTXT"] === "true");
+		
 		$fontSize = (int) $_REQUEST['fontSize'];
 		
 		$kalinsPDFToolOptions = array();//collect our passed in values so we can save them for next time
@@ -140,8 +146,10 @@ if($isSingle){
 		$kalinsPDFToolOptions["convertTed"] = $convertTed;
 		$kalinsPDFToolOptions["autoPageBreak"] = $autoPageBreak;
 		$kalinsPDFToolOptions["includeTOC"] = $includeTOC;
+		$kalinsPDFToolOptions["bCreatePDF"] = $bCreatePDF;
+		$kalinsPDFToolOptions["bCreateHTML"] = $bCreateHTML;
+		$kalinsPDFToolOptions["bCreateTXT"] = $bCreateTXT;
 		
-		//$convertVimeo
 		//$kalinsPDFToolOptions["includeTables"] = $includeTables;
 		$kalinsPDFToolOptions["beforePage"] = $beforePage;
 		$kalinsPDFToolOptions["beforePost"] = $beforePost;
@@ -155,15 +163,31 @@ if($isSingle){
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
 		die(json_encode($outputVar));
-	}	
+	}
 	
-	if(file_exists($pdfDir .$filename)){//if the file already exists, echo an error and quit
-		$outputVar->status = "file already exists.";
-		die(json_encode($outputVar));
-		return;
-	}else{
-		$outputVar->fileName = $filename;
-		$outputVar->date = date("Y-m-d H:i:s", time());
+	$outputVar->aFiles = array();
+	function processFileType($fileType, $filename, $outputVar, $pdfDir){
+		if(file_exists($pdfDir .$filename .$fileType)){//if a file already exists, error and quit
+			$outputVar->status = $filename .$fileType ." already exists.";
+			die(json_encode($outputVar));
+		}
+		//add array of new filenames/dates to the result object
+		$newFileObj = new stdClass();
+		$newFileObj->fileName = $filename .$fileType;
+		$newFileObj->date = date("Y-m-d H:i:s", time());
+		array_push($outputVar->aFiles, $newFileObj);
+	}
+
+	if($bCreateHTML){
+		processFileType(".html", $filename, $outputVar, $pdfDir);
+	}
+
+	if($bCreatePDF){
+		processFileType(".pdf", $filename, $outputVar, $pdfDir);
+	}
+	
+	if($bCreateTXT){
+		processFileType(".txt", $filename, $outputVar, $pdfDir);
 	}
 }
 
@@ -196,7 +220,7 @@ try{
 		$objTcpdf->SetTitle( kalins_pdf_page_shortcode_replace($headerTitle, $result[0]) );// set default header data
 		$objTcpdf->SetHeaderData(null, null, kalins_pdf_page_shortcode_replace($headerTitle, $result[0]), kalins_pdf_page_shortcode_replace($headerSub, $result[0]) );
 	}else{
-		$objTcpdf->SetTitle( kalins_pdf_global_shortcode_replace($headerTitle, $isSingle) );// set default header data
+		$objTcpdf->SetTitle( kalins_pdf_global_shortcode_replace($headerTitle) );// set default header data
 		$objTcpdf->SetHeaderData(null, null, kalins_pdf_global_shortcode_replace($headerTitle), kalins_pdf_global_shortcode_replace($headerSub) );
 	}
 	// set header and footer fonts
@@ -234,17 +258,24 @@ try{
 } catch (Exception $e) {
 	$outputVar->status = "problem setting TCPDF options. Double check header titles and font size";
 	die(json_encode($outputVar));
-	return;
 }
 
 $objTcpdf->SetFont( 'Times', '', $fontSize );
 
-$totalHTML = "";
+$totalHTML = '<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>' .kalins_pdf_global_shortcode_replace($headerTitle) .'</title>
+  <meta name="description" content="' .kalins_pdf_global_shortcode_replace($headerSub) .'">
+</head>
+<body>';
+
+$totalTXT = '';
 
 try{
 	if($titlePage != ""){
 		$objTcpdf->AddPage();//create title page and start off our PDF file
-		//$objTcpdf->SetFont( PDF_FONT_NAME_MAIN, '', $fontSize );
 		if($isSingle){
 			$titlePage = kalins_pdf_page_shortcode_replace($titlePage, $result[0]);
 		}else{
@@ -254,6 +285,7 @@ try{
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
 		
 		$totalHTML = $totalHTML .$strHtml;
+		$totalTXT = $totalTXT .$titlePage;
 		
 		if($autoPageBreak != "true" && $includeTOC == "true"){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
 			$objTcpdf->AddPage();
@@ -262,7 +294,6 @@ try{
 } catch (Exception $e) {
 	$outputVar->status = "problem creating title page.";
 	die(json_encode($outputVar));
-	return;
 }
 
 //global $proBar;
@@ -350,14 +381,10 @@ try{
 			$objTcpdf->Bookmark($objPost->post_title, 0, 0);
 			//$objTcpdf->Cell(0, 10, '', 0, 1, 'L');
 		}
-		
-		// set font
-		//$objTcpdf->SetFont( PDF_FONT_NAME_MAIN, '', $fontSize );
-		
-		//$content = apply_filters('the_content', $content);
 	
 		$strHtml = wpautop($content, true );
 		$totalHTML = $totalHTML .$strHtml;
+		$totalTXT = $totalTXT .$content;
 		
 		// output the HTML content
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
@@ -368,14 +395,12 @@ try{
 } catch (Exception $e) {
 	$outputVar->status = "problem creating pages and posts. Perhaps there's a problem with one of the pages you've selected or with the before or after HTML.";
 	die(json_encode($outputVar));
-	return;
 }
 
 try{
 	if($finalPage != ""){
 		$objTcpdf->AddPage();//create final page in pdf
 		$objTcpdf->SetFont( PDF_FONT_NAME_MAIN, '', $fontSize );
-		//$finalPage = kalins_pdf_global_shortcode_replace($finalPage, $isSingle);
 		
 		if($isSingle){
 			$finalPage = kalins_pdf_page_shortcode_replace($finalPage, $result[0]);
@@ -385,13 +410,13 @@ try{
 		
 		$strHtml = wpautop($finalPage, true );
 		$totalHTML = $totalHTML .$strHtml;
+		$totalTXT = $totalTXT .$finalPage;
 				
 		$objTcpdf->writeHTML( $strHtml , true, 0, true, 0);
 	}
 } catch (Exception $e) {
 	$outputVar->status = "problem creating final page.";
 	die(json_encode($outputVar));
-	return;
 }
 
 try{
@@ -415,24 +440,32 @@ try{
 		// end of TOC page
 		$objTcpdf->endTOCPage();
 	}
-		
-	//create and save the PDF document
-	$objTcpdf->Output( $pdfDir .$filename, 'F' );
 	
-	//file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
+	if($bCreatePDF){
+		//create and save the PDF document
+		$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
+	}
+	
+	if($bCreateHTML){
+		$totalHTML = $totalHTML .'</body>
+</html>';
+		file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
+	}
+	
+	if($bCreateTXT){
+		file_put_contents ( $pdfDir .$filename .".txt" , $totalTXT );
+	}
 	
 } catch (Exception $e) {
 	$outputVar->status = "problem outputting the final PDF file.";
 	die(json_encode($outputVar));
-	return;
 }
 
-//$outputVar->totalHTML = $totalHTML;
 $outputVar->status = "success";//set success status for output to AJAX
 
 if(!isset($skipReturn)){
 	if($isSingle){//if this is called from a page/post we redirect so that user can download pdf directly
-		header("Location: " .$pdfURL .$filename);
+		header("Location: " .$pdfURL .$filename .".pdf");
 		die();
 	}else{
 		die(json_encode($outputVar));//if it's called from the creation station admin panel we output the result object to AJAX

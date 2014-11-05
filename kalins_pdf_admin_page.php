@@ -209,25 +209,25 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			    </div>
 			    <div class="form-group col-md-6 col-xs-12" >
 				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
 				    </div>
 				    <div class="checkbox col-md-offset-2"> 	  
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
 				    </div>
 				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
 				    </div>
 			    </div>
 			 		<div class="form-group col-md-6 col-xs-12" >
 			      <b>Convert videos to links:</b>
 			      <div class="checkbox">
-			      	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube,</label>
+			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube,</label>
 			      </div>
 				    <div class="checkbox"> 
-			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo,</label>
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo,</label>
 			      </div>
 				    <div class="checkbox"> 
-			       	<label><input type='checkbox' ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
+			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
 			      </div>
 			    </div>
 			    
@@ -270,13 +270,13 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 
 		      <div class="form-group col-xs-12" >
 		      	<div class="checkbox col-md-offset-1">
-		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.filenameByTitle"></input> Use post slug for PDF filename instead of ID</label>
+		      		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.filenameByTitle"></input> Use post slug for PDF filename instead of ID</label>
 		      	</div>
 		      	<div class="checkbox col-md-offset-1">
-		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.showOnMulti"></input> Show on home, category, tag and search pages (does not work if you use excerpts on any of these pages)</label>
+		      		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.showOnMulti"></input> Show on home, category, tag and search pages (does not work if you use excerpts on any of these pages)</label>
 		        </div>
 		        <div class="checkbox col-md-offset-1">
-		      		<label><input type='checkbox' ng-model="InputCtrl.oOptions.autoGenerate"></input> Automatically generate PDFs on publish and update</label>
+		      		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.autoGenerate"></input> Automatically generate PDFs on publish and update</label>
 		      	</div>
 					</div>
 

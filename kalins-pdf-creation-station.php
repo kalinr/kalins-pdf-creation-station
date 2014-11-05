@@ -476,7 +476,8 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 	if($filename == "all"){//if we're deleting all of them
 		if ($handle = opendir($pdfDir)) {//open pdf directory
 			while (false !== ($file = readdir($handle))) {
-				if ($file != "." && $file != ".." && substr($file, stripos($file, ".")+1, 3) == "pdf") {//loop to find all relevant files 
+				//loop to find all relevant files
+				if ($file != "." && $file != ".." && (stripos($file, ".pdf") > 0 || stripos($file, ".html") > 0 || stripos($file, ".txt") > 0)) { 
 					unlink($pdfDir .$file);//and delete them
 				}
 			}
@@ -658,6 +659,9 @@ function kalins_pdf_getDefaultOptions(){//simply returns all our default option 
 	$kalinsPDFAdminOptions["autoPageBreak"] = true;
 	$kalinsPDFAdminOptions["includeTOC"] = true;
 	
+	$kalinsPDFAdminOptions["bCreatePDF"] = true;
+	$kalinsPDFAdminOptions["bCreateHTML"] = false;
+	$kalinsPDFAdminOptions["bCreateTXT"] = false;
 	
 	return $kalinsPDFAdminOptions;
 }
