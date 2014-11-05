@@ -252,8 +252,7 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			    </div>
 					
 			    <div class="form-group">
-			      
-					<p class="col-md-offset-1"><b>Default Link Placement</b> (can be overwritten in page/post edit page):</p>
+						<p class="col-md-offset-1"><b>Default Link Placement</b> (can be overwritten in page/post edit page):</p>
 					  <div class="btn-group col-md-offset-1" data-toggle="buttons" >
 					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'top'}"><input type="radio" value="top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page </label>
 					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'bottom'}"><input type="radio" value="bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page </label>
@@ -288,7 +287,6 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		      <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
 			  </form>
 			</accordion-group>
-			
 			
 			<accordion-group is-open="groupOpen[4]">
 		    <accordion-heading>

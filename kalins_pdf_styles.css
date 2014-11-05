@@ -15,3 +15,10 @@
   display:inline;
   width:auto; 
 }
+
+/*wordpress uses the 'hidden' class differently than bootstrap expects, so adding bootstrap prevents the contextual help 
+from showing. This overrides that on just the contextual_help_wrap div.*/
+#contextual-help-wrap{
+  display: block !important;
+  visibility: visible !important;
+}

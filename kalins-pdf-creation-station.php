@@ -161,12 +161,8 @@ function kalins_pdf_configure_pages() {
 	add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
 }
 
-function kalins_pdf_admin_head() {
-	
-	//echo "My plugin admin head";
-	//wp_enqueue_script("jquery");
+function kalins_pdf_admin_head() {	
 	wp_enqueue_script("jquery-ui-sortable");
-	//wp_enqueue_script("jquery-ui-dialog");
 	wp_enqueue_script( 'kalinPDFAngularJS' );
 	wp_enqueue_script( 'kalinPDF_ng-table' );
 	wp_enqueue_script( 'kalinPDF_angular-ui' );
@@ -174,24 +170,20 @@ function kalins_pdf_admin_head() {
 	wp_enqueue_script( 'kalinPDF_angular-bootstrap' );
 }
 
-function kalins_pdf_admin_styles(){//not sure why this didn't work if called from pdf_admin_head	
-	//wp_enqueue_style('kalinPDF_ng-tableStyle');
-	
+function kalins_pdf_admin_styles(){//not sure why this didn't work if called from pdf_admin_head		
 	wp_enqueue_style('kalinPDFBootstrapStyle');
 	wp_enqueue_style('kalinPDFStyle');
 }
 
 function kalinsPDF_inner_custom_box($post) {//creates the box that goes on the post/page edit page
-  	// show nonce for verification and post box label
-  	echo '<input type="hidden" name="kalinsPDF_noncename" id="kalinsPDF_noncename" value="' .wp_create_nonce( plugin_basename(__FILE__) ) . '" />Create PDF of this page? <br />';
+  // show nonce for verification and post box label
+  echo '<input type="hidden" name="kalinsPDF_noncename" id="kalinsPDF_noncename" value="' .wp_create_nonce( plugin_basename(__FILE__) ) . '" />Create PDF of this page? <br />';
 	
 	$meta = json_decode(get_post_meta($post->ID, "kalinsPDFMeta", true));//grab meta from this particular post
 	
 	if($meta){//if that meta exists, set $showLink
 		$showLink = $meta->showLink;
 	}else{//if there is no meta for this page/post yet, grab the default
-		//$adminOptions = kalins_pdf_get_admin_options();
-		//$showLink = $adminOptions['showLink'];
 		$showLink = "default";
 	}
 	
@@ -286,10 +278,12 @@ function kalinsPDF_publish_post( $post_id ){
 	return;
 }
 
+// This is very similar to widget() but with important differences. If you make any changes here, make
+// sure they don't also need to be made there
 function kalinsPDF_content_filter($content){
 	
+	//set in kalins_pdf_create.php, in case the user just clicked a split second earlier and it's still processing
 	global $kalinsPDFRunning;
-	
 	if(isset($kalinsPDFRunning)){
 		return $content;
 	}
@@ -331,13 +325,11 @@ function kalinsPDF_content_filter($content){
 		$postID = "po_" .$postID;
 	}
 	
-	//-------remove these three lines if you aren't using shortcodes in the link and you want to conserve processing power
 	$adminOptions["beforeLink"] = kalins_pdf_page_shortcode_replace($adminOptions["beforeLink"], $post);
 	$adminOptions["linkText"] = kalins_pdf_page_shortcode_replace($adminOptions["linkText"], $post);
 	$adminOptions["afterLink"] = kalins_pdf_page_shortcode_replace($adminOptions["afterLink"], $post);
-    //-------
 	
-    $strHtml = $adminOptions["beforeLink"] .'<a href="' . get_bloginfo('wpurl') . '/wp-content/plugins/kalins-pdf-creation-station/kalins_pdf_create.php?singlepost=' .$postID .'" target="_blank" >' .$adminOptions["linkText"] .'</a>' .$adminOptions["afterLink"];
+  $strHtml = $adminOptions["beforeLink"] .'<a href="' . get_bloginfo('wpurl') . '/wp-content/plugins/kalins-pdf-creation-station/kalins_pdf_create.php?singlepost=' .$postID .'" target="_blank" >' .$adminOptions["linkText"] .'</a>' .$adminOptions["afterLink"];
     
 	switch($showLink){//return the content with the link attached above or below
 		case "top":
@@ -346,17 +338,6 @@ function kalinsPDF_content_filter($content){
 			return $content .$strHtml;
 	}
 }
-
-/*function kalins_pdf_contextual_help($text, $screen) {
-	if (strcmp($screen, 'settings_page_kalins-pdf-creation-station/kalins-pdf-creation-station') == 0 ) {//if we're on settings page, add setting help and return
-		require_once( WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_admin_help.php');
-		return;
-	}
-	
-	if (strcmp($screen, 'tools_page_kalins-pdf-creation-station/kalins-pdf-creation-station') == 0 ) {//otherwise show the tool help page (the two help files are very similar but have a few important differences)
-		require_once( WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_tool_help.php');
-	}
-}*/
 
 function kalins_pdf_contextual_help($contextual_help, $screen_id, $screen) {
 	global $kPDFadminPage;
@@ -970,12 +951,8 @@ function kalinsPDF_timeCallback($matches){
 function kalins_pdf_global_shortcode_replace($str){//replace global shortcodes
 	$str = str_replace("[blog_name]", get_option('blogname'), $str);
 	$str = str_replace("[blog_description]", get_option('blogdescription'), $str);
-	$str = str_replace("[blog_url]", get_option('home'), $str);
-	
-	//$str = str_replace("[current_time]", date("Y-m-d H:i:s", time()), $str);
-	
+	$str = str_replace("[blog_url]", get_option('home'), $str);	
 	$str = preg_replace_callback('#\[ *current_time *(format=[\'|\"]([^\'\"]*)[\'|\"])? *\]#', "kalinsPDF_timeCallback", $str);//this one has its own proprietary function so no need for class and parameters
-	
 	return $str;
 }
 
@@ -991,35 +968,128 @@ function kalinsPDF_createPDFDir(){
 	}
 }
 
-/*function kalinsPDF_activate(){
-	//echo "test echo";
-	
-	throw new Exception('Division by zero.');
-}*/
-
 //---------------------end utility functions-----------------------------------
 
+class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
+
+	function WP_Kalins_PDF_Creation_Station_Widget() {
+		$widget_ops = array( 'classname' => 'widget_KalinsPDFCreationStation', 'description' => __( "Show a link to the PDF version of the post or page" ) );
+		$this->WP_Widget('kalinsPDFCreationStation', __("PDF Creation Station"), $widget_ops);
+	}
+
+	// This code displays the widget on the screen.
+	// This is very similar to kalinsPDF_content_filter but with important differences. If you make any changes here, make
+	// sure they don't also need to be made there
+	function widget($args, $instance) {
+		//set in kalins_pdf_create.php, in case the user just clicked a split second earlier and it's still processing
+		global $kalinsPDFRunning;
+		if(isset($kalinsPDFRunning)){
+			return "";
+		}
+		
+		if(!is_single() && !is_page()){//if we're not on a page or post we don't show the widget
+			return "";
+		}
+		
+		$adminOptions = kalins_pdf_get_admin_options();
+		
+		global $post;
+		
+		$meta = json_decode(get_post_meta($post->ID, "kalinsPDFMeta", true));
+		
+		if($meta){
+			$showLink = $meta->showLink;
+		}
+		
+		if(!$meta || $showLink == "default"){
+			if(str_word_count(strip_tags($post->post_content)) > $adminOptions['wordCount']){//if this post is longer than the minimum word count
+				$showLink = $adminOptions['showLink'];
+			}else{
+				return "";//if it's not long enough, just quit
+			}
+		}
+		
+		if($showLink === "none"){//if we don't want a link or if we're not on a single page/post we don't need to do anything else
+			return "";
+		}
+		
+		//at this point we know we're going to show a link
+		extract($args);
+		echo $before_widget;//echo wordpress' standard html
+		if(!empty($instance['title'])) {//only show the title if this widget has one
+			echo $before_title . $instance['title'] . $after_title;
+		}
+		
+		//change each postID to identify if it's a page or post for use by our create script
+		$postID = $post->ID;
+		if($post->post_type == "page"){
+			$postID = "pg_" .$postID;
+		}else{
+			$postID = "po_" .$postID;
+		}
+		
+		//TODO: if any of these are blank, replace with defaults from $adminOptions (this shouldn't happen but it does, maybe there's a bug in the wordpress widget settings save feature) 
+		$adminOptions["beforeLink"] = kalins_pdf_page_shortcode_replace($instance["beforeLink"], $post);
+		$adminOptions["linkText"] = kalins_pdf_page_shortcode_replace($instance["linkText"], $post);
+		$adminOptions["afterLink"] = kalins_pdf_page_shortcode_replace($instance["afterLink"], $post);
+		
+		echo $adminOptions["beforeLink"] .'<a href="' . get_bloginfo('wpurl') . '/wp-content/plugins/kalins-pdf-creation-station/kalins_pdf_create.php?singlepost=' .$postID .'" target="_blank" >' .$adminOptions["linkText"] .'</a>' .$adminOptions["afterLink"];
+
+		echo $after_widget;
+	}
+
+	// Updates the settings.
+	function update($new_instance, $old_instance) {
+		return $new_instance;
+	}
+	
+	//TODO: figure out how to handle it when user enters single quote characters into beforeLink, linkText or afterLink
+	function form($instance) {
+		echo '<div>';
+		//create three lists of data for each text field
+		$aTextFieldLabels = array("Title:", "Link text:", "Before link:", "After link:");
+		$aTextFieldNames = array("title", "linkText", "beforeLink", "afterLink");
+		$adminOptions = kalins_pdf_get_admin_options();
+		$aTextFieldDefaultValues = array("", $adminOptions["linkText"], $adminOptions["beforeLink"], $adminOptions["afterLink"]);
+		
+		//loop to add each of our four textfields to the widget form
+		for($i=0; $i<4; $i++){
+			$sFieldName = $aTextFieldNames[$i];
+			
+			echo '<label for="' . $this->get_field_id($sFieldName) .'">' .$aTextFieldLabels[$i] .'</label>';
+			echo '<input type="text" class="widefat" ';
+			echo 'name="' . $this->get_field_name($sFieldName) . '" ';
+			echo 'id="' . $this->get_field_id($sFieldName) . '" ';
+			
+			//if we have already saved a value, use it
+			if (isset($instance[$sFieldName]))
+			{
+				echo "value='" . $instance[$sFieldName] . "' /><br/><br/>";
+			}else{
+				//if we've never saved a value, enter the default value
+				echo "value='" .$aTextFieldDefaultValues[$i] ."' /><br/><br/>";
+			}
+		}
+		
+		echo '<br/><br/></div>';
+
+	} // end function form
+
+} // end class WP_Widget_BareBones
 
 //wp actions to get everything started
+
+add_action('widgets_init', create_function('', 'return register_widget("WP_Kalins_PDF_Creation_Station_Widget");'));// Register the widget.
 add_action('admin_init', 'kalins_pdf_admin_init');
 add_action('admin_menu', 'kalins_pdf_configure_pages');
-//add_action( 'init', 'kalins_pdf_init' );//just keep this for whenever we do internationalization - if the function is actually needed, that is.
-
-add_action('publish_post', 'kalinsPDF_publish_post');
-add_action('publish_page', 'kalinsPDF_publish_post');//xmlrpc_publish_post
+add_action('publish_post', 'kalinsPDF_publish_post');//runs action on post publish
+add_action('publish_page', 'kalinsPDF_publish_post');//runs action on page publish
 add_action('xmlrpc_publish_post', 'kalinsPDF_publish_post');
 add_action('publish_future_post', 'kalinsPDF_publish_post');
 
-//add_action('transition_post_status', 'kalinsPDF_publish_post', 1);
-
 add_action('save_post', 'kalinsPDF_save_postdata');
-
 
 //content filter is called whenever a blog page is displayed. Comment this out if you aren't using links applied directly to individual posts, or if the link is set in your theme
 add_filter("the_content", "kalinsPDF_content_filter" );
-
-
-//register_activation_hook( __FILE__, 'kalinsPDF_activate' );
-
 
 ?>
