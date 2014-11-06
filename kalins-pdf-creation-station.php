@@ -977,7 +977,7 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 		$this->WP_Widget('kalinsPDFCreationStation', __("PDF Creation Station"), $widget_ops);
 	}
 
-	// This code displays the widget on the screen.
+	// This code displays the user-facing widget
 	// This is very similar to kalinsPDF_content_filter but with important differences. If you make any changes here, make
 	// sure they don't also need to be made there
 	function widget($args, $instance) {
@@ -1015,26 +1015,41 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 		
 		//at this point we know we're going to show a link
 		extract($args);
-		echo $before_widget;//echo wordpress' standard html
-		if(!empty($instance['title'])) {//only show the title if this widget has one
-			echo $before_title . $instance['title'] . $after_title;
-		}
-		
-		//change each postID to identify if it's a page or post for use by our create script
+
+		//change postID to identify if it's a page or post for use by our create script
 		$postID = $post->ID;
 		if($post->post_type == "page"){
 			$postID = "pg_" .$postID;
 		}else{
 			$postID = "po_" .$postID;
 		}
+
+		//if we have not saved an option, use the default and run it's shortcode conversion; else grab the widget setting and run its shortcode conversion
+		if(empty($instance['beforeLink'])){
+			$adminOptions["beforeLink"] = kalins_pdf_page_shortcode_replace($adminOptions["beforeLink"], $post);
+		}else{
+			$adminOptions["beforeLink"] = kalins_pdf_page_shortcode_replace($instance["beforeLink"], $post);
+		}
 		
-		//TODO: if any of these are blank, replace with defaults from $adminOptions (this shouldn't happen but it does, maybe there's a bug in the wordpress widget settings save feature) 
-		$adminOptions["beforeLink"] = kalins_pdf_page_shortcode_replace($instance["beforeLink"], $post);
-		$adminOptions["linkText"] = kalins_pdf_page_shortcode_replace($instance["linkText"], $post);
-		$adminOptions["afterLink"] = kalins_pdf_page_shortcode_replace($instance["afterLink"], $post);
+		if(empty($instance['linkText'])){
+			$adminOptions["linkText"] = kalins_pdf_page_shortcode_replace($adminOptions["linkText"], $post);				
+		}else{
+			$adminOptions["linkText"] = kalins_pdf_page_shortcode_replace($instance["linkText"], $post);
+		}
+		
+		if(empty($instance['afterLink'])){
+			$adminOptions["afterLink"] = kalins_pdf_page_shortcode_replace($adminOptions["afterLink"], $post);				
+		}else{
+			$adminOptions["afterLink"] = kalins_pdf_page_shortcode_replace($instance["afterLink"], $post);
+		}
+		
+		//begin echoing content to user-facing widget
+		echo $before_widget;//echo wordpress' standard html
+		if(!empty($instance['title'])) {//only show the title if this widget has one
+			echo $before_title . $instance['title'] . $after_title;
+		}
 		
 		echo $adminOptions["beforeLink"] .'<a href="' . get_bloginfo('wpurl') . '/wp-content/plugins/kalins-pdf-creation-station/kalins_pdf_create.php?singlepost=' .$postID .'" target="_blank" >' .$adminOptions["linkText"] .'</a>' .$adminOptions["afterLink"];
-
 		echo $after_widget;
 	}
 
@@ -1042,8 +1057,8 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 	function update($new_instance, $old_instance) {
 		return $new_instance;
 	}
-	
-	//TODO: figure out how to handle it when user enters single quote characters into beforeLink, linkText or afterLink
+
+	//this code displays the admin-facing widget interface
 	function form($instance) {
 		echo '<div>';
 		//create three lists of data for each text field
@@ -1056,19 +1071,21 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 		for($i=0; $i<4; $i++){
 			$sFieldName = $aTextFieldNames[$i];
 			
+			$sFieldValue = $aTextFieldDefaultValues[$i];
+			//if we have already saved a value, use it instead of the default
+			if(isset($instance[$sFieldName])){
+				$sFieldValue = $instance[$sFieldName];
+			}
+			
+			//apostrophes will mess everything up when echoed, so we escape them
+			$sFieldValue = str_replace("'", "&#39;", $sFieldValue);
+			
+			//begin echoing content to admin-facing interface 
 			echo '<label for="' . $this->get_field_id($sFieldName) .'">' .$aTextFieldLabels[$i] .'</label>';
 			echo '<input type="text" class="widefat" ';
 			echo 'name="' . $this->get_field_name($sFieldName) . '" ';
 			echo 'id="' . $this->get_field_id($sFieldName) . '" ';
-			
-			//if we have already saved a value, use it
-			if (isset($instance[$sFieldName]))
-			{
-				echo "value='" . $instance[$sFieldName] . "' /><br/><br/>";
-			}else{
-				//if we've never saved a value, enter the default value
-				echo "value='" .$aTextFieldDefaultValues[$i] ."' /><br/><br/>";
-			}
+			echo "value='" . $sFieldValue . "' /><br/><br/>";
 		}
 		
 		echo '<br/><br/></div>';
