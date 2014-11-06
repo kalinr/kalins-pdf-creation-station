@@ -431,6 +431,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		      <div><strong>CREATE PDF!</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[5], 'glyphicon-chevron-right': !groupOpen[5]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
+	      
 		      <div class="form-group">
 			      <label for="txtHeaderTitle" class="control-label col-xs-2">Header title:</label>
 			      <div class="col-xs-10">
@@ -449,62 +450,66 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			    		<input type="number" ng-model="InputCtrl.oOptions.fontSize" id="numFontSize" class="form-control" /> 
 			    	</div>
 			    </div>
-			    <div class="form-group col-md-6 col-xs-12" >
-			    	<div class="checkbox col-md-offset-2">
-			    		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
-			    	</div>
-			    	<div class="checkbox col-md-offset-2">
-			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents</label>
-			      </div>
-				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
+			    
+			    <div class="row">
+				    <div class="form-group col-md-6 col-xs-12" >
+				    	<div class="checkbox col-md-offset-2">
+				    		<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.autoPageBreak"></input> Automatic page breaks</label>
+				    	</div>
+				    	<div class="checkbox col-md-offset-2">
+				      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeTOC"></input> Include Table of Contents</label>
+				      </div>
+					    <div class="checkbox col-md-offset-2">
+					      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.includeImages"></input> Include Images</label>
+					    </div>
+					    <div class="checkbox col-md-offset-2"> 	  
+					      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
+					    </div>
+					    <div class="checkbox col-md-offset-2">
+					      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
+					    </div>
 				    </div>
-				    <div class="checkbox col-md-offset-2"> 	  
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runShortcodes"></input> Run other plugin shortcodes,</label>
-				    </div>
-				    <div class="checkbox col-md-offset-2">
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.runFilters"></input> and content filters</label>
+				    
+				 		<div class="form-group col-md-6 col-xs-12" >
+				      <b>Convert videos to links:</b>
+				      <div class="checkbox">
+				      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
+				      </div>
+				      
+					    <div class="checkbox"> 
+				       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
+				      </div>
+					    <div class="checkbox"> 
+				       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
+				      </div>
 				    </div>
 			    </div>
 			    
-			 		<div class="form-group col-xs-12" >
-			      <b>Convert videos to links:</b>
-			      <div class="checkbox">
-			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
-			      </div>
-			      
-				    <div class="checkbox"> 
-			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
-			      </div>
-				    <div class="checkbox"> 
-			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertTed"></input> Ted Talks</label>
-			      </div>
-			    </div>
-			    
-				  <div class="form-group col-xs-12" >
-			      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input>&nbsp;.pdf</label>
-						<div class="checkbox col-md-offset-1">
-			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input>.pdf</label>
-			      </div>
-			      <div class="checkbox col-md-offset-1">
-			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input>.html</label>
-			      </div>
-			      <div class="checkbox col-md-offset-1">
-			       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input>.txt</label>
-			      </div>
+			    <div class="row">
+					  <div class="form-group col-xs-12" >
+				      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input></label>
+							&nbsp;
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input> .pdf </label>
+							&nbsp;|&nbsp;
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input> .html </label>
+							&nbsp;|&nbsp;
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt</label>
+						</div>
 					</div>
-					
-			    <div class="form-group text-center">
-			      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
-			      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
+
+					<div class="row">
+				    <div class="form-group text-center">
+				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
+				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
+				    </div>
+				    <p class="text-center">{{InputCtrl.sCreateStatus}}</p>
 			    </div>
-			    <p align="center">{{InputCtrl.sCreateStatus}}</p> 
 		    </form>
 	    </accordion-group>
 
 	    <accordion-group is-open="groupOpen[6]">
 		    <accordion-heading>
-		      <div><strong>Existing PDF Files</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[6], 'glyphicon-chevron-right': !groupOpen[6]}"></i></div>
+		      <div><strong>Existing Files</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[6], 'glyphicon-chevron-right': !groupOpen[6]}"></i></div>
 	      </accordion-heading>
 	    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
 		    <div ng-show="InputCtrl.pdfList.length > 0">
