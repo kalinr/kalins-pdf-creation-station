@@ -38,7 +38,6 @@
 	}	
 	
 	$pdfList = array();
-	$count = 0;
 	$pdfDir = KALINS_PDF_DIR;
 	
 	if ($handle = opendir($pdfDir)) {		
@@ -48,8 +47,7 @@
 				$fileObj = new stdClass();
 				$fileObj->fileName = $file;
 				$fileObj->date = date("Y-m-d H:i:s", filemtime($pdfDir .$file));
-				$pdfList[$count] = $fileObj;//compile array of file information simply to pass to javascript				
-				$count++;
+				array_push($pdfList, $fileObj);//compile array of file information simply to pass to javascript				
 			}
 		}
 		closedir($handle);

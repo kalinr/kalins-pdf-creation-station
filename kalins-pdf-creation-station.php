@@ -44,17 +44,6 @@ use ProgressBar.class.php in a new php file in an iframe on tool page for pdf ge
 
 */
 
-
-
-
-//TODO: https://wordpress.org/support/topic/problem-with-admin-ajaxphp-adding-0-to-the-end-of-json-response
-//put die(); at end of every ajax call to prevent the 0 from printing so we can get pure JSON as a response 
-//so we don't need to parse the string on the client side
-
-
-
-
-
 if ( !function_exists( 'add_action' ) ) {
 	echo "Hi there!  I'm just a plugin, not much I can do when called directly.";
 	exit;
@@ -102,8 +91,7 @@ function kalins_pdf_tool_page() {//load php that builds our tool page
 	require_once( WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_tool_page.php');
 }
 
-function kalins_pdf_admin_init(){
-	
+function kalins_pdf_admin_init(){	
 	//creation tool ajax connections
 	add_action('wp_ajax_kalins_pdf_tool_create', 'kalins_pdf_tool_create');
 	add_action('wp_ajax_kalins_pdf_tool_delete', 'kalins_pdf_tool_delete');
@@ -114,7 +102,8 @@ function kalins_pdf_admin_init(){
 	add_action('wp_ajax_kalins_pdf_admin_save', 'kalins_pdf_admin_save');
 	add_action('wp_ajax_kalins_pdf_create_all', 'kalins_pdf_create_all');
 		
-	register_deactivation_hook( __FILE__, 'kalins_pdf_cleanup' );
+	//TODO: get rid of this and replace it with (uninstall.php), what it says to do on this page: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
+	register_uninstall_hook( __FILE__, 'kalins_pdf_cleanup' );
 	
 //	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
 	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
@@ -128,9 +117,9 @@ function kalins_pdf_admin_init(){
 	
 	wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
 	
-	//TODO: move this into our vendor folder if it's needed. delete it if it's not.
-	//wp_register_script( 'kalinPDF_bootstrapJS', 'http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js');
-
+	//TODO: this should be in a add_meta_boxes action instead of admin_init; need to figure out why that action doesn't work
+	add_meta_box( "kalinsPDFNavMenu", "PDF Creation Station", 'kalinsPDF_nav_menu_box', 'nav-menus', 'side');
+	
 	//--------------you may comment-out the foreach loop if you are using hard-coded PDF links in your theme. This will make your admin panels run slightly more efficiently.-------------
 	
 	$post_types = get_post_types('','names'); 
@@ -142,23 +131,77 @@ function kalins_pdf_admin_init(){
 	//--------------------------------
 }
 
-function kalins_pdf_configure_pages() {
+//show the new meta_box in the Appearance->Menus admin page
+function kalinsPDF_nav_menu_box(){
+	echo '<div id="posttype-wl-login" class="posttypediv">
+          <div id="tabs-panel-wishlist-login" class="tabs-panel tabs-panel-active">';
+        			
+	$count = 1;
+	$pdfDir = KALINS_PDF_DIR;
 	
+	if ($handle = opendir($pdfDir)) {
+		echo '<ul id ="wishlist-login-checklist" class="categorychecklist form-no-clear">';
+		while (false !== ($file = readdir($handle))) {
+			//loop to find all relevant files (stripos is not case sensitive so it finds .PDF, .HTML, .TXT)
+			if ($file != "." && $file != ".." && (stripos($file, ".pdf") > 0 || stripos($file, ".html") > 0 || stripos($file, ".txt") > 0  )) {
+				//for each file, echo the checkbox with $file label and all the hidden fields needed for the wordpress nav-menu admin to work properly
+				echo '<li>
+        			  <label class="menu-item-title"><input type="checkbox" class="menu-item-checkbox" name="menu-item[' .$count .'][menu-item-object-id]" value="' .$count .'"> ' .$file .'</label>
+        				<input type="hidden" class="menu-item-type" name="menu-item[' .$count .'][menu-item-type]" value="custom">
+        				<input type="hidden" class="menu-item-title" name="menu-item[' .$count .'][menu-item-title]" value="' .$file .'">
+        				<input type="hidden" class="menu-item-url" name="menu-item[' .$count .'][menu-item-url]" value="' .KALINS_PDF_URL .$file .'">
+        				<input type="hidden" class="menu-item-classes" name="menu-item[' .$count .'][menu-item-classes]" value="wl-login-pop">
+        			</li>';
+				
+				$count++;
+			}
+		}
+		closedir($handle);
+		
+		//echo closing tags and the submit button and 'select all' button. nothing dynamic here.
+		echo '</ul>
+	  </div>
+	  <p class="button-controls">
+	    <span class="list-controls">
+	      <a href="/wordpress/wp-admin/nav-menus.php?page-tab=all&amp;selectall=1#posttype-wl-login" class="select-all">Select All</a>
+	    </span>
+	    <span class="add-to-menu">
+	      <input type="submit" class="button-secondary submit-add-to-menu right" value="Add to Menu" name="add-post-type-menu-item" id="submit-posttype-wl-login">
+	    	<span class="spinner"></span>
+	    </span>
+	  </p>';
+	}else{
+		//if we did not find any files...
+	}
+
+	
+	
+  echo '</div>';
+}
+
+function kalins_pdf_configure_pages() {
 	global $kPDFadminPage;
 	
 	$kPDFadminPage = add_submenu_page('options-general.php', 'Kalins PDF Creation Station', 'PDF Creation Station', 'manage_options', 'kalins-pdf-admin', 'kalins_pdf_admin_page');
+	add_action( 'load-' . $kPDFadminPage , 'my_load_function' );
 	
 	global $kPDFtoolPage;
 	
 	$kPDFtoolPage = add_submenu_page('tools.php', 'Kalins PDF Creation Station', 'PDF Creation Station', 'manage_options', 'kalins-pdf-tool', 'kalins_pdf_tool_page');
+	add_action( 'load-' . $kPDFtoolPage , 'my_load_function' );
 	
 	add_action( "admin_print_scripts-$kPDFadminPage", 'kalins_pdf_admin_head' );
 	add_action('admin_print_styles-' . $kPDFadminPage, 'kalins_pdf_admin_styles');
 	
 	add_action( "admin_print_scripts-$kPDFtoolPage", 'kalins_pdf_admin_head' );
 	add_action('admin_print_styles-' . $kPDFtoolPage, 'kalins_pdf_admin_styles');
-	
+		
 	add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
+}
+
+//TODO: look into adding a lot from kalins_pdf_admin_init() and maybe kalins_pdf_configure_pages() into here since this only runs when we actually need it to
+function my_load_function(){
+	//echo "is this my page?";
 }
 
 function kalins_pdf_admin_head() {	
@@ -726,10 +769,7 @@ function kalins_pdf_page_shortcode_replace($str, $page){//replace all passed in 
 	
 	$str = preg_replace_callback('#\[ *post_parent *(link=[\'|\"]([^\'\"]*)[\'|\"])? *\]#', array(&$postCallback, 'postParentCallback'), $str);
 	
-	$str = preg_replace_callback('#\[ *post_thumb *(size=[\'|\"]([^\'\"]*)[\'|\"])? *(extract=[\'|\"]([^\'\"]*)[\'|\"])? *\]#',
-			array(&$postCallback, 'postThumbCallback'),
-			$str);
-	
+	$str = preg_replace_callback('#\[ *post_thumb *(size=[\'|\"]([^\'\"]*)[\'|\"])? *(extract=[\'|\"]([^\'\"]*)[\'|\"])? *\]#', array(&$postCallback, 'postThumbCallback'), $str);
 	
 	$str = kalins_pdf_global_shortcode_replace($str);//then parse the global shortcodes
 	
