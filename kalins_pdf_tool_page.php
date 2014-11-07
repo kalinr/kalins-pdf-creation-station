@@ -72,51 +72,45 @@ var app = angular.module('kalinsPDFToolPage', ['ngTable', 'ui.sortable', 'ui.boo
 
 //TODO: turn this into a module in separate file so we don't repeat this code on the settings page
 app.controller("UIController",["$scope", function($scope) {
-
 	$scope.groupOpen = [true, true, true, true, true, true, true, true, true];
-
-	/*
-	var self = this;
-	self.aCollapsed = [false, false, false, false, false, false, false, false, false];//list of states for the main divs
-	self.bAllCollapsed = false;//state for close/open all button
-	self.sToggleAllTrue = "Open All";
-	self.sToggleAllFalse = "Close All";
-	self.sToggleAll = self.sToggleAllFalse;//model string to show on close/open all button
-
-	//toggle a single div open/closed
-	self.toggleCollapsed = function(index){
-		self.aCollapsed[index] = !self.aCollapsed[index];
+	$scope.bAllOpen = true;//state for close/open all button
+	
+	$scope.sToggleAllTrue = "Close All";
+	$scope.sToggleAllFalse = "Open All";
+	$scope.sToggleAll = $scope.sToggleAllTrue;//model string to show on close/open all button
+	
+	$scope.$watch('groupOpen', function(){
 		var nStateCount = 0;
-
+	
 		//loop to see if we have opened or closed more than half the divs since the last time we clicked open/close all
-		for(var i = 0; i < self.aCollapsed.length; i++ ){
-			if(self.aCollapsed[i] != self.bAllCollapsed){
-				nStateCount = nStateCount + 1;
+		for(var i = 0; i < $scope.groupOpen.length; i++ ){
+			if($scope.groupOpen[i] != $scope.bAllOpen){
+				nStateCount++;
 			}
 		}
-
+	
 		//if we have opened/closed more than half, set the open/close all button text appropriately
-		if(nStateCount > 5){
-			self.bAllCollapsed = !self.bAllCollapsed;
-			self.setToggleAllText();
+		if(nStateCount > 4){
+			$scope.bAllOpen = !$scope.bAllOpen;
+			$scope.setToggleAllText();
 		}
-	}*/
+	}, true); 
 
 	//open or close all main divs
-	self.toggleAll = function(){
-		self.bAllCollapsed = !self.bAllCollapsed;
-		for(var i = 0; i < self.aCollapsed.length; i++ ){
-			self.aCollapsed[i] = self.bAllCollapsed;
+	$scope.toggleAll = function(){		
+		$scope.bAllOpen = !$scope.bAllOpen;
+		for(var i = 0; i < $scope.groupOpen.length; i++ ){
+			$scope.groupOpen[i] = $scope.bAllOpen;
 		}
-		self.setToggleAllText();
+		$scope.setToggleAllText();
 	}
 
 	//set the text on the open/close all button
-	self.setToggleAllText = function(){
-		if(self.bAllCollapsed){
-			self.sToggleAll = self.sToggleAllTrue;
+	$scope.setToggleAllText = function(){
+		if($scope.bAllOpen){
+			$scope.sToggleAll = $scope.sToggleAllTrue;
 		}else{
-			self.sToggleAll = self.sToggleAllFalse;
+			$scope.sToggleAll = $scope.sToggleAllFalse;
 		}
 	}	
 }]);
@@ -345,6 +339,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com">kalinbooks.com</a></h3>
 		<p>Create custom PDF files for any combination of posts and pages.</p>
+		
+		<div class="form-group text-right">
+			<button class="btn btn-info" ng-click="toggleAll();">{{sToggleAll}}</button>
+		</div>
 
 		<accordion close-others="false">
 	    <accordion-group is-open="groupOpen[0]">

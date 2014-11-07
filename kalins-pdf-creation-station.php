@@ -132,18 +132,21 @@ function kalins_pdf_admin_init(){
 }
 
 //show the new meta_box in the Appearance->Menus admin page
-function kalinsPDF_nav_menu_box(){
-	echo '<div id="posttype-wl-login" class="posttypediv">
-          <div id="tabs-panel-wishlist-login" class="tabs-panel tabs-panel-active">';
-        			
+function kalinsPDF_nav_menu_box(){    			
 	$count = 1;
-	$pdfDir = KALINS_PDF_DIR;
 	
-	if ($handle = opendir($pdfDir)) {
-		echo '<ul id ="wishlist-login-checklist" class="categorychecklist form-no-clear">';
+	if ($handle = opendir(KALINS_PDF_DIR)) {
+		//echo '<ul id ="wishlist-login-checklist" class="categorychecklist form-no-clear">';
 		while (false !== ($file = readdir($handle))) {
 			//loop to find all relevant files (stripos is not case sensitive so it finds .PDF, .HTML, .TXT)
 			if ($file != "." && $file != ".." && (stripos($file, ".pdf") > 0 || stripos($file, ".html") > 0 || stripos($file, ".txt") > 0  )) {
+				
+				if($count === 1){
+					echo '<div id="posttype-wl-login" class="posttypediv">
+									<div id="tabs-panel-wishlist-login" class="tabs-panel tabs-panel-active">
+										<ul id ="wishlist-login-checklist" class="categorychecklist form-no-clear">';
+				}
+				
 				//for each file, echo the checkbox with $file label and all the hidden fields needed for the wordpress nav-menu admin to work properly
 				echo '<li>
         			  <label class="menu-item-title"><input type="checkbox" class="menu-item-checkbox" name="menu-item[' .$count .'][menu-item-object-id]" value="' .$count .'"> ' .$file .'</label>
@@ -158,25 +161,29 @@ function kalinsPDF_nav_menu_box(){
 		}
 		closedir($handle);
 		
-		//echo closing tags and the submit button and 'select all' button. nothing dynamic here.
-		echo '</ul>
-	  </div>
-	  <p class="button-controls">
-	    <span class="list-controls">
-	      <a href="/wordpress/wp-admin/nav-menus.php?page-tab=all&amp;selectall=1#posttype-wl-login" class="select-all">Select All</a>
-	    </span>
-	    <span class="add-to-menu">
-	      <input type="submit" class="button-secondary submit-add-to-menu right" value="Add to Menu" name="add-post-type-menu-item" id="submit-posttype-wl-login">
-	    	<span class="spinner"></span>
-	    </span>
-	  </p>';
+		if($count > 1){
+			//echo closing tags and the submit button and 'select all' button. nothing dynamic here.
+			echo '</ul>
+			  </div>
+			  <p class="button-controls">
+			    <span class="list-controls">
+			      <a href="/wordpress/wp-admin/nav-menus.php?page-tab=all&amp;selectall=1#posttype-wl-login" class="select-all">Select All</a>
+			    </span>
+			    <span class="add-to-menu">
+			      <input type="submit" class="button-secondary submit-add-to-menu right" value="Add to Menu" name="add-post-type-menu-item" id="submit-posttype-wl-login">
+			    	<span class="spinner"></span>
+			    </span>
+			  </p>
+			</div>';
+		}else{
+			//if we did not find any files
+			echo "You need to create some PDF files in <a href='tools.php?page=kalins-pdf-tool'>Tools-&#62;PDF Creation Station.</a>";
+		}
 	}else{
-		//if we did not find any files...
+		//if we did not find the directory
+		echo "You need to create some PDF files in <a href='tools.php?page=kalins-pdf-tool' >Tools-&#62;PDF Creation Station.</a>";
 	}
-
 	
-	
-  echo '</div>';
 }
 
 function kalins_pdf_configure_pages() {
