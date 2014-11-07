@@ -91,7 +91,10 @@ function kalins_pdf_tool_page() {//load php that builds our tool page
 	require_once( WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_tool_page.php');
 }
 
-function kalins_pdf_admin_init(){	
+//runs on every admin page
+function kalins_pdf_admin_init(){
+	
+	//not sure why the ajax connections stopped working when put into kalins_admin_page_loaded so they remain here
 	//creation tool ajax connections
 	add_action('wp_ajax_kalins_pdf_tool_create', 'kalins_pdf_tool_create');
 	add_action('wp_ajax_kalins_pdf_tool_delete', 'kalins_pdf_tool_delete');
@@ -101,22 +104,10 @@ function kalins_pdf_admin_init(){
 	add_action('wp_ajax_kalins_pdf_reset_admin_defaults', 'kalins_pdf_reset_admin_defaults');//kalins_pdf_admin_save
 	add_action('wp_ajax_kalins_pdf_admin_save', 'kalins_pdf_admin_save');
 	add_action('wp_ajax_kalins_pdf_create_all', 'kalins_pdf_create_all');
-		
+	
 	//TODO: get rid of this and replace it with (uninstall.php), what it says to do on this page: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
 	register_uninstall_hook( __FILE__, 'kalins_pdf_cleanup' );
-	
-//	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
-	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
-	//wp_register_style('kalinPDF_ng-tableStyle', 'http://bazalt-cms.com/assets/ng-table/0.3.0/ng-table.css');
-	
-	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
-	
-	wp_register_script( 'kalinPDFAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular.js' );
-	wp_register_script( 'kalinPDF_ng-table', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ng-table.js' );
-	wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular-ui-sortable.js' );
-	
-	wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
-	
+
 	//TODO: this should be in a add_meta_boxes action instead of admin_init; need to figure out why that action doesn't work
 	add_meta_box( "kalinsPDFNavMenu", "PDF Creation Station", 'kalinsPDF_nav_menu_box', 'nav-menus', 'side');
 	
@@ -186,29 +177,43 @@ function kalinsPDF_nav_menu_box(){
 	
 }
 
+//runs on every admin page
 function kalins_pdf_configure_pages() {
 	global $kPDFadminPage;
 	
 	$kPDFadminPage = add_submenu_page('options-general.php', 'Kalins PDF Creation Station', 'PDF Creation Station', 'manage_options', 'kalins-pdf-admin', 'kalins_pdf_admin_page');
-	add_action( 'load-' . $kPDFadminPage , 'my_load_function' );
+	add_action( 'load-' . $kPDFadminPage , 'kalins_admin_page_loaded' );
 	
 	global $kPDFtoolPage;
 	
 	$kPDFtoolPage = add_submenu_page('tools.php', 'Kalins PDF Creation Station', 'PDF Creation Station', 'manage_options', 'kalins-pdf-tool', 'kalins_pdf_tool_page');
-	add_action( 'load-' . $kPDFtoolPage , 'my_load_function' );
+	add_action( 'load-' . $kPDFtoolPage , 'kalins_admin_page_loaded' );
+}
+
+//runs just on our tool and settings page
+function kalins_admin_page_loaded(){	
+	global $kPDFadminPage;
+	global $kPDFtoolPage;
 	
 	add_action( "admin_print_scripts-$kPDFadminPage", 'kalins_pdf_admin_head' );
 	add_action('admin_print_styles-' . $kPDFadminPage, 'kalins_pdf_admin_styles');
 	
 	add_action( "admin_print_scripts-$kPDFtoolPage", 'kalins_pdf_admin_head' );
 	add_action('admin_print_styles-' . $kPDFtoolPage, 'kalins_pdf_admin_styles');
-		
+	
 	add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
-}
-
-//TODO: look into adding a lot from kalins_pdf_admin_init() and maybe kalins_pdf_configure_pages() into here since this only runs when we actually need it to
-function my_load_function(){
-	//echo "is this my page?";
+	
+	//	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
+	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
+	//wp_register_style('kalinPDF_ng-tableStyle', 'http://bazalt-cms.com/assets/ng-table/0.3.0/ng-table.css');
+	
+	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
+	
+	wp_register_script( 'kalinPDFAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular.js' );
+	wp_register_script( 'kalinPDF_ng-table', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ng-table.js' );
+	wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular-ui-sortable.js' );
+	
+	wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
 }
 
 function kalins_pdf_admin_head() {	

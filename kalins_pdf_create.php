@@ -441,6 +441,7 @@ try{
 		$objTcpdf->endTOCPage();
 	}
 	
+	//TODO: this var creates a bug when trying to multi-create on the settings page
 	if($bCreatePDF){
 		//create and save the PDF document
 		$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
