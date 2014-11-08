@@ -104,9 +104,6 @@ function kalins_pdf_admin_init(){
 	add_action('wp_ajax_kalins_pdf_reset_admin_defaults', 'kalins_pdf_reset_admin_defaults');//kalins_pdf_admin_save
 	add_action('wp_ajax_kalins_pdf_admin_save', 'kalins_pdf_admin_save');
 	add_action('wp_ajax_kalins_pdf_create_all', 'kalins_pdf_create_all');
-	
-	//TODO: get rid of this and replace it with (uninstall.php), what it says to do on this page: http://codex.wordpress.org/Function_Reference/register_uninstall_hook
-	register_uninstall_hook( __FILE__, 'kalins_pdf_cleanup' );
 
 	//TODO: this should be in a add_meta_boxes action instead of admin_init; need to figure out why that action doesn't work
 	add_meta_box( "kalinsPDFNavMenu", "PDF Creation Station", 'kalinsPDF_nav_menu_box', 'nav-menus', 'side');
@@ -1160,5 +1157,7 @@ add_action('save_post', 'kalinsPDF_save_postdata');
 
 //content filter is called whenever a blog page is displayed. Comment this out if you aren't using links applied directly to individual posts, or if the link is set in your theme
 add_filter("the_content", "kalinsPDF_content_filter" );
+
+register_uninstall_hook( __FILE__, 'kalins_pdf_cleanup' );
 
 ?>
