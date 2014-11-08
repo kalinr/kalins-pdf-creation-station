@@ -441,20 +441,23 @@ try{
 		$objTcpdf->endTOCPage();
 	}
 	
-	//TODO: this var creates a bug when trying to multi-create on the settings page
-	if($bCreatePDF){
-		//create and save the PDF document
+	//create and save the proper document(s)
+	if($isSingle){
 		$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
-	}
-	
-	if($bCreateHTML){
-		$totalHTML = $totalHTML .'</body>
-</html>';
-		file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
-	}
-	
-	if($bCreateTXT){
-		file_put_contents ( $pdfDir .$filename .".txt" , $totalTXT );
+	}	else {
+		if( $bCreatePDF){
+			$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
+		}
+		
+		if($bCreateHTML){
+			$totalHTML = $totalHTML .'</body>
+	</html>';
+			file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
+		}
+		
+		if($bCreateTXT){
+			file_put_contents ( $pdfDir .$filename .".txt" , $totalTXT );
+		}
 	}
 	
 } catch (Exception $e) {
