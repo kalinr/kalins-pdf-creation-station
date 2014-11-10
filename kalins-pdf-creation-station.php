@@ -211,12 +211,15 @@ function kalins_admin_page_loaded(){
 	wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular-ui-sortable.js' );
 	
 	wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
+	
+	wp_register_script( 'kalinPDF_KalinsUIService', WP_PLUGIN_URL . '/kalins-pdf-creation-station/KalinsUIService.js' );
 }
 
 function kalins_pdf_admin_head() {	
 	wp_enqueue_script("jquery-ui-sortable");
 	wp_enqueue_script( 'kalinPDFAngularJS' );
 	wp_enqueue_script( 'kalinPDF_ng-table' );
+	wp_enqueue_script( 'kalinPDF_KalinsUIService' );
 	wp_enqueue_script( 'kalinPDF_angular-ui' );
 	//wp_enqueue_script( 'kalinPDF_bootstrapJS' );
 	wp_enqueue_script( 'kalinPDF_angular-bootstrap' );
