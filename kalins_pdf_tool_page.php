@@ -74,6 +74,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	//TODO: angular's ui-sortable actually uses jQuery. replace it with what we find here to eliminate jQuery:
 	//http://amnah.net/2014/02/18/how-to-set-up-sortable-in-angularjs-without-jquery/
 	
+	//build our toggle manager for the accordion's toggle all button
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true], "Close All", "Open All");
 
 	var self = this;

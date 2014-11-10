@@ -17,55 +17,13 @@
 
 <script type='text/javascript'>
 
-var app = angular.module('kalinsPDFAdminPage', ['ui.bootstrap']);
+var app = angular.module('kalinsPDFAdminPage', ['ui.bootstrap', 'kalinsUI']);
 
-//TODO: turn this into a module in separate file so we don't repeat this code on the settings page
-app.controller("UIController",["$scope", function($scope) {
-	$scope.groupOpen = [true, true, true, true, true, true];
-	$scope.bAllOpen = true;//state for close/open all button
+app.controller("InputController",["$scope", "$http", "kalinsToggles", function($scope, $http, kalinsToggles) {
+
+	//build our toggle manager for the accordion's toggle all button
+	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All");
 	
-	$scope.sToggleAllTrue = "Close All";
-	$scope.sToggleAllFalse = "Open All";
-	$scope.sToggleAll = $scope.sToggleAllTrue;//model string to show on close/open all button
-	
-	$scope.$watch('groupOpen', function(){
-		var nStateCount = 0;
-	
-		//loop to see if we have opened or closed more than half the divs since the last time we clicked open/close all
-		for(var i = 0; i < $scope.groupOpen.length; i++ ){
-			if($scope.groupOpen[i] != $scope.bAllOpen){
-				nStateCount++;
-			}
-		}
-	
-		//if we have opened/closed more than half, set the open/close all button text appropriately
-		if(nStateCount > 3){
-			$scope.bAllOpen = !$scope.bAllOpen;
-			$scope.setToggleAllText();
-		}
-	}, true); 
-
-	//open or close all main divs
-	$scope.toggleAll = function(){		
-		$scope.bAllOpen = !$scope.bAllOpen;
-		for(var i = 0; i < $scope.groupOpen.length; i++ ){
-			$scope.groupOpen[i] = $scope.bAllOpen;
-		}
-		$scope.setToggleAllText();
-	}
-
-	//set the text on the open/close all button
-	$scope.setToggleAllText = function(){
-		if($scope.bAllOpen){
-			$scope.sToggleAll = $scope.sToggleAllTrue;
-		}else{
-			$scope.sToggleAll = $scope.sToggleAllFalse;
-		}
-	}	
-}]);
-
-
-app.controller("InputController",["$scope", "$http", function($scope, $http) {
 	var self = this;
 
 	var saveNonce = '<?php echo $save_nonce; //pass a different nonce security string for each possible ajax action?>';
@@ -142,21 +100,20 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 }]);
 </script>
 
-<div ng-app="kalinsPDFAdminPage" ng-controller="UIController as UICtrl" class="kContainer">
-	<div ng-controller="InputController as InputCtrl">
+	<div ng-app="kalinsPDFAdminPage" ng-controller="InputController as InputCtrl" class="kContainer">
 	
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
 		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help button to the right.</p>
 		
 		<div class="form-group text-right">
-			<button class="btn btn-info" ng-click="toggleAll();">{{sToggleAll}}</button>
+			<button class="btn btn-info" ng-click="kalinsToggles.toggleAll();">{{kalinsToggles.sToggleAll}}</button>
 		</div>
 		
 		<accordion close-others="false">
-	    <accordion-group is-open="groupOpen[0]">
+	    <accordion-group is-open="kalinsToggles.aBooleans[0]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML before page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[0], 'glyphicon-chevron-right': !groupOpen[0]}"></i></div>
+		      <div><strong>Insert HTML before page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
 		    <b>HTML to insert before page:</b><br />
 		    <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
@@ -164,9 +121,9 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		    <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePost"></textarea>
 			</accordion-group>
 			  			  
-	    <accordion-group is-open="groupOpen[1]">
+	    <accordion-group is-open="kalinsToggles.aBooleans[1]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML after page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[1], 'glyphicon-chevron-right': !groupOpen[1]}"></i></div>
+		      <div><strong>Insert HTML after page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert after page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
@@ -174,9 +131,9 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPost"></textarea>
 			</accordion-group>
 			  
-			<accordion-group is-open="groupOpen[2]">
+			<accordion-group is-open="kalinsToggles.aBooleans[2]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML for title and final pages</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[2], 'glyphicon-chevron-right': !groupOpen[2]}"></i></div>
+		      <div><strong>Insert HTML for title and final pages</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert for title page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
@@ -184,9 +141,9 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.finalPage"></textarea>
 			</accordion-group>
 			
-			<accordion-group is-open="groupOpen[3]">
+			<accordion-group is-open="kalinsToggles.aBooleans[3]">
 		    <accordion-heading>
-		      <div><strong>Options</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[3], 'glyphicon-chevron-right': !groupOpen[3]}"></i></div>
+		      <div><strong>Options</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
 		      <div class="form-group">
@@ -288,9 +245,9 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			  </form>
 			</accordion-group>
 			
-			<accordion-group is-open="groupOpen[4]">
+			<accordion-group is-open="kalinsToggles.aBooleans[4]">
 		    <accordion-heading>
-		      <div><strong>Shortcodes</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[4], 'glyphicon-chevron-right': !groupOpen[4]}"></i></div>
+		      <div><strong>Shortcodes</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[4], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[4]}"></i></div>
 	      </accordion-heading>   
 		  	<b>shortcodes:</b> Use these codes anywhere in the above form to insert blog or page information.
 		  	<p><ul>
@@ -327,9 +284,9 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 		    <p>Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.</p> 
 			</accordion-group>
 			
-			<accordion-group is-open="groupOpen[5]">
+			<accordion-group is-open="kalinsToggles.aBooleans[5]">
 		    <accordion-heading>
-		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': groupOpen[5], 'glyphicon-chevron-right': !groupOpen[5]}"></i></div>
+		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
 	      </accordion-heading> 
 		  	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 		       
@@ -348,5 +305,4 @@ app.controller("InputController",["$scope", "$http", function($scope, $http) {
 			</accordion-group>
 		</accordion>
 	</div>
-</div>
 </html>
