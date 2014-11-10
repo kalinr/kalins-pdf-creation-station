@@ -306,7 +306,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<accordion close-others="false">
 	    <accordion-group is-open="kalinsToggles.aBooleans[0]">
 		    <accordion-heading>
-		      <div><strong>Add pages and posts</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.kalinsToggles.aBooleans[0]}"></i></div>
+		      <div><strong>Add pages and posts</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
