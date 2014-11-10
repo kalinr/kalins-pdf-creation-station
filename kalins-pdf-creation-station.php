@@ -341,7 +341,7 @@ function kalinsPDF_content_filter($content){
 	}
 	
 	$adminOptions = kalins_pdf_get_admin_options();
-	
+	//TODO: check for and skip private post (not sure if I need to. look into this once you're not using a symlink)
 	if($adminOptions['showOnMulti'] == "false" && !is_single() && !is_page()){//if we're not on a single page/post we don't need to do anything else
 		return $content;
 	}
@@ -546,8 +546,8 @@ function kalins_pdf_create_all(){
  	foreach($myPosts as $post) {
     if(kalinsPDF_build_pdf($post)){
 		  $postCount = $postCount + 1;
-			  if($postCount == $postLimit){
-					break;
+			if($postCount == $postLimit){
+				break;
 			}
 		}
 	}
