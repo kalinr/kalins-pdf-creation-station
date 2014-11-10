@@ -70,13 +70,16 @@
 
 var app = angular.module('kalinsPDFToolPage', ['ngTable', 'ui.sortable', 'ui.bootstrap', 'kalinsUI']);
 
-app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", "kalinsToggles", function($scope, $http, $filter, ngTableParams, kalinsToggles) {
+app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams", "kalinsToggles", "kalinsAlertManager", function($scope, $http, $filter, ngTableParams, kalinsToggles, kalinsAlertManager) {
 	//TODO: angular's ui-sortable actually uses jQuery. replace it with what we find here to eliminate jQuery:
 	//http://amnah.net/2014/02/18/how-to-set-up-sortable-in-angularjs-without-jquery/
 	
 	//build our toggle manager for the accordion's toggle all button
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true], "Close All", "Open All");
 
+	//set up the alerts that show under the form buttons
+	$scope.kalinsAlertManager = new kalinsAlertManager(4);
+	
 	var self = this;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
@@ -144,22 +147,22 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
 				  self.oOptions = data;
-				  self.sCreateStatus = "Defaults reset successfully.";
+				  $scope.kalinsAlertManager.addAlert("Defaults reset successfully.", "success");
 			  }).
 			  error(function(data, status, headers, config) {
-			    self.sCreateStatus = "An error occurred: " + data;
+			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 			  });
 		}
 	}
 
 	self.createDocument = function(){
 		if(self.buildPostList.length === 0){
-			self.sCreateStatus = "Error: You need to add at least one page or post.";
+			$scope.kalinsAlertManager.addAlert("Error: You need to add at least one page or post.", "danger");
 			return;
 		}
 
 		if(!self.oOptions.bCreatePDF && !self.oOptions.bCreateHTML && !self.oOptions.bCreateTXT){
-			self.sCreateStatus = "Error: You need to select at least one filetype: .pdf, .html or .txt.";
+			$scope.kalinsAlertManager.addAlert("Error: You need to select at least one filetype: .pdf, .html or .txt.", "danger");
 			return;
 		}
 
@@ -179,7 +182,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				data.pageIDs += ",";
 			}
 		}
-		self.sCreateStatus = "Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.";
+		$scope.kalinsAlertManager.addAlert("Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.", "success");
 		
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {
@@ -191,13 +194,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 						self.pdfList.push(data.aFiles[i]);
 					}
 					$scope.pdfListTableParams.reload();
-					self.sCreateStatus = "File created successfully";
+					$scope.kalinsAlertManager.addAlert("File created successfully", "success");
 				}else{
-					self.sCreateStatus = "Error: " + data.status;
+					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
 				}
 		  }).
 		  error(function(data, status, headers, config) {
-		    self.sCreateStatus = "An error occurred: " + data;
+		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 		  });
 	}
 
@@ -258,7 +261,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 						if(filename == "all"){
 							self.pdfList.splice(0, self.pdfList.length);
 							$scope.pdfListTableParams.reload();
-							self.sCreateStatus = "Files deleted successfully";
+							$scope.kalinsAlertManager.addAlert("Files deleted successfully", "success");
 						}else{
 							//figure out which item to delete out of our array
 							for(var i =0; i<self.pdfList.length; i++){
@@ -277,14 +280,14 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 								$scope.pdfListTableParams.page(currentPage - 1);
 							}
 							$scope.pdfListTableParams.reload();
-							self.sCreateStatus = "File deleted successfully";
+							$scope.kalinsAlertManager.addAlert("File deleted successfully", "success");
 						}
 					}else{
-						self.sCreateStatus = data.status;
+						$scope.kalinsAlertManager.addAlert(data.status, "success");
 					}
 			  }).
 			  error(function(data, status, headers, config) {
-			    self.sCreateStatus = "An error occurred: " + data;
+			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "success");
 			  });
 		}
 	}
@@ -454,8 +457,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
 				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
 				    </div>
-				    <p class="text-center">{{InputCtrl.sCreateStatus}}</p>
 			    </div>
+			    
+			    <div class="row">
+		      	<div class="col-md-offset-1 col-md-10">
+					  	<alert ng-repeat="alert in kalinsAlertManager.aAlerts" type="{{alert.type}}" close="kalinsAlertManager.closeAlert($index)">{{alert.index}} - {{alert.msg}}</alert>
+					  </div>
+					</div>
 		    </form>
 	    </accordion-group>
 

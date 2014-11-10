@@ -23,7 +23,8 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 
 	//build our toggle manager for the accordion's toggle all button
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All");
-	  
+
+	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
 	
 	var self = this;
