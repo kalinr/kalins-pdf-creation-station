@@ -19,10 +19,15 @@
 
 var app = angular.module('kalinsPDFAdminPage', ['ui.bootstrap', 'kalinsUI']);
 
-app.controller("InputController",["$scope", "$http", "kalinsToggles", function($scope, $http, kalinsToggles) {
+app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAlertManager", function($scope, $http, kalinsToggles, kalinsAlertManager) {
 
 	//build our toggle manager for the accordion's toggle all button
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All");
+
+	var aAlerts = [];
+  aAlerts['settingsSaved'] = {type: 'success', msg: '"Settings saved successfully."' };
+	  
+	$scope.kalinsAlertManager = new kalinsAlertManager(aAlerts, 3);
 	
 	var self = this;
 
@@ -45,6 +50,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", function($
 		  success(function(data, status, headers, config) {				
 				if(data === "success"){
 					self.sCreateStatus = "Settings saved successfully.";
+					$scope.kalinsAlertManager.addAlert("settingsSaved");
 				}else{
 					self.sCreateStatus = data;
 				}
@@ -242,6 +248,13 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", function($
 		        <button ng-click="InputCtrl.createAll()" class="btn btn-success">Create All</button>
 		      </div>
 		      <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
+		      
+		      <div class="row">
+		      	<div class="col-md-offset-1 col-md-10">
+					  	<alert ng-repeat="alert in kalinsAlertManager.aAlerts" type="{{alert.type}}" close="kalinsAlertManager.closeAlert($index)">{{alert.index}} - {{alert.msg}}</alert>
+					  </div>
+					</div>
+		      
 			  </form>
 			</accordion-group>
 			

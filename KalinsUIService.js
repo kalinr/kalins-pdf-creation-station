@@ -50,4 +50,37 @@ kalinsApp.factory('kalinsToggles', ["$rootScope", function($rootScope) {
 	return kalinsToggles;
 }]);
 
+
+kalinsApp.factory('kalinsAlertManager', ["$filter",function($filter) {
+	
+	var kalinsAlertManager = function(aAlerts, nMax){
+		var self = this;
+		self.nMax = nMax;
+		self.aAlerts = aAlerts;
+		self.nTotalAlerts = 0;//the total number of alerts we've shown so far
+		
+		self.closeAlert = function(index) {
+		  self.aAlerts.splice(index, 1);
+		};
+		
+		self.addAlert = function(sAlertName) {
+		  self.nTotalAlerts++;//increment first so it starts at 1 but still represents an accurate total
+		  
+		  //copy the correct alert object into a new object in case it's a duplicate
+		  var oNewAlert = JSON.parse($filter('json')(self.aAlerts[sAlertName]));
+		  oNewAlert.index = self.nTotalAlerts;
+			
+		  //add new alert to beginning of array so it's shown on top
+		  self.aAlerts.unshift(oNewAlert);
+		  
+		  //if we've gone beyond our maximum, remove last item in array
+		  if(self.aAlerts.length > self.nMax){
+		    self.closeAlert(self.aAlerts.length - 1);
+		  }
+		};
+	}
+	
+	return kalinsAlertManager;
+}]);
+
 })();
