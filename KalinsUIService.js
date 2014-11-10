@@ -39,7 +39,7 @@ kalinsApp.factory('kalinsToggles', ["$rootScope", function($rootScope) {
 		}, true);
 	
 		//turn everything to the opposite of what the current average is
-		self.toggleAll = function(){		
+		self.toggleAll = function(){
 			self.bMostTrue = !self.bMostTrue;
 			for(var i = 0; i < self.aBooleans.length; i++ ){
 				self.aBooleans[i] = self.bMostTrue;
@@ -53,23 +53,22 @@ kalinsApp.factory('kalinsToggles', ["$rootScope", function($rootScope) {
 
 kalinsApp.factory('kalinsAlertManager', ["$filter",function($filter) {
 	
-	var kalinsAlertManager = function(aAlerts, nMax){
+	var kalinsAlertManager = function(nMax){
 		var self = this;
 		self.nMax = nMax;
-		self.aAlerts = aAlerts;
+		self.aAlerts = [];
 		self.nTotalAlerts = 0;//the total number of alerts we've shown so far
 		
 		self.closeAlert = function(index) {
 		  self.aAlerts.splice(index, 1);
 		};
 		
-		self.addAlert = function(sAlertName) {
+		self.addAlert = function(sAlertMessage, type) {
 		  self.nTotalAlerts++;//increment first so it starts at 1 but still represents an accurate total
 		  
-		  //copy the correct alert object into a new object in case it's a duplicate
-		  var oNewAlert = JSON.parse($filter('json')(self.aAlerts[sAlertName]));
+		  var oNewAlert = {type:type, msg:sAlertMessage, index:self.nTotalAlerts};
 		  oNewAlert.index = self.nTotalAlerts;
-			
+
 		  //add new alert to beginning of array so it's shown on top
 		  self.aAlerts.unshift(oNewAlert);
 		  

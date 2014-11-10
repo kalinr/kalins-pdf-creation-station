@@ -23,11 +23,8 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 
 	//build our toggle manager for the accordion's toggle all button
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All");
-
-	var aAlerts = [];
-  aAlerts['settingsSaved'] = {type: 'success', msg: '"Settings saved successfully."' };
 	  
-	$scope.kalinsAlertManager = new kalinsAlertManager(aAlerts, 3);
+	$scope.kalinsAlertManager = new kalinsAlertManager(4);
 	
 	var self = this;
 
@@ -36,9 +33,6 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 	var createAllNonce = '<?php echo $create_nonce; ?>';
 		
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
-
-	//the text that shows under the create/reset/create all buttons indicating save status
-	self.sCreateStatus = "";
 
 	self.saveData = function(){
 		//copy our data into new object
@@ -49,14 +43,13 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {				
 				if(data === "success"){
-					self.sCreateStatus = "Settings saved successfully.";
-					$scope.kalinsAlertManager.addAlert("settingsSaved");
+					$scope.kalinsAlertManager.addAlert("Settings saved successfully.", "success");
 				}else{
-					self.sCreateStatus = data;
+					$scope.kalinsAlertManager.addAlert(data, "danger");
 				}
 		  }).
 		  error(function(data, status, headers, config) {
-		    self.sCreateStatus = "An error occurred: " + data;
+		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 		  });
 	}
 
@@ -67,10 +60,10 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
 				  self.oOptions = data;
-				  self.sCreateStatus = "Defaults reset successfully.";
+				  $scope.kalinsAlertManager.addAlert("Defaults reset successfully.", "success");
 			  }).
 			  error(function(data, status, headers, config) {
-			    self.sCreateStatus = "An error occurred: " + data;
+			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 			  });
 		}
 	}
@@ -83,24 +76,24 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		}
 		
 		if(!creationInProcess){
-			self.sCreateStatus = "Creating PDF files for all pages and posts.";
+			$scope.kalinsAlertManager.addAlert("Creating PDF files for all pages and posts.", "success");
 		}
 
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {
 				if(data.status == "success"){
 					if(data.existCount >= data.totalCount){
-						self.sCreateStatus = data.totalCount  +  " PDF files successfully cached.";
+						$scope.kalinsAlertManager.addAlert(data.totalCount  +  " PDF files successfully cached.", "success");
 						creationInProcess = false;
 					}else{
-						self.sCreateStatus = data.existCount + " out of " + data.totalCount  +  " PDF files cached. Now building the next " +  data.createCount + ".";
+						$scope.kalinsAlertManager.addAlert(data.existCount + " out of " + data.totalCount  +  " PDF files cached. Now building the next " +  data.createCount + ".", "success");
 						creationInProcess = true;
 						self.createAll();
 					}
 				}
 		  }).
 		  error(function(data, status, headers, config) {
-		    self.sCreateStatus = "An error occurred: " + data;
+		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 		  });
 	}
 }]);
@@ -247,8 +240,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		        <button ng-click="InputCtrl.resetToDefaults()" class="btn btn-warning">Reset Defaults</button>
 		        <button ng-click="InputCtrl.createAll()" class="btn btn-success">Create All</button>
 		      </div>
-		      <p align="center"><span id="createStatus">{{InputCtrl.sCreateStatus}}</span></p>
-		      
+		      		      
 		      <div class="row">
 		      	<div class="col-md-offset-1 col-md-10">
 					  	<alert ng-repeat="alert in kalinsAlertManager.aAlerts" type="{{alert.type}}" close="kalinsAlertManager.closeAlert($index)">{{alert.index}} - {{alert.msg}}</alert>
