@@ -22,7 +22,7 @@ var app = angular.module('kalinsPDFAdminPage', ['ui.bootstrap', 'kalinsUI']);
 app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAlertManager", function($scope, $http, kalinsToggles, kalinsAlertManager) {
 
 	//build our toggle manager for the accordion's toggle all button
-	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All");
+	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true], "Close All", "Open All", "kalinsSettingsPageAccordionToggles" );
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);

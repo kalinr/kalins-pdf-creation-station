@@ -75,7 +75,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	//http://amnah.net/2014/02/18/how-to-set-up-sortable-in-angularjs-without-jquery/
 	
 	//build our toggle manager for the accordion's toggle all button
-	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true], "Close All", "Open All");
+	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true], "Close All", "Open All", "kalinsToolPageAccordionToggles");
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
