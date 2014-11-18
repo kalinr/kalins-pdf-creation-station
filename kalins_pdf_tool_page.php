@@ -40,7 +40,7 @@
 	$pdfList = array();
 	$pdfDir = KALINS_PDF_DIR;
 	
-	if ($handle = opendir($pdfDir)) {		
+	if ($handle = opendir($pdfDir)) {
 		while (false !== ($file = readdir($handle))) {
 			//loop to find all relevant files (stripos is not case sensitive so it finds .PDF, .HTML, .TXT)
 			if ($file != "." && $file != ".." && (stripos($file, ".pdf") > 0 || stripos($file, ".html") > 0 || stripos($file, ".txt") > 0  )) {
@@ -52,6 +52,8 @@
 		}
 		closedir($handle);
 	}
+	
+	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/toolStrings.json');
 	
 	/*
 	 require_once 'ProgressBar.class.php';
@@ -79,6 +81,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
+
+	$scope.oHelpStrings = <?php echo $toolStrings ?>;
 	
 	var self = this;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
@@ -306,7 +310,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<accordion close-others="false">
 	    <accordion-group is-open="kalinsToggles.aBooleans[0]">
 		    <accordion-heading>
-		      <div><strong>Add pages and posts</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
+		      <div><strong>Add pages and posts </strong><k-help str="{{oHelpStrings['h_addPages']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
@@ -331,7 +335,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			
 	    <accordion-group is-open="kalinsToggles.aBooleans[1]">
 		    <accordion-heading>
-		      <div><strong>My document</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
+		      <div><strong>My document </strong><k-help str="{{oHelpStrings['h_myDocument']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
 				<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 				<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
@@ -353,7 +357,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[2]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML before every page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
+		      <div><strong>Insert HTML before every page or post </strong><k-help str="{{oHelpStrings['h_insertBefore']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert before every page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
@@ -363,7 +367,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[3]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML after every page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
+		      <div><strong>Insert HTML after every page or post </strong><k-help str="{{oHelpStrings['h_insertAfter']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert after every page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
@@ -373,7 +377,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[4]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML for title and final pages</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[4], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[4]}"></i></div>
+		      <div><strong>Insert HTML for title and final pages </strong><k-help str="{{oHelpStrings['h_insertTitleFinal']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[4], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[4]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert for title page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
@@ -383,7 +387,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    
 	    <accordion-group is-open="kalinsToggles.aBooleans[5]">
 		    <accordion-heading>
-		      <div><strong>CREATE PDF!</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
+		      <div><strong>CREATE PDF! </strong><k-help str="{{oHelpStrings['h_toolOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
 	      
@@ -426,7 +430,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				    </div>
 				    
 				 		<div class="form-group col-md-6 col-xs-12" >
-				      <b>Convert videos to links:</b>
+				      <k-help str="{{oHelpStrings['h_convertLinks']}}"></k-help><b> Convert videos to links:</b>
 				      <div class="checkbox">
 				      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
 				      </div>
@@ -448,7 +452,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							&nbsp;|&nbsp;
 				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input> .html </label>
 							&nbsp;|&nbsp;
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt</label>
+				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt </label>
+				      <k-help str="{{oHelpStrings['h_filenameTypes']}}"></k-help>
 						</div>
 					</div>
 
@@ -469,7 +474,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[6]">
 		    <accordion-heading>
-		      <div><strong>Existing Files</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[6], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[6]}"></i></div>
+		      <div><strong>Existing Files </strong><k-help str="{{oHelpStrings['h_existingFiles']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[6], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[6]}"></i></div>
 	      </accordion-heading>
 	    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
 		    <div ng-show="InputCtrl.pdfList.length > 0">

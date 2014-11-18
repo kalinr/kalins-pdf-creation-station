@@ -88,4 +88,35 @@ kalinsApp.factory('kalinsAlertManager', ["$filter",function($filter) {
 	return kalinsAlertManager;
 }]);
 
+//prevents the bubbling of whatever event you pass in
+//put this on an element that has a click listener that is inside another element with a click listener
+//more reference: http://stackoverflow.com/questions/14544741/how-can-i-make-an-angularjs-directive-to-stoppropagation/14547223#14547223
+//usage: <i ng-click="InputCtrl.testFunction($event);" stop-event='click' class="glyphicon glyphicon-info-sign kInfoIcon"></i>
+kalinsApp.directive('stopEvent', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attr) {
+            element.bind(attr.stopEvent, function (e) {
+                e.stopPropagation();
+            });
+        }
+    };
+ });
+
+//replace all instances of k-help with this longer span
+kalinsApp.directive('kHelp', function() {
+    var directive = {};
+    directive.restrict = 'E'; //restrict so that this only fires when its an element named k-help
+    directive.require = "^str"; //require that the str param be available on the k-help element
+
+    directive.scope = {//put the str var into our current scope so that the template can use it
+      str : "@"
+    }
+
+    directive.template = '<span tooltip-html-unsafe="<p align=left>{{str}}</p>" tooltip-placement="right" tooltip-popup-delay="500" class="glyphicon glyphicon-info-sign kInfoIcon"></span>';    
+    return directive;
+});
+
+
+
 })();

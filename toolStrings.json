@@ -1,0 +1,14 @@
+{
+  "h_addPages": "This is a list of your website's pages and posts. Click the headers to sort or type in the fields to filter each column to find your desired pages/posts. Click add to add any page or post to your new document. They will show up in the section just below.",
+  "h_myDocument":"The pages and posts you have selected will show here. Click and drag them to reorder.",
+  "h_insertBefore":"Enter the content that will appear before every page or post in the final PDF.",
+  "h_insertAfter":"Enter the content that will appear after every page or post in the final PDF.",
+  "h_insertTitleFinal":"This is the content that will appear as the title and/or final pages.",
+  "h_toolOptions":"Adjust other details about the final PDF. If you don't know what you're doing, simply click the green Create PDF button and look for your new file in the section below.",
+  "h_convertLinks":"If you have YouTube, Vimeo or Ted videos embedded in your page, these options will convert them into links to their appropriate page.",
+  "h_filenameTypes":"Choose your filename (or leave it blank) and choose your filetype. You can actually create all three filetypes in one shot.",  
+  "h_existingFiles": "This is the list of PDF, HTML and TXT files that you have already created. Click the headers to sort or type in the fields to filter each column to find your file."
+}
+
+/*theoretically I would move all strings into these files, not just help strings. I would have a mainStrings.json, adminStrings.json and toolStrings.json. mainStrings would be loaded on both admin
+and tool pages, then their values combined and overridden by toolStrings.json or adminStrings.json. This will probably be the first step toward localization if I ever get the time.*/

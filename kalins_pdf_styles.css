@@ -22,3 +22,12 @@ from showing. This overrides that on just the contextual_help_wrap div.*/
   display: block !important;
   visibility: visible !important;
 }
+
+/*our info icon ("i" in circle)*/
+.kInfoIcon {
+    color: blue;
+}
+
+.arrow {
+  margin-left:0px;
+}

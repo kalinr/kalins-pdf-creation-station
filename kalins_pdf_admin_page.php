@@ -12,10 +12,13 @@
 	$create_nonce = wp_create_nonce( 'kalins_pdf_create_all' );
 	
 	$adminOptions = kalins_pdf_get_admin_options();
+	
+	$adminStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/adminStrings.json');
 ?>
 
 
 <script type='text/javascript'>
+"use strict";
 
 var app = angular.module('kalinsPDFAdminPage', ['ui.bootstrap', 'kalinsUI']);
 
@@ -26,6 +29,8 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
+
+	$scope.oHelpStrings = <?php echo $adminStrings ?>;
 	
 	var self = this;
 
@@ -98,14 +103,14 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		  });
 	}
 }]);
+
 </script>
 
-	<div ng-app="kalinsPDFAdminPage" ng-controller="InputController as InputCtrl" class="kContainer">
+	<div ng-app="kalinsPDFAdminPage" ng-controller="InputController as InputCtrl" class="kContainer" ng-strict-di>
 	
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
-		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help button to the right.</p>
-		
+		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help tab to the upper right.</p>
 		<div class="form-group text-right">
 			<button class="btn btn-info" ng-click="kalinsToggles.toggleAll();">{{kalinsToggles.sToggleAll}}</button>
 		</div>
@@ -113,17 +118,17 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		<accordion close-others="false">
 	    <accordion-group is-open="kalinsToggles.aBooleans[0]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML before page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
+		      <div><strong>Insert HTML before page or post </strong><k-help str="{{oHelpStrings['h_insertBefore']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
 		    <b>HTML to insert before page:</b><br />
 		    <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
 		    <b>HTML to insert before post:</b><br />
 		    <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePost"></textarea>
 			</accordion-group>
-			  			  
+
 	    <accordion-group is-open="kalinsToggles.aBooleans[1]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML after page or post</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
+		      <div><strong>Insert HTML after page or post </strong><k-help str="{{oHelpStrings['h_insertAfter']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert after page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
@@ -133,7 +138,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 			  
 			<accordion-group is-open="kalinsToggles.aBooleans[2]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML for title and final pages</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
+		      <div><strong>Insert HTML for title and final pages </strong><k-help str="{{oHelpStrings['h_insertTitleFinal']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert for title page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
@@ -143,7 +148,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 			
 			<accordion-group is-open="kalinsToggles.aBooleans[3]">
 		    <accordion-heading>
-		      <div><strong>Options</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
+		      <div><strong>Options </strong><k-help str="{{oHelpStrings['h_adminOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
 		      <div class="form-group">
@@ -176,7 +181,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 				    </div>
 			    </div>
 			 		<div class="form-group col-md-6 col-xs-12" >
-			      <b>Convert videos to links:</b>
+			      <k-help str="{{oHelpStrings['h_convertLinks']}}"></k-help><b> Convert videos to links:</b>
 			      <div class="checkbox">
 			      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube,</label>
 			      </div>
@@ -189,27 +194,27 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 			    </div>
 			    
 			    <div class="form-group">
-			      <label for="txtLink" class="control-label col-xs-2">Link text:</label>
+			      <label for="txtLink" class="control-label col-xs-2"> Link text:</label>
 			      <div class="col-xs-10">
-			      	<input type="text" id="txtLink" class="form-control" ng-model="InputCtrl.oOptions.linkText"></input>
+			        <input type="text" id="txtLink" class="form-control" ng-model="InputCtrl.oOptions.linkText"></input>
 			     	</div>
 			    </div>
 			    
 			    <div class="form-group">
-			      <label for="txtBeforeLink" class="control-label col-xs-2">Before link:</label>
+			      <label for="txtBeforeLink" class="control-label col-xs-2"> Before link:</label>
 			      <div class="col-xs-10">
 			      	<input type="text" id="txtBeforeLink" class="form-control" ng-model="InputCtrl.oOptions.beforeLink"></input>
 			      </div>
 			    </div>
 			    <div class="form-group">
-			      <label for="txtAfterLink" class="control-label col-xs-2">After link:</label>
+			      <label for="txtAfterLink" class="control-label col-xs-2"> After link:</label>
 			      <div class="col-xs-10">
 			      	<input type="text" id="txtAfterLink" class="form-control" ng-model="InputCtrl.oOptions.afterLink"></input>
 			      </div>
 			    </div>
 					
 			    <div class="form-group">
-						<p class="col-md-offset-1"><b>Default Link Placement</b> (can be overwritten in page/post edit page):</p>
+						<p class="col-md-offset-1"><k-help str="{{oHelpStrings['h_defaultLinkPlacement']}}"></k-help><b> Default Link Placement</b> (can be overwritten in page/post edit page):</p>
 					  <div class="btn-group col-md-offset-1" data-toggle="buttons" >
 					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'top'}"><input type="radio" value="top" ng-model="InputCtrl.oOptions.showLink" /> Link at top of page </label>
 					    <label class="btn btn-success" ng-class="{ 'active': InputCtrl.oOptions.showLink == 'bottom'}"><input type="radio" value="bottom" ng-model="InputCtrl.oOptions.showLink" /> Link at bottom of page </label>
@@ -218,7 +223,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 					</div>
 					
 			    <div class="form-group">
-			    	<label for="numWordCount" class="control-label col-xs-2">Minimum post word count:</label>
+			    	<k-help str="{{oHelpStrings['h_minWordCount']}}"></k-help><label for="numWordCount" class="control-label col-xs-2"> Minimum post word count:</label>
 			    	<div class="col-xs-4 col-sm-2">
 			    		<input type="number" ng-model="InputCtrl.oOptions.wordCount" id="numWordCount" class="form-control" /> 
 			    	</div>
@@ -237,6 +242,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 					</div>
 
 					<div class="form-group text-center">
+						<k-help str="{{oHelpStrings['h_mainButtons']}}"></k-help>
 		        <button ng-click="InputCtrl.saveData()" class="btn btn-success">Save Settings</button>
 		        <button ng-click="InputCtrl.resetToDefaults()" class="btn btn-warning">Reset Defaults</button>
 		        <button ng-click="InputCtrl.createAll()" class="btn btn-success">Create All</button>

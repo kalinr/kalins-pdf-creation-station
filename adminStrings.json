@@ -1,0 +1,14 @@
+{
+  "h_insertBefore":"Enter the content that will appear before every page or post in the final PDF.",
+  "h_insertAfter":"Enter the content that will appear after every page or post in the final PDF.",
+  "h_insertTitleFinal":"This is the content that will appear as the title and/or final pages.",
+  "h_adminOptions":"Adjust other details about the final PDF. If you don't know what you're doing, start by simply clicking the green 'Link at top of page' button and look at a page or post on your website to see a new link to its PDF.",
+  "h_convertLinks":"If you have YouTube, Vimeo or Ted videos embedded in your page, these options will convert them into links to their appropriate page.",
+  "h_linkText":"This is the text/html that will appear as the link to each post/page's PDF file. Also enter the text/html you wish to appear immediately before and after the link.",
+  "h_defaultLinkPlacement":"Choose if you want the PDF link to display above or below the main content of each page/post, or not at all.",
+  "h_minWordCount":"If you have some very short posts, your readers probably won't need a PDF, so you can set the minimum number of words so that links don't show up on shorter posts.",
+  "h_mainButtons": "Save Settings to implement your changes to all the pages/posts on your website.</br> Reset Defaults to change everything back to their original settings that shipped with the plugin.</br> Create All to cycle through every page/post on your website and create all the files so that it's already available when the first user clicks on the link."
+}
+
+/*theoretically I would move all strings into these files, not just help strings. I would have a mainStrings.json, adminStrings.json and toolStrings.json. mainStrings would be loaded on both admin
+and tool pages, then their values combined and overridden by toolStrings.json or adminStrings.json. This will probably be the first step toward localization if I ever get the time.*/
