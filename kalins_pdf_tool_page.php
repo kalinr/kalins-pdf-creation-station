@@ -387,7 +387,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    
 	    <accordion-group is-open="kalinsToggles.aBooleans[5]">
 		    <accordion-heading>
-		      <div><strong>CREATE PDF! </strong><k-help str="{{oHelpStrings['h_toolOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
+		      <div><strong>Create Files </strong><k-help str="{{oHelpStrings['h_toolOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
 	      
@@ -435,7 +435,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
 				      </div>
 				      
-					    <div class="checkbox"> 
+					    <div class="checkbox">
 				       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
 				      </div>
 					    <div class="checkbox"> 
@@ -459,7 +459,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 					<div class="row">
 				    <div class="form-group text-center">
-				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create PDF!</button>
+				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
 				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
 				    </div>
 			    </div>

@@ -299,7 +299,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 			<accordion-group is-open="kalinsToggles.aBooleans[5]">
 		    <accordion-heading>
 		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
-	      </accordion-heading> 
+	      </accordion-heading>
 		  	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 		       
 				<p>
@@ -311,7 +311,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 					</form>
 				</p>
 				<br/>
-		    <p><input type='checkbox' ng-model="InputCtrl.oOptions.doCleanup"></input> Upon plugin deactivation clean up all database entries</p>
+		    <p><input type='checkbox' ng-model="InputCtrl.oOptions.doCleanup"></input> Upon plugin deletion clean up all database entries</p>
 		    <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>       
 		    <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
 			</accordion-group>
