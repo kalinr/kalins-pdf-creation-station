@@ -200,9 +200,7 @@ function kalins_admin_page_loaded(){
 	
 	add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
 	
-	//	wp_register_style('kalinPDFBootstrapStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/bootstrap.css');
 	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
-	//wp_register_style('kalinPDF_ng-tableStyle', 'http://bazalt-cms.com/assets/ng-table/0.3.0/ng-table.css');
 	
 	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
 	
