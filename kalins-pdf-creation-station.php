@@ -219,7 +219,6 @@ function kalins_pdf_admin_head() {
 	wp_enqueue_script( 'kalinPDF_ng-table' );
 	wp_enqueue_script( 'kalinPDF_KalinsUIService' );
 	wp_enqueue_script( 'kalinPDF_angular-ui' );
-	//wp_enqueue_script( 'kalinPDF_bootstrapJS' );
 	wp_enqueue_script( 'kalinPDF_angular-bootstrap' );
 }
 
