@@ -1,15 +1,13 @@
 <?php
 /*
 Plugin Name: Kalin's PDF Creation Station
-Version: 3.2
+Version: 4.0
 Plugin URI: http://kalinbooks.com/pdf-creation-station/
 Description: Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.
 Author: Kalin Ringkvist
 Author URI: http://kalinbooks.com/
 
 Kalin's PDF Creation station by Kalin Ringkvist (email: kalin@kalinflash.com)
-
-Thanks to Marcos Rezende's Blog as PDF and Aleksander Stacherski's AS-PDF plugins which provided a great starting point.
 
 License:
 This program is free software; you can redistribute it and/or modify

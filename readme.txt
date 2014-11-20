@@ -1,8 +1,8 @@
 === Kalin's PDF Creation Station ===
 Contributors: kalinbooks
-Tags: PDF, document, export, print, pdf, creation
+Tags: PDF, document, export, print, pdf, creation, widget
 Requires at least: 3.0
-Tested up to: 3.8.1
+Tested up to: 4.0
 Stable tag: trunk
 
 Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.
@@ -14,7 +14,7 @@ Build highly customizable PDF documents from any combination of pages and posts,
 <p>
 Kalin's PDF Creation Station will add two menus to your WordPress admin. One under tools and one under settings. 
 </p>
-<p>In the tools menu you will be able to build PDF documents from any combination of pages and posts. Select any or all pages and posts from your site, then add a custom title page, end page and custom headers. Adjust font sizes, file names, or insert information such as timestamps, excerpts and urls through the use of shortcodes. Finally, adjust page order through a simple drag and drop interface. All created PDF files will display in a convenient list for you to delete, download or link to.
+<p>In the tools menu you will be able to build PDF (or .html and .txt) documents from any combination of pages and posts. Select any or all pages and posts from your site, then add a custom title page, end page and custom headers. Adjust font sizes, file names, or insert information such as timestamps, excerpts and urls through the use of shortcodes. All created PDF files will display in a convenient list for you to delete, download or link to.
 </p>
 <p>
 In the settings menu you will be able to setup options for a link that can be automatically added to some or all pages and posts. This link will point to an automatically generated PDF version of that page. Most of the same customization options are available here that are available in the creation tool, like title page and font size, as well as the option to fully customize the link itself. On individual page/post edit pages you will be able to override the default link placement so you can show links on some pages and not on others. PDF files are saved to your server so they only need to be created once, reducing server load compared to other PDF generation plugins that create a new PDF every time the link is clicked. The PDF file is automatically deleted when a page or post is edited, so the PDF always matches the page.
@@ -54,10 +54,12 @@ Make sure to use double quotes instead of single quotes when inserting arbitrary
 
 == Screenshots ==
 
-1. A portion of the creator tool that creates custom PDF documents for large portions of your website.
-2. A different shot of the creator tool with a couple sub-menus expanded.
-3. Settings for PDF creation for individual posts. Note the link customization options.
-4. A shot of the box that is added to the page/post edit page to control link placement.
+1. A portion of the creator tool that creates custom PDF documents from multiple pages and posts. This shows the post list section and some collapsed sections.
+2. This is the main section of the multi-create tool showing options and the list of your created files.
+3. The main section of the settings page where you set up PDF links that can appear on every page and post.
+4. A different shot of the settings page.
+5. The configuration box for the widget.
+6. A shot of the box that is added to the page/post edit page to specifically control link placement for each page.
 
 == Changelog ==
 
@@ -134,6 +136,18 @@ removed testing alerts
 *Added new options for post author so you are no longer stuck with just the login name
 *Expanded functionality for post thumbnail shortcode
 
+= 4.0 =
+*Migrated front-end into AngularJS and Bootstrap, away from jQuery.
+*Improved appearance of user interface for both tool and settings pages.
+*Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
+*Sorting of pages in document on tool page has been improved.
+*Added same dynamic sorting and filtering to the list of created documents.
+*Added ability to create .txt and .html files as well as .pdfs in the tool page.
+*Added a widget to allow you to have the post's link in the sidebar without hacking your theme.
+*Added a box in the menu section to allow you to easily link to your files created in the tool page.
+*Fixed a minor bug with apostrophes in the filename on the tool page.
+
+
 == Upgrade Notice ==
 
 = 0.7 =
@@ -173,13 +187,15 @@ Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto 
 Some new shortcodes, features and other improvements. New Table of Contents feature. Better image handling, improved integration with other plugins.
 
 = 3.1 =
-Firefox fix and PDF font change to Times so PDFs should look a little better 
+Firefox fix and PDF font change to Times so PDFs should look a little better.
 
 = 3.2 =
 After all this time, finally releasing a small update. Should work a little faster. New author and thumbnail options.
 
+= 4.0 =
+Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
+
 == About ==
 
-If you find this plugin useful please pay it forward to the community, or visit http://kalinbooks.com/ and check out some of my science fiction or political writings.
-Thanks to Marcos Rezende's Blog as PDF and Aleksander Stacherski's AS-PDF plugins which provided a good starting point.
+If you find this plugin useful, please pay it forward to the community.
 

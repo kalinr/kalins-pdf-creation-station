@@ -94,8 +94,9 @@ if($isSingle){
 		$pdfDir = KALINS_PDF_DIR;
 		
 		if($_REQUEST["filename"] != ""){
-			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]);
-			$filename = str_replace("\'", "", $filename);//remove all apostrophes from filename
+			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]);//&#039;
+			$filename = str_replace("&#039;", "", $filename);//remove all apostrophes from filename
+			$filename = str_replace("\'", "", $filename);
 		}else{
 			//if user did not enter a filename, we use the current timestamp as a filename (mostly just to streamline testing) 
 			$filename = time();
