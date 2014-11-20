@@ -111,6 +111,15 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
 		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help tab to the upper right.</p>
+		
+		<p><a href="#" ng-click="showVideo = !showVideo">Watch a tutorial video</a></p>
+		<div class="text-center" ng-show="showVideo">
+		  <hr>
+		  <iframe width="420" height="315" src="//www.youtube.com/embed/OAi1W-77S9g" frameborder="0" allowfullscreen></iframe>
+		  <p><a href="#" ng-click="showVideo = false">Close video</a></p>
+		  <hr>
+		</div>
+		
 		<div class="form-group text-right">
 			<button class="btn btn-info" ng-click="kalinsToggles.toggleAll();">{{kalinsToggles.sToggleAll}}</button>
 		</div>

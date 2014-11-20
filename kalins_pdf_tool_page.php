@@ -303,6 +303,14 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com">kalinbooks.com</a></h3>
 		<p>Create custom PDF files for any combination of posts and pages.</p>
 		
+		<p><a href="#" ng-click="showVideo = !showVideo">Watch a tutorial video</a></p>
+		<div class="text-center" ng-show="showVideo">
+		  <hr>
+		  <iframe width="420" height="315" src="//www.youtube.com/embed/Zce1QaicJTs" frameborder="0" allowfullscreen></iframe>
+		  <p><a href="#" ng-click="showVideo = false">Close video</a></p>
+		  <hr>
+		</div>
+		
 		<div class="form-group text-right">
 			<button class="btn btn-info" ng-click="kalinsToggles.toggleAll();">{{kalinsToggles.sToggleAll}}</button>
 		</div>
