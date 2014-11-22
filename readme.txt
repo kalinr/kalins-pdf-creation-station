@@ -2,7 +2,7 @@
 Contributors: kalinbooks
 Tags: PDF, document, export, print, pdf, creation, widget
 Requires at least: 3.0
-Tested up to: 4.0
+Tested up to: 4.0.1
 Stable tag: trunk
 
 Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.
@@ -32,6 +32,15 @@ Bugs: http://kalinbooks.com/pdf-creation-station/known-bugs/ If you have any pro
 Future features: http://kalinbooks.com/pdf-creation-station/pdf-creation-possible-features/ If you have feature requests or are interested in my plans for PDF Creation Station
 </p>
 
+<p>
+Tools page demo:
+[youtube http://www.youtube.com/watch?v=zLHpr-8aYVw]
+</p>
+
+<p>
+Settings page demo:
+[youtube http://www.youtube.com/watch?v=OAi1W-77S9g]
+</p>
 
 == Installation ==
 

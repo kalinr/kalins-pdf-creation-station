@@ -25,10 +25,6 @@ kalinsPDF_createPDFDir();
 
 global $wpdb, $post;
 
-//$uploads = wp_upload_dir();
-//$uploadDir = $uploads['basedir'];
-//$uploadURL = $uploads['baseurl'];
-
 $adminOptions = kalins_pdf_get_admin_options();
 
 if($isSingle){
@@ -218,12 +214,23 @@ try{
 	// set document information
 	$objTcpdf->SetCreator(PDF_CREATOR);
 	
+	$theSubTitle = "";
+	$theTitle = "";
+	
 	if($isSingle){
-		$objTcpdf->SetTitle( kalins_pdf_page_shortcode_replace($headerTitle, $result[0]) );// set default header data
-		$objTcpdf->SetHeaderData(null, null, kalins_pdf_page_shortcode_replace($headerTitle, $result[0]), kalins_pdf_page_shortcode_replace($headerSub, $result[0]) );
+		$theTitle = htmlspecialchars_decode(kalins_pdf_page_shortcode_replace($headerTitle, $result[0]));
+		$theTitle = str_replace("&#039;", "'", $theTitle);//manually replace apostrophes (htmlspecialchars_decode didn't work for that one)
+		$theSubTitle = htmlspecialchars_decode(kalins_pdf_page_shortcode_replace($headerSub, $result[0]));
+		$theSubTitle = str_replace("&#039;", "'", $theSubTitle);
+		$objTcpdf->SetTitle( $theTitle );// set default header data
+		$objTcpdf->SetHeaderData(null, null, $theTitle, $theSubTitle);
 	}else{
-		$objTcpdf->SetTitle( kalins_pdf_global_shortcode_replace($headerTitle) );// set default header data
-		$objTcpdf->SetHeaderData(null, null, kalins_pdf_global_shortcode_replace($headerTitle), kalins_pdf_global_shortcode_replace($headerSub) );
+		$theTitle = htmlspecialchars_decode(kalins_pdf_global_shortcode_replace($headerTitle));
+		$theTitle = str_replace("&#039;", "'", $theTitle);//manually replace apostrophes
+		$theSubTitle = htmlspecialchars_decode(kalins_pdf_global_shortcode_replace($headerSub));
+		$theSubTitle = str_replace("&#039;", "'", $theSubTitle);
+		$objTcpdf->SetTitle( $theTitle );// set default header data
+		$objTcpdf->SetHeaderData(null, null, $theTitle, $theSubTitle );
 	}
 	// set header and footer fonts
 	$objTcpdf->setHeaderFont(Array('Times', '', PDF_FONT_SIZE_MAIN));
