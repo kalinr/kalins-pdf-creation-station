@@ -53,7 +53,7 @@
 		closedir($handle);
 	}
 	
-	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/toolStrings.json');
+	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/toolStrings.json');
 	
 	/*
 	 require_once 'ProgressBar.class.php';

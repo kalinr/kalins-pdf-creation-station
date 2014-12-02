@@ -392,15 +392,46 @@ function kalinsPDF_content_filter($content){
 function kalins_pdf_contextual_help($contextual_help, $screen_id, $screen) {
 	global $kPDFadminPage;
 	if($screen_id == $kPDFadminPage){
-		$doc = new DOMDocument();
-	  $toolHelpFile = $doc->loadHTMLFile(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_admin_help.html');
-		$contextual_help = $doc->saveHTML();
+		$sAdminHelp = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/kalins_pdf_admin_help.html');
+			
+		//split the file in two based on the marker I put in the html file
+		$sOverview = substr($sAdminHelp, 0, strpos($sAdminHelp, "<!--0-->"));
+		$sAdvanced = substr($sAdminHelp, strpos($sAdminHelp, "<!--0-->") + 8);
+			
+		$screen = get_current_screen();
+		$screen->add_help_tab( array(
+				'id' => "kAdminHelp1",            //unique id for the tab
+				'title' => "Overview",      //unique visible title for the tab
+				'content' => $sOverview  //actual help text
+		) );
+			
+		$screen->add_help_tab( array(
+				'id' => "kAdminHelp2",            //unique id for the tab
+				'title' => "Advanced",      //unique visible title for the tab
+				'content' => $sAdvanced  //actual help text
+		) );
 	}else{
 		global $kPDFtoolPage;
 		if($screen_id == $kPDFtoolPage){
-			$doc = new DOMDocument();
-			$toolHelpFile = $doc->loadHTMLFile(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/kalins_pdf_tool_help.html');
-			$contextual_help = $doc->saveHTML();
+			$sToolHelp = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/kalins_pdf_tool_help.html');
+			
+			//split the file in two based on the marker I put in the html file
+			$sOverview = substr($sToolHelp, 0, strpos($sToolHelp, "<!--0-->"));
+			$sAdvanced = substr($sToolHelp, strpos($sToolHelp, "<!--0-->") + 8);
+			
+			$screen = get_current_screen();
+			$screen->add_help_tab( array(
+					'id' => "kToolHelp1",            //unique id for the tab
+					'title' => "Overview",      //unique visible title for the tab
+					'content' => $sOverview  //actual help text
+			) );
+			
+			$screen->add_help_tab( array(
+					'id' => "kToolHelp2",            //unique id for the tab
+					'title' => "Advanced",      //unique visible title for the tab
+					'content' => $sAdvanced  //actual help text
+			) );
+			
 		}
 	}
 	return $contextual_help;

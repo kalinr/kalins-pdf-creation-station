@@ -13,7 +13,7 @@
 	
 	$adminOptions = kalins_pdf_get_admin_options();
 	
-	$adminStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/adminStrings.json');
+	$adminStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/adminStrings.json');
 ?>
 
 
