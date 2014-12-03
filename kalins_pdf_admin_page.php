@@ -42,7 +42,8 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 
 	self.saveData = function(){
 		//copy our data into new object
-		var data = JSON.parse( JSON.stringify( self.oOptions ) );
+		var data = {};
+		data.oOptions = JSON.stringify( self.oOptions );
 		data.action = 'kalins_pdf_admin_save';//tell wordpress what to call
 		data._ajax_nonce = saveNonce;//authorize it
 

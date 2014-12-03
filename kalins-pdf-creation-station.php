@@ -459,49 +459,13 @@ function kalins_pdf_reset_admin_defaults(){//called when user clicks the reset b
 }
 
 function kalins_pdf_admin_save(){
-	
 	check_ajax_referer( "kalins_pdf_admin_save" );
 	
-	$kalinsPDFAdminOptions = array();//collect our passed in values so we can save them for next time
-	
-	$kalinsPDFAdminOptions["beforePage"] =      stripslashes($_REQUEST['beforePage']);
-	$kalinsPDFAdminOptions["beforePost"] =      stripslashes($_REQUEST['beforePost']);
-	$kalinsPDFAdminOptions["afterPage"] =       stripslashes($_REQUEST['afterPage']);
-	$kalinsPDFAdminOptions["afterPost"] =       stripslashes($_REQUEST['afterPost']);
-	$kalinsPDFAdminOptions["titlePage"] =       stripslashes($_REQUEST['titlePage']);
-	$kalinsPDFAdminOptions["finalPage"] =       stripslashes($_REQUEST['finalPage']);
-	$kalinsPDFAdminOptions["headerTitle"] =     stripslashes($_REQUEST['headerTitle']);
-	$kalinsPDFAdminOptions["headerSub"] =       stripslashes($_REQUEST['headerSub']);
-	
-	$kalinsPDFAdminOptions['linkText'] =        stripslashes($_REQUEST['linkText']);
-	$kalinsPDFAdminOptions['beforeLink'] =      stripslashes($_REQUEST['beforeLink']);
-	$kalinsPDFAdminOptions['afterLink'] =       stripslashes($_REQUEST['afterLink']);
-	
-	$kalinsPDFAdminOptions["fontSize"] =        (int) $_REQUEST['fontSize'];
-	$kalinsPDFAdminOptions['wordCount'] =       (int) stripslashes($_REQUEST['wordCount']);
-	
-	$kalinsPDFAdminOptions['showLink'] =        stripslashes($_REQUEST['showLink']);
-		
-	$kalinsPDFAdminOptions["includeImages"] =   ($_REQUEST['includeImages'] === "true");//convert these "true"/"false" strings to booleans
-	$kalinsPDFAdminOptions["runShortcodes"] =   ($_REQUEST['runShortcodes'] === "true");
-	$kalinsPDFAdminOptions["runFilters"] =      ($_REQUEST['runFilters'] === "true");
-	
-	$kalinsPDFAdminOptions["convertYoutube"] =  ($_REQUEST['convertYoutube'] === "true");
-	$kalinsPDFAdminOptions["convertVimeo"] =    ($_REQUEST['convertVimeo'] === "true");
-	$kalinsPDFAdminOptions["convertTed"] =      ($_REQUEST['convertTed'] === "true");
-	
-	$kalinsPDFAdminOptions["showOnMulti"] =     ($_REQUEST['showOnMulti'] === "true");
-	$kalinsPDFAdminOptions["filenameByTitle"] = ($_REQUEST['filenameByTitle'] === "true");
-	$kalinsPDFAdminOptions["autoGenerate"] =    ($_REQUEST['autoGenerate'] === "true");
-	
-	//$kalinsPDFAdminOptions["includeTables"] = ($_REQUEST['includeTables'] === "true");
-	
-	$kalinsPDFAdminOptions["doCleanup"] =       ($_REQUEST['doCleanup'] === "true");
-		
+	//decode our JSON after stripping off the slashes that get added in the request
+	$kalinsPDFAdminOptions = json_decode(stripslashes($_REQUEST['oOptions']));
 	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);//save options to database
-
-	$pdfDir = KALINS_PDF_SINGLES_DIR;
 	
+	$pdfDir = KALINS_PDF_SINGLES_DIR;	
 	if ($handle = opendir($pdfDir)) {//open pdf directory
 		while (false !== ($file = readdir($handle))) {
 			if ($file != "." && $file != ".." && substr($file, stripos($file, ".")+1, 3) == "pdf") {//loop to find all relevant files 
@@ -636,7 +600,6 @@ function kalinsPDF_build_pdf( $post ){
 	return true;
 }
 
-
 //--------end ajax calls---------
 
 function kalins_pdf_get_tool_options() {
@@ -656,22 +619,19 @@ function kalins_pdf_get_tool_options() {
 }
 
 function kalins_pdf_get_admin_options() {
-	$kalinsPDFAdminOptions = kalins_pdf_getAdminSettings();
-	
+	//get our previously saved settings
 	$devOptions = get_option(KALINS_PDF_ADMIN_OPTIONS_NAME);
 
-	if (!empty($devOptions)) {
-		foreach ($devOptions as $key => $option){
-			$kalinsPDFAdminOptions[$key] = $option;
-		}
+	if (empty($devOptions)) {
+		//if we don't have any saved settings (like this is the first time this plugin is used), then get our defaults
+		$devOptions = kalins_pdf_getAdminSettings();
+		update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $devOptions);
 	}
 
-	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);
-
-	return $kalinsPDFAdminOptions;
+	return $devOptions;
 }
 
-function kalins_pdf_getAdminSettings(){//simply returns all our default option values
+function kalins_pdf_getAdminSettings(){//simply returns all our default option values for settings page
 	$kalinsPDFAdminOptions = array('headerTitle' => '[post_title] - [post_date]',
 		'headerSub' => 'by [post_author] - [blog_name] - [blog_url]',
 		'includeImages' => false);
@@ -701,7 +661,7 @@ function kalins_pdf_getAdminSettings(){//simply returns all our default option v
 	return $kalinsPDFAdminOptions;
 }
 
-function kalins_pdf_getDefaultOptions(){//simply returns all our default option values
+function kalins_pdf_getDefaultOptions(){//simply returns all our default option values for tool page
 	$kalinsPDFAdminOptions = array('headerTitle' => '[blog_name] - [current_time]',
 		'headerSub' => '[blog_description] - [blog_url]',
 		'filename' => '[blog_name]',
