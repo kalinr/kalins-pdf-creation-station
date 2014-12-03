@@ -11,7 +11,7 @@
 	$delete_nonce = wp_create_nonce( 'kalins_pdf_tool_delete' );
 	$reset_nonce = wp_create_nonce( 'kalins_pdf_tool_reset' );
 	
-	$adminOptions = kalins_pdf_get_tool_options();
+	$adminOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_OPTIONS_NAME );
 
 	if(defined("KALINS_PDF_POST_ORDER")){
 		$customList = get_posts('numberposts=-1&post_type=any&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);

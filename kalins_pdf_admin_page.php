@@ -11,7 +11,7 @@
 	$reset_nonce = wp_create_nonce( 'kalins_pdf_admin_reset' );
 	$create_nonce = wp_create_nonce( 'kalins_pdf_create_all' );
 	
-	$adminOptions = kalins_pdf_get_admin_options();
+	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 	
 	$adminStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/adminStrings.json');
 ?>

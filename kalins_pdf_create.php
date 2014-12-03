@@ -25,7 +25,7 @@ kalinsPDF_createPDFDir();
 
 global $wpdb, $post;
 
-$adminOptions = kalins_pdf_get_admin_options();
+$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 
 if($isSingle){
 	if(!isset($pageIDs)){
@@ -63,7 +63,7 @@ if($isSingle){
 		$outputVar->fileName = $filename .".pdf";
 		$outputVar->date = date("Y-m-d H:i:s", time());
 		
-		$adminOptions = kalins_pdf_get_admin_options();//for individual pages/posts we grab all the PDF options from the options page instead of the POST
+		$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);//for individual pages/posts we grab all the PDF options from the options page instead of the POST
 		
 		$titlePage = $adminOptions["titlePage"];
 		$finalPage = $adminOptions["finalPage"];

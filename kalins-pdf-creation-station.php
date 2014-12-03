@@ -308,7 +308,7 @@ function kalinsPDF_publish_post( $post_id ){
 		unlink($pdfDir .$fileName);//delete it cuz it's now out of date since we're saving new post content
 	}
 	
-	$adminOptions = kalins_pdf_get_admin_options();
+	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 	
 	if($adminOptions["autoGenerate"] == "true"){
 		$isSingle = true;
@@ -338,7 +338,7 @@ function kalinsPDF_content_filter($content){
 		return $content;
 	}
 	
-	$adminOptions = kalins_pdf_get_admin_options();
+	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 	//TODO: check for and skip private post (not sure if I need to. look into this once you're not using a symlink)
 	if($adminOptions['showOnMulti'] == "false" && !is_single() && !is_page()){//if we're not on a single page/post we don't need to do anything else
 		return $content;
@@ -602,30 +602,14 @@ function kalinsPDF_build_pdf( $post ){
 
 //--------end ajax calls---------
 
-function kalins_pdf_get_tool_options() {
-	$kalinsPDFAdminOptions = kalins_pdf_getDefaultOptions();
-	
-	$devOptions = get_option(KALINS_PDF_TOOL_OPTIONS_NAME);
-
-	if (!empty($devOptions)) {
-		foreach ($devOptions as $key => $option){
-			$kalinsPDFAdminOptions[$key] = $option;
-		}
-	}
-
-	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFAdminOptions);
-
-	return $kalinsPDFAdminOptions;
-}
-
-function kalins_pdf_get_admin_options() {
+function kalins_pdf_get_options( $sOptionsName ) {
 	//get our previously saved settings
-	$devOptions = get_option(KALINS_PDF_ADMIN_OPTIONS_NAME);
+	$devOptions = get_option( $sOptionsName );
 
 	if (empty($devOptions)) {
 		//if we don't have any saved settings (like this is the first time this plugin is used), then get our defaults
 		$devOptions = kalins_pdf_getAdminSettings();
-		update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $devOptions);
+		update_option( $sOptionsName, $devOptions );
 	}
 
 	return $devOptions;
@@ -690,7 +674,7 @@ function kalins_pdf_getDefaultOptions(){//simply returns all our default option 
 
 function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Creation Station
 	
-	$adminOptions = kalins_pdf_get_admin_options();
+	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 	if($adminOptions['doCleanup'] == 'true'){//if user set cleanup to true, remove all options and post meta data
 		
 		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);
@@ -1029,7 +1013,7 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 			return "";
 		}
 		
-		$adminOptions = kalins_pdf_get_admin_options();
+		$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 		
 		global $post;
 		
@@ -1102,7 +1086,7 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 		//create three lists of data for each text field
 		$aTextFieldLabels = array("Title:", "Link text:", "Before link:", "After link:");
 		$aTextFieldNames = array("title", "linkText", "beforeLink", "afterLink");
-		$adminOptions = kalins_pdf_get_admin_options();
+		$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
 		$aTextFieldDefaultValues = array("", $adminOptions["linkText"], $adminOptions["beforeLink"], $adminOptions["afterLink"]);
 		
 		//loop to add each of our four textfields to the widget form
