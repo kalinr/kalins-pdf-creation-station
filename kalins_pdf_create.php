@@ -72,6 +72,7 @@ if($isSingle){
 		$pdfDir = KALINS_PDF_DIR;
 		
 		$oOptions = json_decode(stripslashes($_REQUEST['oOptions']));
+		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $oOptions);//save options to database
 		
 		if($oOptions->filename != ""){
 			$filename = kalins_pdf_global_shortcode_replace($oOptions->filename);//&#039;
@@ -85,7 +86,7 @@ if($isSingle){
 		$pageIDs = stripslashes($_REQUEST["pageIDs"]);
 		
 		$includeTOC = $oOptions->includeTOC;
-		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $oOptions);//save options to database
+		
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
 		die(json_encode($outputVar));

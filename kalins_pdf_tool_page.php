@@ -8,17 +8,14 @@
 	kalinsPDF_createPDFDir();//make sure our PDF dir exists
 	
 	$create_nonce = wp_create_nonce( 'kalins_pdf_tool_create' );
+	$save_nonce = wp_create_nonce( 'kalins_pdf_tool_save' );
 	$delete_nonce = wp_create_nonce( 'kalins_pdf_tool_delete' );
 	$reset_nonce = wp_create_nonce( 'kalins_pdf_tool_reset' );
 	
 	$adminOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_OPTIONS_NAME );
-
-	if(defined("KALINS_PDF_POST_ORDER")){
-		$customList = get_posts('numberposts=-1&post_type=any&orderby=' .KALINS_PDF_POST_ORDER_BY ."&order=" .KALINS_PDF_POST_ORDER);
-	}else{
-		$allPostList = get_posts('numberposts=-1&post_type=any&post_status=any');
-	}
 	
+	$allPostList = get_posts('numberposts=-1&post_type=any&post_status=any');
+		
 	$customList = array();
 		
 	$l = count($allPostList);
@@ -35,7 +32,7 @@
 		$newItem->status = $allPostList[$i]->post_status;
 		
 		array_push($customList, $newItem);		
-	}	
+	}
 	
 	$pdfList = array();
 	$pdfDir = KALINS_PDF_DIR;
@@ -52,6 +49,10 @@
 		}
 		closedir($handle);
 	}
+	
+	//get our list of document templates from the database
+	$templateOptions = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	
 	
 	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/toolStrings.json');
 	
@@ -77,7 +78,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	//http://amnah.net/2014/02/18/how-to-set-up-sortable-in-angularjs-without-jquery/
 	
 	//build our toggle manager for the accordion's toggle all button
-	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true], "Close All", "Open All", "kalinsToolPageAccordionToggles");
+	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true, true], "Close All", "Open All", "kalinsToolPageAccordionToggles");
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
@@ -86,12 +87,14 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	
 	var self = this;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
+	var saveNonce = '<?php echo $save_nonce; ?>';
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
 	var resetNonce = '<?php echo $reset_nonce; ?>';
 	
 	self.pdfUrl = "<?php echo KALINS_PDF_URL; ?>";
 	self.pdfList = <?php echo json_encode($pdfList); ?>;
 	self.postList = <?php echo json_encode($customList); ?>;
+	self.templateList = <?php echo json_encode($templateOptions->aTemplates); ?>;
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 	self.buildPostList = [];//the post list that will eventually be compiled into the pdf
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
@@ -200,6 +203,30 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 					}
 					$scope.pdfListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("File created successfully", "success");
+				}else{
+					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
+				}
+		  }).
+		  error(function(data, status, headers, config) {
+		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
+		  });
+	}
+
+	self.saveTemplate = function(){
+		var data = {};
+		data.action = 'kalins_pdf_tool_save';//tell wordpress what to call
+		data._ajax_nonce = saveNonce;//authorize it
+		data.pageIDs = "";
+		//copy our main object so we can mess with it
+		data.oOptions = JSON.parse(JSON.stringify( self.oOptions ));
+		data.oOptions.buildPostList = self.buildPostList;
+		data.oOptions = JSON.stringify( data.oOptions );
+				
+		$http({method:"POST", url:ajaxurl, params: data}).
+		  success(function(data, status, headers, config) {			  
+				if(data === "success"){
+					//$scope.templateListTableParams.reload();
+					$scope.kalinsAlertManager.addAlert("Template saved successfully", "success");
 				}else{
 					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
 				}
@@ -470,6 +497,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				    <div class="form-group text-center">
 				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
 				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
+				      <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
 				    </div>
 			    </div>
 			    
@@ -485,7 +513,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    <accordion-heading>
 		      <div><strong>Existing Files </strong><k-help str="{{oHelpStrings['h_existingFiles']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[6], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[6]}"></i></div>
 	      </accordion-heading>
-	    	<p ng-show="InputCtrl.pdfList.length === 0">You have not created any PDF files yet.</p>
+	    	<p ng-show="InputCtrl.pdfList.length === 0">You do not have any created files.</p>
 		    <div ng-show="InputCtrl.pdfList.length > 0">
 		    	<button ng-click="InputCtrl.deleteFile('all');" class="btn btn-danger">Delete all</button>
 	        <table ng-table="pdfListTableParams" show-filter="InputCtrl.pdfList.length > 1" class="table">
@@ -503,10 +531,33 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	        </table>
 		    </div>
 	    </accordion-group>
-	
+	    
 	    <accordion-group is-open="kalinsToggles.aBooleans[7]">
 		    <accordion-heading>
-		      <div><strong>Shortcodes</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[7], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[7]}"></i></div>
+		      <div><strong>Saved Document Templates </strong><k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[7], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[7]}"></i></div>
+	      </accordion-heading>
+	    	<p ng-show="InputCtrl.templateList.length === 0">You do not have any saved documents templates.</p>
+		    <div ng-show="InputCtrl.templateList.length > 0">
+		    	<button ng-click="InputCtrl.deleteTemplate('all');" class="btn btn-danger">Delete all</button>
+	        <table ng-table="templateListTableParams" show-filter="InputCtrl.templateList.length > 1" class="table">
+	          <tr ng-repeat="template in $data">
+	            <td data-title="'Name'" sortable="'templateName'" filter="{ 'templateName': 'text' }">
+	            	<a href="{{InputCtrl.pdfUrl + template.templateName}}" target="_blank">{{template.templateName}}</a>
+	            </td>
+	            <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
+	              {{template.date}}
+	            </td>
+	            <td data-title="'Delete'">
+	             	<button ng-click="InputCtrl.deleteTemplate(template.templateName);" class="btn btn-warning btn-xs">Delete</button>
+	            </td>
+	          </tr>
+	        </table>
+		    </div>
+	    </accordion-group>
+	
+	    <accordion-group is-open="kalinsToggles.aBooleans[8]">
+		    <accordion-heading>
+		      <div><strong>Shortcodes</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[8], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[8]}"></i></div>
 	      </accordion-heading>
 	    	<b>Blog shortcodes:</b> Use these codes anywhere in the above form to insert information about your blog.
 	    	<p><ul>
@@ -547,9 +598,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	      <p>Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.</p>
 	    </accordion-group>
 	    
-	    <accordion-group is-open="kalinsToggles.aBooleans[8]">
+	    <accordion-group is-open="kalinsToggles.aBooleans[9]">
 		    <accordion-heading>
-		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[8], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[8]}"></i></div>
+		      <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[9], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[9]}"></i></div>
 	      </accordion-heading>
 	    	<p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
 				<p>

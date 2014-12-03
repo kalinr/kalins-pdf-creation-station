@@ -49,6 +49,7 @@ if ( !function_exists( 'add_action' ) ) {
 
 define("KALINS_PDF_ADMIN_OPTIONS_NAME", "kalins_pdf_admin_options");
 define("KALINS_PDF_TOOL_OPTIONS_NAME", "kalins_pdf_tool_options");
+define("KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME", "kalins_pdf_tool_template_options");
 
 //-------edit these lines to change the location of your generated PDF documents----------
 
@@ -95,6 +96,7 @@ function kalins_pdf_admin_init(){
 	//not sure why the ajax connections stopped working when put into kalins_admin_page_loaded so they remain here
 	//creation tool ajax connections
 	add_action('wp_ajax_kalins_pdf_tool_create', 'kalins_pdf_tool_create');
+	add_action('wp_ajax_kalins_pdf_tool_save', 'kalins_pdf_tool_save');
 	add_action('wp_ajax_kalins_pdf_tool_delete', 'kalins_pdf_tool_delete');
 	add_action('wp_ajax_kalins_pdf_tool_defaults', 'kalins_pdf_tool_defaults');
 	
@@ -488,6 +490,27 @@ function kalins_pdf_tool_create(){//called from create button
 	require_once(WP_PLUGIN_DIR .'/kalins-pdf-creation-station/kalins_pdf_create.php');
 }
 
+function kalins_pdf_tool_save(){//called from tool page save template button
+	check_ajax_referer( "kalins_pdf_tool_save" );
+	
+	//get the new template
+	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
+	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
+	
+	//get the array of templates
+	$toolTemplateOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	if(empty($toolTemplateOptions->aTemplates)){
+		$toolTemplateOptions->aTemplates = array();
+	}
+	
+	//add the new template
+	array_push($toolTemplateOptions->aTemplates, $newTemplateSettings);
+	
+	//save the result back to the database
+	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $toolTemplateOptions);
+	die("success");
+}
+
 function kalins_pdf_tool_delete(){//called from either the "Delete All" button or the individual delete buttons
 	
 	check_ajax_referer( "kalins_pdf_tool_delete" );
@@ -685,6 +708,7 @@ function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Crea
 		
 		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);
 		delete_option(KALINS_PDF_ADMIN_OPTIONS_NAME);//remove all options for admin
+		delete_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME);
 		
 		$allposts = get_posts();//first get and delete all post meta data
 		foreach( $allposts as $postinfo) {

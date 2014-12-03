@@ -147,6 +147,7 @@ removed testing alerts
 = 4.0 =
 *Migrated front-end into AngularJS and Bootstrap, away from jQuery.
 *Improved appearance of user interface for both tool and settings pages.
+*UI should now function much better on mobile devices.
 *Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
 *Sorting of pages in document on tool page has been improved.
 *Added same dynamic sorting and filtering to the list of created documents.
@@ -155,6 +156,10 @@ removed testing alerts
 *Added a box in the menu section to allow you to easily link to your files created in the tool page.
 *Fixed a minor bug with apostrophes in the filename on the tool page.
 
+= 4.1 =
+*Cleaned up backend handling of AJAX calls. There should not be any noticeable difference to end users.
+*Divided contextual help menus on settings and tool pages into two tabs.
+*Added ability to save documents on the tool page as templates for future use.
 
 == Upgrade Notice ==
 
@@ -202,6 +207,9 @@ After all this time, finally releasing a small update. Should work a little fast
 
 = 4.0 =
 Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
+
+= 4.1 =
+Added ability to save documents as templates for future use. Also some code cleanup.
 
 == About ==
 
