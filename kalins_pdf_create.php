@@ -38,7 +38,7 @@ if($isSingle){
 	//$pdfURL = $uploadURL .'/kalins-pdf/singles/';
 	$pdfURL = KALINS_PDF_SINGLES_URL;
 	
-	if($adminOptions["filenameByTitle"] == "true"){
+	if($adminOptions->filenameByTitle){
 		
 		$singlePost = "";
 				
@@ -65,22 +65,22 @@ if($isSingle){
 		
 		$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);//for individual pages/posts we grab all the PDF options from the options page instead of the POST
 		
-		$titlePage = $adminOptions["titlePage"];
-		$finalPage = $adminOptions["finalPage"];
-		$beforePage = $adminOptions["beforePage"];
-		$beforePost = $adminOptions["beforePost"];
-		$afterPage = $adminOptions["afterPage"];
-		$afterPost = $adminOptions["afterPost"];
-		$headerTitle = $adminOptions["headerTitle"];
-		$headerSub = $adminOptions["headerSub"];
-		$includeImages = $adminOptions["includeImages"];
-		$runShortcodes = $adminOptions["runShortcodes"];
-		$runFilters = $adminOptions["runFilters"];
-		$convertYoutube = $adminOptions["convertYoutube"];
-		$convertVimeo = $adminOptions["convertVimeo"];
-		$convertTed = $adminOptions["convertTed"];
-		//$includeTables = $adminOptions["includeTables"];
-		$fontSize = $adminOptions["fontSize"];
+		$titlePage = $adminOptions->titlePage;
+		$finalPage = $adminOptions->finalPage;
+		$beforePage = $adminOptions->beforePage;
+		$beforePost = $adminOptions->beforePost;
+		$afterPage = $adminOptions->afterPage;
+		$afterPost = $adminOptions->afterPost;
+		$headerTitle = $adminOptions->headerTitle;
+		$headerSub = $adminOptions->headerSub;
+		$includeImages = $adminOptions->includeImages;
+		$runShortcodes = $adminOptions->runShortcodes;
+		$runFilters = $adminOptions->runFilters;
+		$convertYoutube = $adminOptions->convertYoutube;
+		$convertVimeo = $adminOptions->convertVimeo;
+		$convertTed = $adminOptions->convertTed;
+		//$includeTables = $adminOptions->includeTables;
+		$fontSize = $adminOptions->fontSize;
 		
 		$autoPageBreak = "true";
 		$includeTOC = "false";//singles don't get no Table of contents
@@ -296,7 +296,7 @@ try{
 		$totalHTML = $totalHTML .$strHtml;
 		$totalTXT = $totalTXT .$titlePage;
 		
-		if($autoPageBreak != "true" && $includeTOC == "true"){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
+		if(!$autoPageBreak && $includeTOC){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
 			$objTcpdf->AddPage();
 		}
 	}
