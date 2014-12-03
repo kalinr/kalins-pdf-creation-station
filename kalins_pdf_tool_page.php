@@ -170,7 +170,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			return;
 		}
 
-		var data = JSON.parse( JSON.stringify( self.oOptions ) );
+		var data = {};
+		data.oOptions = JSON.stringify( self.oOptions );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
 		data._ajax_nonce = createNonce;//authorize it
 		data.pageIDs = "";

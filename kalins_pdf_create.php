@@ -25,9 +25,9 @@ kalinsPDF_createPDFDir();
 
 global $wpdb, $post;
 
-$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
-
 if($isSingle){
+	$oOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
+	
 	if(!isset($pageIDs)){
 		$pageIDs = $_GET["singlepost"];
 	}
@@ -38,7 +38,7 @@ if($isSingle){
 	//$pdfURL = $uploadURL .'/kalins-pdf/singles/';
 	$pdfURL = KALINS_PDF_SINGLES_URL;
 	
-	if($adminOptions->filenameByTitle){
+	if($oOptions->filenameByTitle){
 		
 		$singlePost = "";
 				
@@ -48,6 +48,7 @@ if($isSingle){
 			$singlePost = get_page($singleID);
 		}
 		
+		//TODO: sanitize this filename
 		$filename = $singlePost->post_name;
 		
 	}else{
@@ -63,101 +64,28 @@ if($isSingle){
 		$outputVar->fileName = $filename .".pdf";
 		$outputVar->date = date("Y-m-d H:i:s", time());
 		
-		$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);//for individual pages/posts we grab all the PDF options from the options page instead of the POST
-		
-		$titlePage = $adminOptions->titlePage;
-		$finalPage = $adminOptions->finalPage;
-		$beforePage = $adminOptions->beforePage;
-		$beforePost = $adminOptions->beforePost;
-		$afterPage = $adminOptions->afterPage;
-		$afterPost = $adminOptions->afterPost;
-		$headerTitle = $adminOptions->headerTitle;
-		$headerSub = $adminOptions->headerSub;
-		$includeImages = $adminOptions->includeImages;
-		$runShortcodes = $adminOptions->runShortcodes;
-		$runFilters = $adminOptions->runFilters;
-		$convertYoutube = $adminOptions->convertYoutube;
-		$convertVimeo = $adminOptions->convertVimeo;
-		$convertTed = $adminOptions->convertTed;
-		//$includeTables = $adminOptions->includeTables;
-		$fontSize = $adminOptions->fontSize;
-		
-		$autoPageBreak = "true";
-		$includeTOC = "false";//singles don't get no Table of contents
+		$oOptions->autoPageBreak = true;
+		$includeTOC = false;//singles don't get no Table of contents
 	}
 }else{
 	try{		
 		$pdfDir = KALINS_PDF_DIR;
 		
-		if($_REQUEST["filename"] != ""){
-			$filename = kalins_pdf_global_shortcode_replace($_REQUEST["filename"]);//&#039;
+		$oOptions = json_decode(stripslashes($_REQUEST['oOptions']));
+		
+		if($oOptions->filename != ""){
+			$filename = kalins_pdf_global_shortcode_replace($oOptions->filename);//&#039;
 			$filename = str_replace("&#039;", "", $filename);//remove all apostrophes from filename
 			$filename = str_replace("\'", "", $filename);
 		}else{
 			//if user did not enter a filename, we use the current timestamp as a filename (mostly just to streamline testing) 
 			$filename = time();
 		}
-		
+		//$pageIDs are sent on the request instead of the oOptions object because they are not saved to the database
 		$pageIDs = stripslashes($_REQUEST["pageIDs"]);
 		
-		//TODO: lets see if there's an easier way to compile all these params, like simple JSON
-		
-		$titlePage = stripslashes($_REQUEST['titlePage']);
-		$finalPage = stripslashes($_REQUEST['finalPage']);
-		$beforePage = stripslashes($_REQUEST['beforePage']);
-		$beforePost = stripslashes($_REQUEST['beforePost']);
-		$afterPage = stripslashes($_REQUEST['afterPage']);
-		$afterPost = stripslashes($_REQUEST['afterPost']);
-		$headerTitle = stripslashes($_REQUEST['headerTitle']);
-		$headerSub = stripslashes($_REQUEST['headerSub']);
-		//$headerKeyWords = "list, of, keywords,";
-		
-		//booleans
-		$includeImages = ($_REQUEST['includeImages'] === "true");
-		$runShortcodes = ($_REQUEST["runShortcodes"] === "true");
-		$runFilters = ($_REQUEST["runFilters"] === "true");
-		$convertYoutube = ($_REQUEST["convertYoutube"] === "true");
-		$convertVimeo = ($_REQUEST["convertVimeo"] === "true");
-		$convertTed = ($_REQUEST["convertTed"] === "true");
-		//$includeTables = ($_REQUEST['includeTables'] === "true");
-		$autoPageBreak = ($_REQUEST["autoPageBreak"] === "true");
-		$includeTOC = ($_REQUEST["includeTOC"] === "true");
-		
-		$bCreatePDF = ($_REQUEST["bCreatePDF"] === "true");
-		$bCreateHTML = ($_REQUEST["bCreateHTML"] === "true");
-		$bCreateTXT = ($_REQUEST["bCreateTXT"] === "true");
-		
-		$fontSize = (int) $_REQUEST['fontSize'];
-		
-		$kalinsPDFToolOptions = array();//collect our passed in values so we can save them for next time
-			
-		$kalinsPDFToolOptions["headerTitle"] = $headerTitle;
-		$kalinsPDFToolOptions["headerSub"] = $headerSub;
-		$kalinsPDFToolOptions["filename"] = $_REQUEST["filename"];
-		
-		//booleans
-		$kalinsPDFToolOptions["includeImages"] = $includeImages;
-		$kalinsPDFToolOptions["runShortcodes"] = $runShortcodes;
-		$kalinsPDFToolOptions["runFilters"] = $runFilters;
-		$kalinsPDFToolOptions["convertYoutube"] = $convertYoutube;
-		$kalinsPDFToolOptions["convertVimeo"] = $convertVimeo;
-		$kalinsPDFToolOptions["convertTed"] = $convertTed;
-		$kalinsPDFToolOptions["autoPageBreak"] = $autoPageBreak;
-		$kalinsPDFToolOptions["includeTOC"] = $includeTOC;
-		$kalinsPDFToolOptions["bCreatePDF"] = $bCreatePDF;
-		$kalinsPDFToolOptions["bCreateHTML"] = $bCreateHTML;
-		$kalinsPDFToolOptions["bCreateTXT"] = $bCreateTXT;
-		
-		//$kalinsPDFToolOptions["includeTables"] = $includeTables;
-		$kalinsPDFToolOptions["beforePage"] = $beforePage;
-		$kalinsPDFToolOptions["beforePost"] = $beforePost;
-		$kalinsPDFToolOptions["afterPage"] = $afterPage;
-		$kalinsPDFToolOptions["afterPost"] = $afterPost;
-		$kalinsPDFToolOptions["titlePage"] = $titlePage;
-		$kalinsPDFToolOptions["finalPage"] = $finalPage;
-		$kalinsPDFToolOptions["fontSize"] = $fontSize;
-				
-		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFToolOptions);//save options to database
+		$includeTOC = $oOptions->includeTOC;
+		update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $oOptions);//save options to database
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
 		die(json_encode($outputVar));
@@ -176,18 +104,26 @@ if($isSingle){
 		array_push($outputVar->aFiles, $newFileObj);
 	}
 
-	if($bCreateHTML){
+	if($oOptions->bCreateHTML){
 		processFileType(".html", $filename, $outputVar, $pdfDir);
 	}
 
-	if($bCreatePDF){
+	if($oOptions->bCreatePDF){
 		processFileType(".pdf", $filename, $outputVar, $pdfDir);
 	}
 	
-	if($bCreateTXT){
+	if($oOptions->bCreateTXT){
 		processFileType(".txt", $filename, $outputVar, $pdfDir);
 	}
 }
+
+//these are properties from our $oOptions object that are used more than twice AND are handled the same for both 
+//single and multi. Properties used <3 times are just grabbed on the fly from $oOptions
+$titlePage = $oOptions->titlePage;
+$finalPage = $oOptions->finalPage;
+$headerTitle = $oOptions->headerTitle;
+$headerSub = $oOptions->headerSub;
+$fontSize = $oOptions->fontSize;
 
 $result = array ();
 
@@ -296,7 +232,7 @@ try{
 		$totalHTML = $totalHTML .$strHtml;
 		$totalTXT = $totalTXT .$titlePage;
 		
-		if(!$autoPageBreak && $includeTOC){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
+		if(!$oOptions->autoPageBreak && $includeTOC){//if we don't page-break between posts AND we're including table of contents, we need to break after the title page so TOC can be on second page
 			$objTcpdf->AddPage();
 		}
 	}
@@ -326,7 +262,7 @@ try{
 		$post = $objPost;//set global post object so if other plugins run their shortcodes they'll have access to it. Not sure why query_posts doesn't take care of this
 		query_posts('p=' .$post->ID);//for some reason this is also necessary so other plugins have access to values normally inside The Loop
 		
-		if($runShortcodes == "true"){//if we're running shortcodes, run them
+		if($oOptions->runShortcodes){//if we're running shortcodes, run them
 			$content = do_shortcode($content);
 		}else{
 			$content = strip_shortcodes($content);//if not, remove them
@@ -335,21 +271,21 @@ try{
 		global $kalinsPDFRunning;
 		$kalinsPDFRunning = true;
 		
-		if($runFilters == "true"){//apply other plugin content filters if we're set to do that
+		if($oOptions->runFilters == "true"){//apply other plugin content filters if we're set to do that
 			$content = apply_filters('the_content', $content);
 		}
 		
-		if($convertYoutube == "true"){
+		if($oOptions->convertYoutube == "true"){
 			$content = preg_replace("#<object(.*)youtube.com/v/(.*)\"(.*)</object>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
 			$content = preg_replace("#<iframe(.*)http://www.youtube.com/embed/(.*)\"(.*)</iframe>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
 		}
 		
-		if($convertVimeo == "true"){
+		if($oOptions->convertVimeo == "true"){
 			$content = preg_replace("#<object(.*)vimeo.com/moogaloop.swf\?clip_id=(.*)&amp;server(.*)</object>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
 			$content = preg_replace("#<iframe(.*)http://player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
 		}
 		
-		if($convertTed == "true"){//TED Talks
+		if($oOptions->convertTed == "true"){//TED Talks
 			$content = preg_replace("#<object(.*)adKeys=talk=(.*);year=(.*)</object>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
 		}
 		
@@ -358,7 +294,7 @@ try{
 			$content = preg_replace('/\[\/caption\]/', '', $content);//replace all instances of the closing caption tag
 		}
 		
-		if($includeImages != "true"){
+		if($oOptions->includeImages){
 			//remove all image tags if we don't want images
 			if(preg_match('/<img[^>]+./', $content)){
 				$content = preg_replace('/<img[^>]+./', '', $content);
@@ -374,19 +310,19 @@ try{
 		}*/
 		
 		if($objPost->post_type == "page"){//insert appropriate html before and after every page and post
-			$content = $beforePage .$content .$afterPage;
+			$content = $oOptions->beforePage .$content .$oOptions->afterPage;
 		}else{
-			$content = $beforePost .$content .$afterPost;
+			$content = $oOptions->beforePost .$content .$oOptions->afterPost;
 		}
 		
 		$content = kalins_pdf_page_shortcode_replace($content, $objPost);
 		
-		if($autoPageBreak == "true"){
+		if($oOptions->autoPageBreak){
 			// add a page
 			$objTcpdf->AddPage();
 		}
 		
-		if($includeTOC == "true"){//if we're including a TOC, add the bookmark. Pretty sweet that this still works if we're not adding new pages for each post
+		if($includeTOC){//if we're including a TOC, add the bookmark. Pretty sweet that this still works if we're not adding new pages for each post
 			$objTcpdf->Bookmark($objPost->post_title, 0, 0);
 			//$objTcpdf->Cell(0, 10, '', 0, 1, 'L');
 		}
@@ -430,7 +366,7 @@ try{
 
 try{
 	
-	if($includeTOC == "true"){
+	if($includeTOC){
 	
 		// add a new page for TOC
 		$objTcpdf->addTOCPage();
@@ -454,17 +390,17 @@ try{
 	if($isSingle){
 		$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
 	}	else {
-		if( $bCreatePDF){
+		if( $oOptions->bCreatePDF){
 			$objTcpdf->Output( $pdfDir .$filename .".pdf", 'F' );
 		}
 		
-		if($bCreateHTML){
+		if($oOptions->bCreateHTML){
 			$totalHTML = $totalHTML .'</body>
 	</html>';
 			file_put_contents ( $pdfDir .$filename .".html" , $totalHTML );
 		}
 		
-		if($bCreateTXT){
+		if($oOptions->bCreateTXT){
 			file_put_contents ( $pdfDir .$filename .".txt" , $totalTXT );
 		}
 	}
