@@ -7,7 +7,9 @@
   "h_toolOptions":"Adjust other details about the final PDF. If you don't know what you're doing, simply click the green Create PDF button and look for your new file in the section below.",
   "h_convertLinks":"If you have YouTube, Vimeo or Ted videos embedded in your page, these options will convert them into links to their appropriate page.",
   "h_filenameTypes":"Choose your filename (or leave it blank) and choose your filetype. You can actually create all three filetypes in one shot.",  
-  "h_existingFiles": "This is the list of PDF, HTML and TXT files that you have already created. Click the headers to sort or type in the fields to filter each column to find your file."
+  "h_existingFiles": "This is the list of PDF, HTML and TXT files that you have already created. Click the headers to sort or type in the fields to filter each column to find your file.",
+  "h_savedTemplates": "This is where your saved document drafts will appear. Click the Save as Template button in the Create Files section to save your current document draft as a template. To use a template, find it in the list below and click its green Load button.",
+  "h_saveAsTemplate": "Save your current settings to a template that you can reuse in the future. Templates will show up in the Saved Document Templates section below."
 }
 
 /*theoretically I would move all strings into these files, not just help strings. I would have a mainStrings.json, adminStrings.json and toolStrings.json. mainStrings would be loaded on both admin

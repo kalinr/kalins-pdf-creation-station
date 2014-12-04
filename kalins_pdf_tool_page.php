@@ -100,7 +100,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 	self.buildPostList = [];//the post list that will eventually be compiled into the pdf
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
-	self.sNewTemplateName = "";
 	
   $scope.postListTableParams = new ngTableParams({
     page: 1,            // show first page
@@ -192,7 +191,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 
 		var data = {};
-		data.oOptions = JSON.stringify( self.oOptions );
+		data.oOptions = $filter('json')( self.oOptions );
 		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
 		data._ajax_nonce = createNonce;//authorize it
 		data.pageIDs = "";
@@ -235,20 +234,20 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		data = {},
 		nReplaceIndex = -1;
 
-		if(self.sNewTemplateName === ""){
+		if(self.oOptions.templateName === ""){
 			$scope.kalinsAlertManager.addAlert("Error: You need to enter a name for your template.", "danger");
 			return;
 		}
 		
 		for(var i= 0; i<l; i++){
-			if( self.templateList[i].templateName === self.sNewTemplateName ){
+			if( self.templateList[i].templateName === self.oOptions.templateName ){
 				nReplaceIndex = i;
 				break;
 			}
 		}
 
 		if(nReplaceIndex >= 0){
-			if(!confirm("You already have a template named " + self.sNewTemplateName + ". Would you like to overwrite it?" )){
+			if(!confirm("You already have a template named " + self.oOptions.templateName + ". Would you like to overwrite it?" )){
 				return;
 			}
 		}
@@ -257,9 +256,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		data._ajax_nonce = saveNonce;//authorize it
 		data.pageIDs = "";
 		//copy our main object so we can mess with it
-		data.oOptions = JSON.parse(JSON.stringify( self.oOptions ));
+		data.oOptions = JSON.parse($filter('json')( self.oOptions ));
 		data.oOptions.buildPostList = self.buildPostList;
-		data.oOptions.templateName = self.sNewTemplateName;
+		data.oOptions.templateName = self.oOptions.templateName;
 		data.oOptions = JSON.stringify( data.oOptions );
 				
 		$http({method:"POST", url:ajaxurl, params: data}).
@@ -337,6 +336,18 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	self.loadTemplate = function(oTemplate){
 		self.oOptions = oTemplate;
+		self.buildPostList = oTemplate['buildPostList'];
+
+		self.buildPostListByID = [];
+		var l = oTemplate.buildPostList.length;
+		//loop to rebuild our buildPostList, which tells the page/post ng-table which items to highlight
+		for(var i = 0; i<l; i++){
+			if(!self.buildPostListByID[oTemplate.buildPostList[i].ID]){
+				self.buildPostListByID[oTemplate.buildPostList[i].ID] = 1;
+			}else{
+				self.buildPostListByID[oTemplate.buildPostList[i].ID]++;
+			}
+		}
 	}
 
 	self.addPost = function(postID){
@@ -603,9 +614,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				    </div>
 				    		    	<hr>
 				    <div class="form-group text-center">
-		    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.sNewTemplateName" ></input></label>
+				      <k-help str="{{oHelpStrings['h_saveAsTemplate']}}"></k-help>
+		    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.templateName" ></input></label>
 		    	    &nbsp;
-		    	    <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button> <k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help>
+		    	    <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
 		    	  </div>
 			    </div>
 			    
@@ -644,7 +656,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    <accordion-heading>
 		      <div><strong>Saved Document Templates</strong><k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[7], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[7]}"></i></div>
 	      </accordion-heading>
-	    	<p ng-show="InputCtrl.templateList.length === 0">Type a name in the box and hit Save as Template to save your current document as your first template.</p>
+	    	<p ng-show="InputCtrl.templateList.length === 0">Find the Save as Template button in the Create Files section above to save your current document as your first template.</p>
 		    <div ng-show="InputCtrl.templateList.length > 0">
 		    	<div class="form-group">
 	          <button ng-click="InputCtrl.deleteTemplate('all');" class="btn btn-danger">Delete all</button>
