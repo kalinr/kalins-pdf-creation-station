@@ -9,6 +9,7 @@
 	
 	$create_nonce = wp_create_nonce( 'kalins_pdf_tool_create' );
 	$save_nonce = wp_create_nonce( 'kalins_pdf_tool_save' );
+	$delete_template_nonce = wp_create_nonce( 'kalins_pdf_tool_template_delete' );
 	$delete_nonce = wp_create_nonce( 'kalins_pdf_tool_delete' );
 	$reset_nonce = wp_create_nonce( 'kalins_pdf_tool_reset' );
 	
@@ -53,7 +54,7 @@
 	//get our list of document templates from the database
 	$templateOptions = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	
-	
+	//get our help strings to populate the rollovers on the info icons
 	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/toolStrings.json');
 	
 	/*
@@ -88,6 +89,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	var self = this;
 	var createNonce = '<?php echo $create_nonce; //pass a different nonce security string for each possible ajax action?>'
 	var saveNonce = '<?php echo $save_nonce; ?>';
+	var deleteTemplateNonce = '<?php echo $delete_template_nonce; ?>';
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
 	var resetNonce = '<?php echo $reset_nonce; ?>';
 	
@@ -98,13 +100,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
 	self.buildPostList = [];//the post list that will eventually be compiled into the pdf
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
+	self.sNewTemplateName = "";
 	
   $scope.postListTableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
-    filter: {
-      title: ''       // initial filter
-    },
     sorting: {
       title: 'asc'     // initial sorting
     }
@@ -126,9 +126,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
   $scope.pdfListTableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
-    filter: {
-      fileName: ''       // initial filter
-    },
     sorting: {
       fileName: 'asc'     // initial sorting
     }
@@ -146,6 +143,27 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
       $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
     }
   });
+
+  $scope.templateListTableParams = new ngTableParams({
+	    page: 1,            // show first page
+	    count: 10,          // count per page
+	    sorting: {
+	      date: 'desc'     // initial sorting
+	    }
+	  }, {
+	    total: self.templateList.length, // length of templateList
+	    getData: function($defer, params) {
+	      var filteredData = params.filter() ?
+	          $filter('filter')(self.templateList, params.filter()) :
+	          self.templateList;
+	      var orderedData = params.sorting() ?
+	          $filter('orderBy')(filteredData, params.orderBy()) :
+	          self.templateList;
+
+	      params.total(orderedData.length); // set total for recalc pagination
+	      $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+	    }
+	  });
 
 	self.resetToDefaults = function(){		
 		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form. (This will NOT delete or change your existing PDF documents.)")){
@@ -220,12 +238,15 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		//copy our main object so we can mess with it
 		data.oOptions = JSON.parse(JSON.stringify( self.oOptions ));
 		data.oOptions.buildPostList = self.buildPostList;
+		data.oOptions.templateName = self.sNewTemplateName;
 		data.oOptions = JSON.stringify( data.oOptions );
 				
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {			  
-				if(data === "success"){
-					//$scope.templateListTableParams.reload();
+				if(data.status === "success"){
+					//console.log(data.oOptions);
+					self.templateList.push(data.newTemplate);
+					$scope.templateListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("Template saved successfully", "success");
 				}else{
 					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
@@ -234,6 +255,57 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  error(function(data, status, headers, config) {
 		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 		  });
+	}
+
+	self.deleteTemplate = function(templateName){
+		var confirmText = "Are you sure you want to delete " + templateName + "?";
+		if(templateName === "all"){
+			confirmText = "Are you sure you want to delete every template you have created?";
+		}
+		
+		if(confirm(confirmText)){
+			var indexToDelete = 0;
+			
+			var data = { action: 'kalins_pdf_tool_template_delete',
+				templateName: templateName, 
+				_ajax_nonce : deleteTemplateNonce
+			}
+	
+			$http({method:"POST", url:ajaxurl, params: data}).
+			  success(function(data, status, headers, config) {
+					if(data === "success"){
+						if(templateName == "all"){
+							self.templateList.splice(0, self.templateList.length);
+							$scope.templateListTableParams.reload();
+							$scope.kalinsAlertManager.addAlert("Templates deleted successfully", "success");
+						}else{
+							//figure out which item to delete out of our array
+							for(var i =0; i<self.templateList.length; i++){
+								if(templateName === self.templateList[i]['templateName']){
+									indexToDelete = i;
+									break;
+								}
+							}
+							
+							self.templateList.splice(indexToDelete, 1);
+	
+							var currentPage = $scope.templateListTableParams.page();
+							//check if our current page data is empty and if so, go to previous page
+							//(even if we call reload() before this, we still check for 1.)
+							if($scope.templateListTableParams.data.length === 1 && currentPage > 1){
+								$scope.templateListTableParams.page(currentPage - 1);
+							}
+							$scope.templateListTableParams.reload();
+							$scope.kalinsAlertManager.addAlert("Template deleted successfully", "success");
+						}
+					}else{
+						$scope.kalinsAlertManager.addAlert(data.status, "danger");
+					}
+			  }).
+			  error(function(data, status, headers, config) {
+			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
+			  });
+		}
 	}
 
 	self.addPost = function(postID){
@@ -315,11 +387,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							$scope.kalinsAlertManager.addAlert("File deleted successfully", "success");
 						}
 					}else{
-						$scope.kalinsAlertManager.addAlert(data.status, "success");
+						$scope.kalinsAlertManager.addAlert(data.status, "danger");
 					}
 			  }).
 			  error(function(data, status, headers, config) {
-			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "success");
+			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
 			  });
 		}
 	}
@@ -346,7 +418,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<accordion close-others="false">
 	    <accordion-group is-open="kalinsToggles.aBooleans[0]">
 		    <accordion-heading>
-		      <div><strong>Add pages and posts </strong><k-help str="{{oHelpStrings['h_addPages']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
+		      <div><strong>Add pages and posts</strong><k-help str="{{oHelpStrings['h_addPages']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
@@ -371,7 +443,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			
 	    <accordion-group is-open="kalinsToggles.aBooleans[1]">
 		    <accordion-heading>
-		      <div><strong>My document </strong><k-help str="{{oHelpStrings['h_myDocument']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
+		      <div><strong>My document</strong><k-help str="{{oHelpStrings['h_myDocument']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
 				<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 				<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
@@ -393,7 +465,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[2]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML before every page or post </strong><k-help str="{{oHelpStrings['h_insertBefore']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
+		      <div><strong>Insert HTML before every page or post</strong><k-help str="{{oHelpStrings['h_insertBefore']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[2], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[2]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert before every page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.beforePage"></textarea>
@@ -403,7 +475,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[3]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML after every page or post </strong><k-help str="{{oHelpStrings['h_insertAfter']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
+		      <div><strong>Insert HTML after every page or post</strong><k-help str="{{oHelpStrings['h_insertAfter']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[3], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[3]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert after every page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.afterPage"></textarea>
@@ -413,7 +485,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[4]">
 		    <accordion-heading>
-		      <div><strong>Insert HTML for title and final pages </strong><k-help str="{{oHelpStrings['h_insertTitleFinal']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[4], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[4]}"></i></div>
+		      <div><strong>Insert HTML for title and final pages</strong><k-help str="{{oHelpStrings['h_insertTitleFinal']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[4], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[4]}"></i></div>
 	      </accordion-heading>
         <b>HTML to insert for title page:</b><br />
         <textarea class="form-control" rows='3' ng-model="InputCtrl.oOptions.titlePage"></textarea>
@@ -423,7 +495,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    
 	    <accordion-group is-open="kalinsToggles.aBooleans[5]">
 		    <accordion-heading>
-		      <div><strong>Create Files </strong><k-help str="{{oHelpStrings['h_toolOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
+		      <div><strong>Create Files</strong><k-help str="{{oHelpStrings['h_toolOptions']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
 	      </accordion-heading>
 	      <form class="form-horizontal" role="form">
 	      
@@ -497,8 +569,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				    <div class="form-group text-center">
 				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
 				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
-				      <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
 				    </div>
+				    		    	<hr>
+				    <div class="form-group text-center">
+		    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.sNewTemplateName" ></input></label>
+		    	    &nbsp;
+		    	    <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button> <k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help>
+		    	  </div>
 			    </div>
 			    
 			    <div class="row">
@@ -511,7 +588,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[6]">
 		    <accordion-heading>
-		      <div><strong>Existing Files </strong><k-help str="{{oHelpStrings['h_existingFiles']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[6], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[6]}"></i></div>
+		      <div><strong>Existing Files</strong><k-help str="{{oHelpStrings['h_existingFiles']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[6], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[6]}"></i></div>
 	      </accordion-heading>
 	    	<p ng-show="InputCtrl.pdfList.length === 0">You do not have any created files.</p>
 		    <div ng-show="InputCtrl.pdfList.length > 0">
@@ -534,18 +611,24 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    
 	    <accordion-group is-open="kalinsToggles.aBooleans[7]">
 		    <accordion-heading>
-		      <div><strong>Saved Document Templates </strong><k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[7], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[7]}"></i></div>
+		      <div><strong>Saved Document Templates</strong><k-help str="{{oHelpStrings['h_savedTemplates']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[7], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[7]}"></i></div>
 	      </accordion-heading>
-	    	<p ng-show="InputCtrl.templateList.length === 0">You do not have any saved documents templates.</p>
+	    	<p ng-show="InputCtrl.templateList.length === 0">Type a name in the box and hit Save as Template to save your current document as your first template.</p>
 		    <div ng-show="InputCtrl.templateList.length > 0">
-		    	<button ng-click="InputCtrl.deleteTemplate('all');" class="btn btn-danger">Delete all</button>
+		    	<div class="form-group">
+	          <button ng-click="InputCtrl.deleteTemplate('all');" class="btn btn-danger">Delete all</button>
+	        </div>
+	        
 	        <table ng-table="templateListTableParams" show-filter="InputCtrl.templateList.length > 1" class="table">
 	          <tr ng-repeat="template in $data">
 	            <td data-title="'Name'" sortable="'templateName'" filter="{ 'templateName': 'text' }">
-	            	<a href="{{InputCtrl.pdfUrl + template.templateName}}" target="_blank">{{template.templateName}}</a>
+	            	{{template.templateName}}
 	            </td>
 	            <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
 	              {{template.date}}
+	            </td>
+	            <td data-title="'Load'">
+	             	<button ng-click="InputCtrl.loadTemplate(template.templateName);" class="btn btn-success btn-xs">Load</button>
 	            </td>
 	            <td data-title="'Delete'">
 	             	<button ng-click="InputCtrl.deleteTemplate(template.templateName);" class="btn btn-warning btn-xs">Delete</button>
@@ -554,6 +637,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	        </table>
 		    </div>
 	    </accordion-group>
+	    
 	
 	    <accordion-group is-open="kalinsToggles.aBooleans[8]">
 		    <accordion-heading>

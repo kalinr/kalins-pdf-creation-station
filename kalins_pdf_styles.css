@@ -26,6 +26,7 @@ from showing. This overrides that on just the contextual_help_wrap div.*/
 /*our info icon ("i" in circle)*/
 .kInfoIcon {
     color: blue;
+    padding-left: 8px;
 }
 
 .arrow {

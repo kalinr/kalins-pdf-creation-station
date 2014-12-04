@@ -97,6 +97,7 @@ function kalins_pdf_admin_init(){
 	//creation tool ajax connections
 	add_action('wp_ajax_kalins_pdf_tool_create', 'kalins_pdf_tool_create');
 	add_action('wp_ajax_kalins_pdf_tool_save', 'kalins_pdf_tool_save');
+	add_action('wp_ajax_kalins_pdf_tool_template_delete', 'kalins_pdf_tool_template_delete');
 	add_action('wp_ajax_kalins_pdf_tool_delete', 'kalins_pdf_tool_delete');
 	add_action('wp_ajax_kalins_pdf_tool_defaults', 'kalins_pdf_tool_defaults');
 	
@@ -492,10 +493,12 @@ function kalins_pdf_tool_create(){//called from create button
 
 function kalins_pdf_tool_save(){//called from tool page save template button
 	check_ajax_referer( "kalins_pdf_tool_save" );
-	
+		
 	//get the new template
 	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
+	
+	
 	
 	//get the array of templates
 	$toolTemplateOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
@@ -506,8 +509,46 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 	//add the new template
 	array_push($toolTemplateOptions->aTemplates, $newTemplateSettings);
 	
+	$outputVar = new stdClass();
+	$outputVar->status = "success";
+	$outputVar->newTemplate = $newTemplateSettings;
 	//save the result back to the database
 	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $toolTemplateOptions);
+	
+	//and send our new object back to the client so we can add it to our list
+	die(json_encode($outputVar));
+}
+
+function kalins_pdf_tool_template_delete(){//called from either the "Delete All" button or the individual delete buttons
+
+	check_ajax_referer( "kalins_pdf_tool_template_delete" );
+	//$outputVar = new stdClass();
+	$templateName = $_REQUEST["templateName"];
+	
+	if($templateName === "all"){
+		$templates = new stdClass();
+		$templates->aTemplates = array();
+		
+	}else{
+		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+		
+		//unset($templates->aTemplates[$templateName]);
+		
+		$l = count($templates->aTemplates);
+		for($i = 0; $i < $l; $i++){
+			//echo "looping";
+			if($templates->aTemplates[$i]->templateName === $templateName){
+				
+				//echo "found it";
+				
+			  array_splice($templates->aTemplates, $i, 1);
+				break;
+			}
+		}
+		
+	
+	}
+	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
 	die("success");
 }
 
@@ -519,7 +560,7 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 	
 	$pdfDir = KALINS_PDF_DIR;
 		
-	if($filename == "all"){//if we're deleting all of them
+	if($filename === "all"){//if we're deleting all of them
 		if ($handle = opendir($pdfDir)) {//open pdf directory
 			while (false !== ($file = readdir($handle))) {
 				//loop to find all relevant files
