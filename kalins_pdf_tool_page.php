@@ -335,6 +335,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 	}
 
+	self.loadTemplate = function(oTemplate){
+		self.oOptions = oTemplate;
+	}
+
 	self.addPost = function(postID){
 		if(self.buildPostListByID[postID]){
 			if(!confirm("This post has already been added at least once. Are you sure you want to add it again?")){
@@ -655,7 +659,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	              {{template.date}}
 	            </td>
 	            <td data-title="'Load'">
-	             	<button ng-click="InputCtrl.loadTemplate(template.templateName);" class="btn btn-success btn-xs">Load</button>
+	             	<button ng-click="InputCtrl.loadTemplate(template);" class="btn btn-success btn-xs">Load</button>
 	            </td>
 	            <td data-title="'Delete'">
 	             	<button ng-click="InputCtrl.deleteTemplate(template.templateName);" class="btn btn-warning btn-xs">Delete</button>
