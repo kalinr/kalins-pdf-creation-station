@@ -215,7 +215,7 @@ function kalins_admin_page_loaded(){
 }
 
 function kalins_pdf_admin_head() {	
-	wp_enqueue_script("jquery-ui-sortable");
+	wp_enqueue_script( "jquery-ui-sortable");
 	wp_enqueue_script( 'kalinPDFAngularJS' );
 	wp_enqueue_script( 'kalinPDF_ng-table' );
 	wp_enqueue_script( 'kalinPDF_KalinsUIService' );
@@ -498,16 +498,26 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
-	
-	
 	//get the array of templates
 	$toolTemplateOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	if(empty($toolTemplateOptions->aTemplates)){
 		$toolTemplateOptions->aTemplates = array();
 	}
 	
-	//add the new template
-	array_push($toolTemplateOptions->aTemplates, $newTemplateSettings);
+	$bFound = false;
+	$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	$l = count($templates->aTemplates);
+	for($i = 0; $i < $l; $i++){
+		if($templates->aTemplates[$i]->templateName === $newTemplateSettings->templateName){
+			array_splice($templates->aTemplates, $i, 1, $newTemplateSettings);
+			$bFound = true;
+			break;
+		}
+	}
+	
+	if(!$bFound){	
+		array_push($toolTemplateOptions->aTemplates, $newTemplateSettings);
+	}
 	
 	$outputVar = new stdClass();
 	$outputVar->status = "success";
@@ -530,17 +540,10 @@ function kalins_pdf_tool_template_delete(){//called from either the "Delete All"
 		$templates->aTemplates = array();
 		
 	}else{
-		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
-		
-		//unset($templates->aTemplates[$templateName]);
-		
+		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );		
 		$l = count($templates->aTemplates);
 		for($i = 0; $i < $l; $i++){
-			//echo "looping";
-			if($templates->aTemplates[$i]->templateName === $templateName){
-				
-				//echo "found it";
-				
+			if($templates->aTemplates[$i]->templateName === $templateName){				
 			  array_splice($templates->aTemplates, $i, 1);
 				break;
 			}

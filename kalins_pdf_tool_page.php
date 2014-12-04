@@ -231,7 +231,28 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	}
 
 	self.saveTemplate = function(){
-		var data = {};
+		var l = self.templateList.length,
+		data = {},
+		nReplaceIndex = -1;
+
+		if(self.sNewTemplateName === ""){
+			$scope.kalinsAlertManager.addAlert("Error: You need to enter a name for your template.", "danger");
+			return;
+		}
+		
+		for(var i= 0; i<l; i++){
+			if( self.templateList[i].templateName === self.sNewTemplateName ){
+				nReplaceIndex = i;
+				break;
+			}
+		}
+
+		if(nReplaceIndex >= 0){
+			if(!confirm("You already have a template named " + self.sNewTemplateName + ". Would you like to overwrite it?" )){
+				return;
+			}
+		}
+		
 		data.action = 'kalins_pdf_tool_save';//tell wordpress what to call
 		data._ajax_nonce = saveNonce;//authorize it
 		data.pageIDs = "";
@@ -245,7 +266,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  success(function(data, status, headers, config) {			  
 				if(data.status === "success"){
 					//console.log(data.oOptions);
-					self.templateList.push(data.newTemplate);
+					if(nReplaceIndex >= 0){
+						//if we're overwriting, splice it in
+						self.templateList.splice(nReplaceIndex, 1, data.newTemplate);
+					}else{
+						//otherwise, add new template to end of list
+						self.templateList.push(data.newTemplate);
+					}
 					$scope.templateListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("Template saved successfully", "success");
 				}else{
