@@ -737,6 +737,7 @@ function kalins_pdf_getToolSettings(){//simply returns all our default option va
 	//tool page specific properties:
 	$kalinsPDFAdminOptions->filename = '[blog_name]';
 	$kalinsPDFAdminOptions->templateName = '';
+	$kalinsPDFAdminOptions->buildPostList = array();
 	$kalinsPDFAdminOptions->autoPageBreak = true;
 	$kalinsPDFAdminOptions->includeTOC = true;
 	$kalinsPDFAdminOptions->bCreatePDF = true;

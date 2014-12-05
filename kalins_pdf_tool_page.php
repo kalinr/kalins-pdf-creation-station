@@ -71,6 +71,7 @@
 ?>
 
 <script type='text/javascript'>
+"use strict";
 
 var app = angular.module('kalinsPDFToolPage', ['ngTable', 'ui.sortable', 'ui.bootstrap', 'kalinsUI']);
 
@@ -98,7 +99,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.postList = <?php echo json_encode($customList); ?>;
 	self.templateList = <?php echo json_encode($templateOptions->aTemplates); ?>;
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
-	self.buildPostList = [];//the post list that will eventually be compiled into the pdf
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
 	
   $scope.postListTableParams = new ngTableParams({
@@ -180,7 +180,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	}
 
 	self.createDocument = function(){
-		if(self.buildPostList.length === 0){
+		if(self.oOptions.buildPostList.length === 0){
 			$scope.kalinsAlertManager.addAlert("Error: You need to add at least one page or post.", "danger");
 			return;
 		}
@@ -197,13 +197,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		data.pageIDs = "";
 		
 		//loop to compile a string of pa_ and po_ that tells php which pages/posts to compile and whether to treat them as a page or post
-		for(var i = 0; i < self.buildPostList.length; i++){
-			if(self.buildPostList[i].type === "page"){
-				data.pageIDs = data.pageIDs + "pa_" + self.buildPostList[i].ID;
+		for(var i = 0; i < self.oOptions.buildPostList.length; i++){
+			if(self.oOptions.buildPostList[i].type === "page"){
+				data.pageIDs = data.pageIDs + "pa_" + self.oOptions.buildPostList[i].ID;
 			}else{
-				data.pageIDs = data.pageIDs + "po_" + self.buildPostList[i].ID;
+				data.pageIDs = data.pageIDs + "po_" + self.oOptions.buildPostList[i].ID;
 			}
-			if(i < self.buildPostList.length - 1){
+			if(i < self.oOptions.buildPostList.length - 1){
 				data.pageIDs += ",";
 			}
 		}
@@ -238,7 +238,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			$scope.kalinsAlertManager.addAlert("Error: You need to enter a name for your template.", "danger");
 			return;
 		}
-		
+
+		//find out if we already have a template by that name
 		for(var i= 0; i<l; i++){
 			if( self.templateList[i].templateName === self.oOptions.templateName ){
 				nReplaceIndex = i;
@@ -246,6 +247,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			}
 		}
 
+		//if we already have one, ask user if they really want to overwrite it
 		if(nReplaceIndex >= 0){
 			if(!confirm("You already have a template named " + self.oOptions.templateName + ". Would you like to overwrite it?" )){
 				return;
@@ -257,14 +259,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		data.pageIDs = "";
 		//copy our main object so we can mess with it
 		data.oOptions = JSON.parse($filter('json')( self.oOptions ));
-		data.oOptions.buildPostList = self.buildPostList;
+		data.oOptions.buildPostList = self.oOptions.buildPostList;
 		data.oOptions.templateName = self.oOptions.templateName;
 		data.oOptions = JSON.stringify( data.oOptions );
 				
 		$http({method:"POST", url:ajaxurl, params: data}).
 		  success(function(data, status, headers, config) {			  
 				if(data.status === "success"){
-					//console.log(data.oOptions);
 					if(nReplaceIndex >= 0){
 						//if we're overwriting, splice it in
 						self.templateList.splice(nReplaceIndex, 1, data.newTemplate);
@@ -336,7 +337,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	self.loadTemplate = function(oTemplate){
 		self.oOptions = oTemplate;
-		self.buildPostList = oTemplate['buildPostList'];
 
 		self.buildPostListByID = [];
 		var l = oTemplate.buildPostList.length;
@@ -363,7 +363,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				//copy object in case user wants to add multipes of the same page. angular won't allow duplicates. Must use angular json filter
 				//to avoid copying angular's internal $$haskey that it uses to uniquely identify array elements
 				var newObj = JSON.parse($filter('json')(self.postList[i]));
-				self.buildPostList.push(newObj);
+				self.oOptions.buildPostList.push(newObj);
 				
 				//add count to the tracking array to support adding same post multiple times
 				if(!self.buildPostListByID[postID]){
@@ -378,10 +378,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	self.removePost = function(postID){
 		//loop to find the correct ID in our main postList
-		for(var i = 0; i<self.buildPostList.length; i++){
-			if(self.buildPostList[i].ID === postID){
-				self.buildPostList.splice(i,1);
-				self.buildPostListByID[postID]--;
+		for(var i = 0; i<self.oOptions.buildPostList.length; i++){
+			if(self.oOptions.buildPostList[i].ID === postID){
+				self.oOptions.buildPostList.splice(i,1);
+				self.oOptions.buildPostListByID[postID]--;
 				break;
 			}
 		}
@@ -437,6 +437,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			  });
 		}
 	}
+
+	//load our current options so that buildPostListByID is created properly
+	self.loadTemplate(self.oOptions);
+	
 }]);	
 </script>
 
@@ -487,10 +491,10 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    <accordion-heading>
 		      <div><strong>My document</strong><k-help str="{{oHelpStrings['h_myDocument']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
-				<p ng-show="InputCtrl.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
-				<table ng-show="InputCtrl.buildPostList.length > 0" class="table">
-					<tbody ui:sortable ng-model="InputCtrl.buildPostList">
-		        <tr ng-repeat="post in InputCtrl.buildPostList">
+				<p ng-show="InputCtrl.oOptions.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
+				<table ng-show="InputCtrl.oOptions.buildPostList.length > 0" class="table">
+					<tbody ui:sortable ng-model="InputCtrl.oOptions.buildPostList">
+		        <tr ng-repeat="post in InputCtrl.oOptions.buildPostList">
 		          <td>
 		          	{{post.title}}
 		          </td>
