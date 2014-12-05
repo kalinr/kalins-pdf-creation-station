@@ -14,7 +14,6 @@ try{
 		//require_once("../wp-config.php");
 	}
 	
-	require_once('tcpdf/config/lang/eng.php');
 	require_once('tcpdf/tcpdf.php');
 } catch (Exception $e) {
 	$outputVar->status = "problem loading wp-config or TCPDF library.";
@@ -35,7 +34,6 @@ if($isSingle){
 	$singleID = substr($pageIDs, 3);
 
 	$pdfDir = KALINS_PDF_SINGLES_DIR;
-	//$pdfURL = $uploadURL .'/kalins-pdf/singles/';
 	$pdfURL = KALINS_PDF_SINGLES_URL;
 	
 	if($oOptions->filenameByTitle){
