@@ -449,6 +449,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com">kalinbooks.com</a></h3>
 		<p>Create custom PDF files for any combination of posts and pages.</p>
+		<p><a href="http://kalinbooks.com/pdf-creation-station/">Plugin page</a> | <a href="http://kalinbooks.com/pdf-creation-station/known-bugs/">Report bug</a></p>
 		
 		<p><a href="#" ng-click="showVideo = !showVideo">Watch a tutorial video</a></p>
 		<div class="text-center" ng-show="showVideo">

@@ -261,6 +261,26 @@ try{
 		$post = $objPost;//set global post object so if other plugins run their shortcodes they'll have access to it. Not sure why query_posts doesn't take care of this
 		query_posts('p=' .$post->ID);//for some reason this is also necessary so other plugins have access to values normally inside The Loop
 		
+		if($oOptions->convertYoutube){
+			$content = preg_replace("#\[embed\](.*)youtube.com/watch\?v=(.*)\[/embed]#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
+			$content = preg_replace("#<object(.*)youtube.com/v/(.*)\"(.*)</object>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)youtube.com/embed/(.*)[\'\"](.*)</iframe>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
+		}
+		
+		if($oOptions->convertVimeo){
+			$content = preg_replace("#<object(.*)vimeo.com/moogaloop.swf\?clip_id=(.*)&amp;server(.*)</object>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)http://player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
+		}
+		
+		if($oOptions->convertTed){//TED Talks
+			$content = preg_replace("#<object(.*)adKeys=talk=(.*);year=(.*)</object>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
+		}
+		
+		if(preg_match('/\[caption +[^\]]*\]/', $content)){//remove all captions surrounding images and whatnot since tcpdf can't interpret them (but leave the images in place)
+			$content = preg_replace('/\[caption +[^\]]*\]/', '', $content);//replace all instances of the opening caption tag
+			$content = preg_replace('/\[\/caption\]/', '', $content);//replace all instances of the closing caption tag
+		}
+		
 		if($oOptions->runShortcodes){//if we're running shortcodes, run them
 			$content = do_shortcode($content);
 		}else{
@@ -270,27 +290,8 @@ try{
 		global $kalinsPDFRunning;
 		$kalinsPDFRunning = true;
 		
-		if($oOptions->runFilters == "true"){//apply other plugin content filters if we're set to do that
+		if($oOptions->runFilters){//apply other plugin content filters if we're set to do that
 			$content = apply_filters('the_content', $content);
-		}
-		
-		if($oOptions->convertYoutube == "true"){
-			$content = preg_replace("#<object(.*)youtube.com/v/(.*)\"(.*)</object>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
-			$content = preg_replace("#<iframe(.*)http://www.youtube.com/embed/(.*)\"(.*)</iframe>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
-		}
-		
-		if($oOptions->convertVimeo == "true"){
-			$content = preg_replace("#<object(.*)vimeo.com/moogaloop.swf\?clip_id=(.*)&amp;server(.*)</object>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
-			$content = preg_replace("#<iframe(.*)http://player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
-		}
-		
-		if($oOptions->convertTed == "true"){//TED Talks
-			$content = preg_replace("#<object(.*)adKeys=talk=(.*);year=(.*)</object>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
-		}
-		
-		if(preg_match('/\[caption +[^\]]*\]/', $content)){//remove all captions surrounding images and whatnot since tcpdf can't interpret them (but leave the images in place)
-			$content = preg_replace('/\[caption +[^\]]*\]/', '', $content);//replace all instances of the opening caption tag
-			$content = preg_replace('/\[\/caption\]/', '', $content);//replace all instances of the closing caption tag
 		}
 		
 		if($oOptions->includeImages){

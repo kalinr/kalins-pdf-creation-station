@@ -112,6 +112,7 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 		<h2>PDF Creation Station</h2>
 		<h3>by Kalin Ringkvist - <a href="http://kalinbooks.com/">kalinbooks.com</a></h3>
 		<p>Settings for creating PDF files on individual pages and posts. For more information, click the help tab to the upper right.</p>
+		<p><a href="http://kalinbooks.com/pdf-creation-station/">Plugin page</a> | <a href="http://kalinbooks.com/pdf-creation-station/known-bugs/">Report bug</a></p>
 		
 		<p><a href="#" ng-click="showVideo = !showVideo">Watch a tutorial video</a></p>
 		<div class="text-center" ng-show="showVideo">

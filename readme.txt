@@ -157,9 +157,11 @@ removed testing alerts
 *Fixed a minor bug with apostrophes in the filename on the tool page.
 
 = 4.1 =
+*Added the ability to save documents on the tool page as templates for future use.
 *Cleaned up backend handling of AJAX calls. There should not be any noticeable difference to end users.
 *Divided contextual help menus on settings and tool pages into two tabs.
-*Added ability to save documents on the tool page as templates for future use.
+*Upgraded the TCPDF library from 6.0.061 to 6.0.099.
+*Converting YouTube videos to links should be more reliable now
 
 == Upgrade Notice ==
 
