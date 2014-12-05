@@ -161,7 +161,8 @@ removed testing alerts
 *Cleaned up backend handling of AJAX calls. There should be no noticeable difference to end users.
 *Divided contextual help menus on settings and tool pages into two tabs.
 *Upgraded the TCPDF library from 6.0.061 to 6.0.099.
-*Converting YouTube and Vimeo videos to links should be more reliable now
+*YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
+*YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
 
 == Upgrade Notice ==
 

@@ -260,20 +260,23 @@ try{
 		$post = $objPost;//set global post object so if other plugins run their shortcodes they'll have access to it. Not sure why query_posts doesn't take care of this
 		query_posts('p=' .$post->ID);//for some reason this is also necessary so other plugins have access to values normally inside The Loop
 		
+		//each of our three video services have three ways of embedding: 1) the wordpress shortcode way 2)the official iframe and 3)the old method using an object to load flash
+		//I'm doing my best to support all three
 		if($oOptions->convertYoutube){
 			$content = preg_replace("#\[embed\](.*)youtube.com/watch\?v=(.*)\[/embed]#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)youtube.com/embed/(.*)[\'\"] (.*)</iframe>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
 			$content = preg_replace("#<object(.*)youtube.com/v/(.*)\"(.*)</object>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
-			$content = preg_replace("#<iframe(.*)youtube.com/embed/(.*)[\'\"](.*)</iframe>#", '<p><a href="http://www.youtube.com/watch?v=\\2">YouTube Video</a></p>', $content);
 		}
 		
 		if($oOptions->convertVimeo){
 			$content = preg_replace("#\[embed\](.*)vimeo.com(.*)\[/embed]#", '<p><a href="http://vimeo.com\\2">Vimeo Video</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)player.vimeo.com/video/(.*)[\'\"] (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
 			$content = preg_replace("#<object(.*)vimeo.com/moogaloop.swf\?clip_id=(.*)&amp;server(.*)</object>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
-			$content = preg_replace("#<iframe(.*)player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
 		}
 		
 		if($oOptions->convertTed){//TED Talks
-			$content = preg_replace("#<iframe(.*)ted.com/(.*)[\'\"](.*)</iframe>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
+			$content = preg_replace("#\[embed\](.*)ted.com(.*)\[/embed]#", '<p><a href="http://www.ted.com\\2">Ted Talk</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)ted.com/(.*)[\'\"] (.*)</iframe>#", '<p><a href="http://www.ted.com/\\2.html">Ted Talk</a></p>', $content);
 			$content = preg_replace("#<object(.*)adKeys=talk=(.*);year=(.*)</object>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
 		}
 		
