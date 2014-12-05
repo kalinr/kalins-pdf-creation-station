@@ -171,6 +171,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			$http({method:"POST", url:ajaxurl, params: data}).
 			  success(function(data, status, headers, config) {
 				  self.oOptions = data;
+				  self.buildPostListByID = [];
 				  $scope.kalinsAlertManager.addAlert("Defaults reset successfully.", "success");
 			  }).
 			  error(function(data, status, headers, config) {
