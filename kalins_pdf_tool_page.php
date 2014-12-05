@@ -382,7 +382,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		for(var i = 0; i<self.oOptions.buildPostList.length; i++){
 			if(self.oOptions.buildPostList[i].ID === postID){
 				self.oOptions.buildPostList.splice(i,1);
-				self.oOptions.buildPostListByID[postID]--;
+				self.buildPostListByID[postID]--;
 				break;
 			}
 		}
