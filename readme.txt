@@ -158,10 +158,10 @@ removed testing alerts
 
 = 4.1 =
 *Added the ability to save documents on the tool page as templates for future use.
-*Cleaned up backend handling of AJAX calls. There should not be any noticeable difference to end users.
+*Cleaned up backend handling of AJAX calls. There should be no noticeable difference to end users.
 *Divided contextual help menus on settings and tool pages into two tabs.
 *Upgraded the TCPDF library from 6.0.061 to 6.0.099.
-*Converting YouTube videos to links should be more reliable now
+*Converting YouTube and Vimeo videos to links should be more reliable now
 
 == Upgrade Notice ==
 

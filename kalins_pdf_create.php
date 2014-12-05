@@ -46,7 +46,6 @@ if($isSingle){
 			$singlePost = get_page($singleID);
 		}
 		
-		//TODO: sanitize this filename
 		$filename = $singlePost->post_name;
 		
 	}else{
@@ -268,11 +267,13 @@ try{
 		}
 		
 		if($oOptions->convertVimeo){
+			$content = preg_replace("#\[embed\](.*)vimeo.com(.*)\[/embed]#", '<p><a href="http://vimeo.com\\2">Vimeo Video</a></p>', $content);
 			$content = preg_replace("#<object(.*)vimeo.com/moogaloop.swf\?clip_id=(.*)&amp;server(.*)</object>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
-			$content = preg_replace("#<iframe(.*)http://player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
+			$content = preg_replace("#<iframe(.*)player.vimeo.com/video/(.*)\" (.*)</iframe>#", '<p><a href="http://vimeo.com/\\2">Vimeo Video</a></p>', $content);
 		}
 		
 		if($oOptions->convertTed){//TED Talks
+			$content = preg_replace("#<iframe(.*)ted.com/(.*)[\'\"](.*)</iframe>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
 			$content = preg_replace("#<object(.*)adKeys=talk=(.*);year=(.*)</object>#", '<p><a href="http://www.ted.com/talks/\\2.html">Ted Talk</a></p>', $content);
 		}
 		

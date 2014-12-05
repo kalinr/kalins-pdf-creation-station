@@ -342,7 +342,6 @@ function kalinsPDF_content_filter($content){
 	}
 	
 	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
-	//TODO: check for and skip private post (not sure if I need to. look into this once you're not using a symlink)
 	if(!$adminOptions->showOnMulti && !is_single() && !is_page()){//if we're not on a single page/post we don't need to do anything else
 		return $content;
 	}
