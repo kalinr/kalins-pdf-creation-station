@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Kalin's PDF Creation Station
-Version: 4.0
+Version: 4.1
 Plugin URI: http://kalinbooks.com/pdf-creation-station/
 Description: Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.
 Author: Kalin Ringkvist
@@ -498,13 +498,12 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
 	//get the array of templates
-	$toolTemplateOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
-	if(empty($toolTemplateOptions->aTemplates)){
-		$toolTemplateOptions->aTemplates = array();
+	$templates = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	if(empty($templates->aTemplates)){
+		$templates->aTemplates = array();
 	}
 	
 	$bFound = false;
-	$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	$l = count($templates->aTemplates);
 	for($i = 0; $i < $l; $i++){
 		if($templates->aTemplates[$i]->templateName === $newTemplateSettings->templateName){
@@ -514,15 +513,15 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		}
 	}
 	
-	if(!$bFound){	
-		array_push($toolTemplateOptions->aTemplates, $newTemplateSettings);
+	if(!$bFound){
+		array_push($templates->aTemplates, $newTemplateSettings);
 	}
 	
 	$outputVar = new stdClass();
 	$outputVar->status = "success";
 	$outputVar->newTemplate = $newTemplateSettings;
 	//save the result back to the database
-	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $toolTemplateOptions);
+	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
 	
 	//and send our new object back to the client so we can add it to our list
 	die(json_encode($outputVar));

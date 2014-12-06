@@ -33,7 +33,7 @@ Future features: http://kalinbooks.com/pdf-creation-station/pdf-creation-possibl
 </p>
 
 <p>
-Tools page demo:
+Tools page demo (note this is for 4.0, so it's missing the new template saving feature):
 [youtube http://www.youtube.com/watch?v=zLHpr-8aYVw]
 </p>
 
@@ -212,7 +212,7 @@ After all this time, finally releasing a small update. Should work a little fast
 Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
 
 = 4.1 =
-Added ability to save documents as templates for future use. Also some code cleanup.
+Added ability to save documents as templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions.
 
 == About ==
 

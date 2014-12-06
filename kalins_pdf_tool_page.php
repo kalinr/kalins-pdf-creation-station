@@ -99,6 +99,17 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.postList = <?php echo json_encode($customList); ?>;
 	self.templateList = <?php echo json_encode($templateOptions->aTemplates); ?>;
 	self.oOptions = <?php echo json_encode($adminOptions); ?>;
+
+	//necessary for compatibility when user upgrades from version <=4.0 where buildPostList doesn't exist on oOptions
+	if(!self.oOptions.buildPostList){
+		self.oOptions.buildPostList = [];
+	}
+
+	//necessary if user has never saved a template before
+	if(!self.templateList){
+		self.templateList = [];
+	}
+	
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
 	
   $scope.postListTableParams = new ngTableParams({
@@ -222,7 +233,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 					$scope.pdfListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("File created successfully", "success");
 				}else{
-					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
+					if(data.status){
+						$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
+					}else{
+						$scope.kalinsAlertManager.addAlert("Unknown Error: <br/>" + data, "danger");
+					}
 				}
 		  }).
 		  error(function(data, status, headers, config) {
@@ -277,7 +292,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 					$scope.templateListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("Template saved successfully", "success");
 				}else{
-					$scope.kalinsAlertManager.addAlert("Error: " + data.status, "danger");
+					$scope.kalinsAlertManager.addAlert("Error: " + data, "danger");
 				}
 		  }).
 		  error(function(data, status, headers, config) {
@@ -327,7 +342,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							$scope.kalinsAlertManager.addAlert("Template deleted successfully", "success");
 						}
 					}else{
-						$scope.kalinsAlertManager.addAlert(data.status, "danger");
+						$scope.kalinsAlertManager.addAlert(data, "danger");
 					}
 			  }).
 			  error(function(data, status, headers, config) {
@@ -430,7 +445,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							$scope.kalinsAlertManager.addAlert("File deleted successfully", "success");
 						}
 					}else{
-						$scope.kalinsAlertManager.addAlert(data.status, "danger");
+						$scope.kalinsAlertManager.addAlert(data, "danger");
 					}
 			  }).
 			  error(function(data, status, headers, config) {
