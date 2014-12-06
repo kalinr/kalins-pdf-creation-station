@@ -503,11 +503,12 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		$templates->aTemplates = array();
 	}
 	
+		
 	$bFound = false;
 	$l = count($templates->aTemplates);
 	for($i = 0; $i < $l; $i++){
 		if($templates->aTemplates[$i]->templateName === $newTemplateSettings->templateName){
-			array_splice($templates->aTemplates, $i, 1, $newTemplateSettings);
+			$templates->aTemplates[$i] = $newTemplateSettings;
 			$bFound = true;
 			break;
 		}
