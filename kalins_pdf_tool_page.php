@@ -32,6 +32,38 @@
 		$newItem->date = substr($allPostList[$i]->post_date, 0, strpos($allPostList[$i]->post_date, " "));
 		$newItem->status = $allPostList[$i]->post_status;
 		
+		$newItem->cats = "";//create empty properties for our cats and tags
+		$newItem->tags = "";
+		
+		//don't get categories and tags for pages
+		if($newItem->type != "page"){
+			//get the category IDs
+			$post_categories = wp_get_post_categories( $newItem->ID  );
+			$cats = array();
+			
+			//loop through every category and retrieve its actual name, concatenating it to the string
+			foreach($post_categories as $c){
+				$cat = get_category( $c );	
+				$newItem->cats .= $cat->name .", ";
+			}
+			
+			//trim the extra ', '
+			$newItem->cats = rtrim($newItem->cats, ', ');
+			
+			//get our tags
+			$post_tags = wp_get_post_tags( $newItem->ID  );
+			$tags = array();
+			
+			//loop through all the tags and retrive their actual name, concatenating it to the string
+			foreach($post_tags as $t){
+				//$tag = get_tags( $t );
+				$newItem->tags .= $t->name .", ";
+			}
+			
+			//trim the extra ', '
+			$newItem->tags = rtrim($newItem->tags, ', ');
+		}
+		
 		array_push($customList, $newItem);		
 	}
 	
@@ -497,6 +529,15 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		          <td data-title="'Status'" sortable="'status'" filter="{ 'status': 'text' }">
 		            {{post.status}}
 		          </td>
+		          
+		          <td data-title="'Categories'" sortable="'cats'" filter="{ 'cats': 'text' }">
+		            {{post.cats}}
+		          </td>
+		          
+		          <td data-title="'Tags'" sortable="'tags'" filter="{ 'tags': 'text' }">
+		            {{post.tags}}
+		          </td>
+		          
 		          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
 		            <button class="btn btn-success btn-xs">Add</button>
 		          </td>
