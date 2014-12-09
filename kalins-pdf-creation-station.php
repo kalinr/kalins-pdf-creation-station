@@ -495,6 +495,10 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		
 	//get the new template
 	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
+	
+	//save these settings as our current default before also saving them as a named template
+	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $newTemplateSettings);
+	
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
 	//get the array of templates
@@ -503,7 +507,6 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		$templates->aTemplates = array();
 	}
 	
-		
 	$bFound = false;
 	$l = count($templates->aTemplates);
 	for($i = 0; $i < $l; $i++){
