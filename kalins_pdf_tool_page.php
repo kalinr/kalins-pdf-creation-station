@@ -52,7 +52,7 @@
 	}
 	
 	//get our list of document templates from the database
-	$templateOptions = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	$templateOptions = kalins_pdf_get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	
 	//get our help strings to populate the rollovers on the info icons
 	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/toolStrings.json');
