@@ -495,15 +495,18 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		
 	//get the new template
 	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
+	
+	//save these settings as our current default before also saving them as a named template
+	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $newTemplateSettings);
+	
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
 	//get the array of templates
-	$templates = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	$templates = kalins_pdf_get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	if(empty($templates->aTemplates)){
 		$templates->aTemplates = array();
 	}
 	
-		
 	$bFound = false;
 	$l = count($templates->aTemplates);
 	for($i = 0; $i < $l; $i++){
@@ -665,18 +668,31 @@ function kalinsPDF_build_pdf( $post ){
 
 //--------end ajax calls---------
 
+//this function basically serves as our database gateway for all our Creation Station options
 function kalins_pdf_get_options( $sOptionsName ) {
 	//get our previously saved settings
 	$devOptions = get_option( $sOptionsName );
 
 	if (empty($devOptions)) {
 		//if we don't have any saved settings (like this is the first time this plugin is used), then get our defaults
-		if($sOptionsName === KALINS_PDF_ADMIN_OPTIONS_NAME){	
-		  $devOptions = kalins_pdf_getAdminSettings();//get admin settings
-		}else{
-			$devOptions = kalins_pdf_getToolSettings();//otherwise, get tool settings
+		switch ($sOptionsName){
+			case KALINS_PDF_ADMIN_OPTIONS_NAME:
+				$devOptions = kalins_pdf_getAdminSettings();//get default admin settings
+				break;
+			case KALINS_PDF_TOOL_OPTIONS_NAME:
+			  $devOptions = kalins_pdf_getToolSettings();// get default tool settings
+			  break;
+			case KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME:
+				$devOptions = new stdClass();//set to empty object since we have no default saved templates (but maybe we will someday)
 		}
-		
+
+		update_option( $sOptionsName, $devOptions );
+	}
+	
+	//In v4.1 I changed the options object from array to object. Now we must convert old array to object.
+	if(gettype($devOptions) === "array"){
+		//actually, that's a lot easier to convert than I thought it would be: just typecast the darn thing.
+		$devOptions = (object) $devOptions;
 		update_option( $sOptionsName, $devOptions );
 	}
 
@@ -749,8 +765,8 @@ function kalins_pdf_getToolSettings(){//simply returns all our default option va
 function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Creation Station
 	
 	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
-	if($adminOptions['doCleanup'] == 'true'){//if user set cleanup to true, remove all options and post meta data
 		
+	if($adminOptions->doCleanup){//if user set cleanup to true, remove all options and post meta data		
 		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);
 		delete_option(KALINS_PDF_ADMIN_OPTIONS_NAME);//remove all options for admin
 		delete_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME);
@@ -763,7 +779,7 @@ function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Crea
 		$allposts = get_pages();//then get and delete all page meta data
 		foreach( $allposts as $postinfo) {
 			delete_post_meta($postinfo->ID, 'kalinsPDFMeta');
-		}
+		}		
 	}
 } 
 

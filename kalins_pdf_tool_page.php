@@ -84,7 +84,7 @@
 	}
 	
 	//get our list of document templates from the database
-	$templateOptions = get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	$templateOptions = kalins_pdf_get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	
 	//get our help strings to populate the rollovers on the info icons
 	$toolStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/toolStrings.json');
@@ -279,7 +279,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	self.saveTemplate = function(){
 		var l = self.templateList.length,
-		data = {},
+		outData = {},
 		nReplaceIndex = -1;
 
 		if(self.oOptions.templateName === ""){
@@ -302,33 +302,33 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			}
 		}
 		
-		data.action = 'kalins_pdf_tool_save';//tell wordpress what to call
-		data._ajax_nonce = saveNonce;//authorize it
-		data.pageIDs = "";
+		outData.action = 'kalins_pdf_tool_save';//tell wordpress what to call
+		outData._ajax_nonce = saveNonce;//authorize it
+		outData.pageIDs = "";
 		//copy our main object so we can mess with it
-		data.oOptions = JSON.parse($filter('json')( self.oOptions ));
-		data.oOptions.buildPostList = self.oOptions.buildPostList;
-		data.oOptions.templateName = self.oOptions.templateName;
-		data.oOptions = JSON.stringify( data.oOptions );
+		outData.oOptions = JSON.parse($filter('json')( self.oOptions ));
+		outData.oOptions.buildPostList = self.oOptions.buildPostList;
+		outData.oOptions.templateName = self.oOptions.templateName;
+		outData.oOptions = JSON.stringify( outData.oOptions );
 				
-		$http({method:"POST", url:ajaxurl, params: data}).
-		  success(function(data, status, headers, config) {			  
-				if(data.status === "success"){
+		$http({method:"POST", url:ajaxurl, params: outData}).
+		  success(function(inData, status, headers, config) {			  
+				if(inData.status === "success"){
 					if(nReplaceIndex >= 0){
 						//if we're overwriting, splice it in
-						self.templateList.splice(nReplaceIndex, 1, data.newTemplate);
+						self.templateList.splice(nReplaceIndex, 1, inData.newTemplate);
 					}else{
 						//otherwise, add new template to end of list
-						self.templateList.push(data.newTemplate);
+						self.templateList.push(inData.newTemplate);
 					}
 					$scope.templateListTableParams.reload();
 					$scope.kalinsAlertManager.addAlert("Template saved successfully", "success");
 				}else{
-					$scope.kalinsAlertManager.addAlert("Error: " + data, "danger");
+					$scope.kalinsAlertManager.addAlert("Error: " + inData, "danger");
 				}
 		  }).
-		  error(function(data, status, headers, config) {
-		    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
+		  error(function(inData, status, headers, config) {
+		    $scope.kalinsAlertManager.addAlert("An error occurred: " + inData, "danger");
 		  });
 	}
 
