@@ -502,10 +502,12 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
 	//get the array of templates
-	$templates = kalins_pdf_get_option( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
-	if(empty($templates->aTemplates)){
+	$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+	
+	/*this shouldn't be necessary anymore since we are creating the aTemplates array in the get_options gateway (kalins_pdf_get_options())
+	 * if(empty($templates->aTemplates)){
 		$templates->aTemplates = array();
-	}
+	}*/
 	
 	$bFound = false;
 	$l = count($templates->aTemplates);
@@ -532,26 +534,21 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 }
 
 function kalins_pdf_tool_template_delete(){//called from either the "Delete All" button or the individual delete buttons
-
 	check_ajax_referer( "kalins_pdf_tool_template_delete" );
-	//$outputVar = new stdClass();
 	$templateName = $_REQUEST["templateName"];
 	
 	if($templateName === "all"){
 		$templates = new stdClass();
 		$templates->aTemplates = array();
-		
 	}else{
 		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );		
 		$l = count($templates->aTemplates);
-		for($i = 0; $i < $l; $i++){
-			if($templates->aTemplates[$i]->templateName === $templateName){				
-			  array_splice($templates->aTemplates, $i, 1);
+		for($i = 0; $i < $l; $i++){//loop through all template items
+			if($templates->aTemplates[$i]->templateName === $templateName){//if our name matches		
+			  array_splice($templates->aTemplates, $i, 1);//delete the item in the array
 				break;
 			}
 		}
-		
-	
 	}
 	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
 	die("success");
@@ -682,8 +679,11 @@ function kalins_pdf_get_options( $sOptionsName ) {
 			case KALINS_PDF_TOOL_OPTIONS_NAME:
 			  $devOptions = kalins_pdf_getToolSettings();// get default tool settings
 			  break;
+			  //TODO: make the main tool options into a template. Put it in the array as a default, give it a reserved name
+			  //like "default" and don't let the user delete it.
 			case KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME:
 				$devOptions = new stdClass();//set to empty object since we have no default saved templates (but maybe we will someday)
+				$devOptions->aTemplates = array();
 		}
 
 		update_option( $sOptionsName, $devOptions );
