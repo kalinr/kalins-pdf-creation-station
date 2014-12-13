@@ -478,13 +478,6 @@ function kalins_pdf_admin_save(){
 	}
 }
 
-function kalins_pdf_tool_defaults(){//called when user clicks the reset button
-	check_ajax_referer( "kalins_pdf_tool_reset" );
-	$kalinsPDFAdminOptions = kalins_pdf_getToolSettings();
-	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $kalinsPDFAdminOptions);
-	die(json_encode($kalinsPDFAdminOptions));
-}
-
 function kalins_pdf_tool_create(){//called from create button
 	check_ajax_referer( "kalins_pdf_tool_create" );
 	require_once(WP_PLUGIN_DIR .'/kalins-pdf-creation-station/kalins_pdf_create.php');
@@ -495,19 +488,14 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		
 	//get the new template
 	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
-	
-	//save these settings as our current default before also saving them as a named template
-	update_option(KALINS_PDF_TOOL_OPTIONS_NAME, $newTemplateSettings);
-	
+
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
 	//get the array of templates
 	$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
 	
-	/*this shouldn't be necessary anymore since we are creating the aTemplates array in the get_options gateway (kalins_pdf_get_options())
-	 * if(empty($templates->aTemplates)){
-		$templates->aTemplates = array();
-	}*/
+	//remember this name so that it's kept as the current template so it's automatically loaded next time the page loads
+	$templates->sCurTemplate = $newTemplateSettings->templateName;
 	
 	$bFound = false;
 	$l = count($templates->aTemplates);
@@ -523,13 +511,14 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 		array_push($templates->aTemplates, $newTemplateSettings);
 	}
 	
-	$outputVar = new stdClass();
-	$outputVar->status = "success";
-	$outputVar->newTemplate = $newTemplateSettings;
 	//save the result back to the database
 	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
 	
-	//and send our new object back to the client so we can add it to our list
+	$outputVar = new stdClass();
+	$outputVar->status = "success";
+	$outputVar->newTemplate = $newTemplateSettings;
+	
+	//send our new object back to the client so we can add it to our list
 	die(json_encode($outputVar));
 }
 
@@ -538,8 +527,10 @@ function kalins_pdf_tool_template_delete(){//called from either the "Delete All"
 	$templateName = $_REQUEST["templateName"];
 	
 	if($templateName === "all"){
+		//create new template object, list array and add its "original defaults" template back in
 		$templates = new stdClass();
 		$templates->aTemplates = array();
+		$templates->aTemlates["original defaults"] = kalins_pdf_getToolSettings();
 	}else{
 		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );		
 		$l = count($templates->aTemplates);
@@ -548,6 +539,11 @@ function kalins_pdf_tool_template_delete(){//called from either the "Delete All"
 			  array_splice($templates->aTemplates, $i, 1);//delete the item in the array
 				break;
 			}
+		}
+		
+		//if we deleted our currently viewed template, set sCurTemplate to the default object that can't be deleted
+		if($templateName === $templates->sCurTemplate){
+			$templates->sCurTemplate = "original defaults";
 		}
 	}
 	update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
@@ -676,26 +672,35 @@ function kalins_pdf_get_options( $sOptionsName ) {
 			case KALINS_PDF_ADMIN_OPTIONS_NAME:
 				$devOptions = kalins_pdf_getAdminSettings();//get default admin settings
 				break;
-			case KALINS_PDF_TOOL_OPTIONS_NAME:
-			  $devOptions = kalins_pdf_getToolSettings();// get default tool settings
-			  break;
-			  //TODO: make the main tool options into a template. Put it in the array as a default, give it a reserved name
-			  //like "default" and don't let the user delete it.
 			case KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME:
 				$devOptions = new stdClass();//set to empty object since we have no default saved templates (but maybe we will someday)
 				$devOptions->aTemplates = array();
+				$devOptions->aTemplates[0] = kalins_pdf_getToolSettings();
+				$devOptions->aTemplates[0]->date = date("Y-m-d H:i:s", time());//add save date
+				
+				$oldOptions = get_option( KALINS_PDF_TOOL_OPTIONS_NAME );
+				
+				//if we have the old options object available, 
+				if(!empty($oldOptions)){
+					//typecast it to object since we were previously using an associative array
+					$oldOptions = (object)$oldOptions;
+					$oldOptions->templateName = "previous settings";//give it a name that hopefully the user can understand
+					$oldOptions->buildPostList = array();//and give it its empty buildPostList which wasn't present on the main object in v4.0
+					$oldOptions->date = date("Y-m-d H:i:s", time());//add save date
+					
+					$devOptions->aTemplates[1] = $oldOptions; //copy old settings onto the new array,
+					$devOptions->sCurTemplate = "previous settings";
+					delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);// permanently delete the old settings
+				}else{
+					//if there are no options saved from v 4.0 (i.e. when this is the first time they've ever been to the tools page), we set the default object from kalins_pdf_getToolSettings() to be our current template
+					$devOptions->sCurTemplate = "original defaults";
+				}
+				
+				break;
 		}
 
 		update_option( $sOptionsName, $devOptions );
 	}
-	
-	//In v4.1 I changed the options object from array to object. Now we must convert old array to object.
-	if(gettype($devOptions) === "array"){
-		//actually, that's a lot easier to convert than I thought it would be: just typecast the darn thing.
-		$devOptions = (object) $devOptions;
-		update_option( $sOptionsName, $devOptions );
-	}
-
 	return $devOptions;
 }
 
@@ -759,15 +764,20 @@ function kalins_pdf_getToolSettings(){//simply returns all our default option va
 	$kalinsPDFAdminOptions->bCreateHTML = false;
 	$kalinsPDFAdminOptions->bCreateTXT = false;
 	
+	$kalinsPDFAdminOptions->templateName = "original defaults";
+	
 	return $kalinsPDFAdminOptions;
 }
 
 function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Creation Station
 	
 	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
+	
+	//typecast to object, just in case user never saved new settings, this would still be an associative array
+	$adminOptions = (object)$adminOptions;
 		
-	if($adminOptions->doCleanup){//if user set cleanup to true, remove all options and post meta data		
-		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);
+	if($adminOptions->doCleanup){//if user set cleanup to true, remove all options and post meta data
+		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);//keep this just in case they still have this and never went to the tool page to get it updated
 		delete_option(KALINS_PDF_ADMIN_OPTIONS_NAME);//remove all options for admin
 		delete_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME);
 		

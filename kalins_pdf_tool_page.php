@@ -11,10 +11,7 @@
 	$save_nonce = wp_create_nonce( 'kalins_pdf_tool_save' );
 	$delete_template_nonce = wp_create_nonce( 'kalins_pdf_tool_template_delete' );
 	$delete_nonce = wp_create_nonce( 'kalins_pdf_tool_delete' );
-	$reset_nonce = wp_create_nonce( 'kalins_pdf_tool_reset' );
-	
-	$adminOptions = kalins_pdf_get_options( KALINS_PDF_TOOL_OPTIONS_NAME );
-	
+		
 	$allPostList = get_posts('numberposts=-1&post_type=any&post_status=any');
 		
 	$customList = array();
@@ -124,23 +121,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	var saveNonce = '<?php echo $save_nonce; ?>';
 	var deleteTemplateNonce = '<?php echo $delete_template_nonce; ?>';
 	var deleteNonce = '<?php echo $delete_nonce; ?>';
-	var resetNonce = '<?php echo $reset_nonce; ?>';
 	
 	self.pdfUrl = "<?php echo KALINS_PDF_URL; ?>";
 	self.pdfList = <?php echo json_encode($pdfList); ?>;
 	self.postList = <?php echo json_encode($customList); ?>;
+	self.sCurTemplate = "<?php echo $templateOptions->sCurTemplate; ?>";
 	self.templateList = <?php echo json_encode($templateOptions->aTemplates); ?>;
-	self.oOptions = <?php echo json_encode($adminOptions); ?>;
-
-	//necessary for compatibility when user upgrades from version <=4.0 where buildPostList doesn't exist on oOptions
-	if(!self.oOptions.buildPostList){
-		self.oOptions.buildPostList = [];
-	}
-
-	//necessary if user has never saved a template before
-	if(!self.templateList){
-		self.templateList = [];
-	}
+	self.oOptions = {};//this is our currently active set of options that populates the entire page. It gets populated via loadTemplate()
 	
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
 	
@@ -207,22 +194,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	    }
 	  });
 
-	self.resetToDefaults = function(){		
-		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered into the form. (This will NOT delete or change your existing PDF documents.)")){
-			var data = { action: 'kalins_pdf_tool_defaults', _ajax_nonce : resetNonce};
-
-			$http({method:"POST", url:ajaxurl, params: data}).
-			  success(function(data, status, headers, config) {
-				  self.oOptions = data;
-				  self.buildPostListByID = [];
-				  $scope.kalinsAlertManager.addAlert("Defaults reset successfully.", "success");
-			  }).
-			  error(function(data, status, headers, config) {
-			    $scope.kalinsAlertManager.addAlert("An error occurred: " + data, "danger");
-			  });
-		}
-	}
-
 	self.createDocument = function(){
 		if(self.oOptions.buildPostList.length === 0){
 			$scope.kalinsAlertManager.addAlert("Error: You need to add at least one page or post.", "danger");
@@ -277,22 +248,25 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		  });
 	}
 
+	self.getTemplateIndexByName = function(sTemplateName){
+		//loop through all our templates
+		var l = self.templateList.length;
+		for(var i= 0; i<l; i++){
+			if( self.templateList[i].templateName === sTemplateName ){
+				return i;//return the index of the one we find
+			}
+		}
+		return -1;
+	}
+
 	self.saveTemplate = function(){
 		var l = self.templateList.length,
 		outData = {},
-		nReplaceIndex = -1;
+		nReplaceIndex = self.getTemplateIndexByName( self.oOptions.templateName );
 
 		if(self.oOptions.templateName === ""){
 			$scope.kalinsAlertManager.addAlert("Error: You need to enter a name for your template.", "danger");
 			return;
-		}
-
-		//find out if we already have a template by that name
-		for(var i= 0; i<l; i++){
-			if( self.templateList[i].templateName === self.oOptions.templateName ){
-				nReplaceIndex = i;
-				break;
-			}
 		}
 
 		//if we already have one, ask user if they really want to overwrite it
@@ -335,7 +309,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.deleteTemplate = function(templateName){
 		var confirmText = "Are you sure you want to delete " + templateName + "?";
 		if(templateName === "all"){
-			confirmText = "Are you sure you want to delete every template you have created?";
+			confirmText = "Are you sure you want to delete every template you have created? (This will not delete the original defaults template.)";
 		}
 		
 		if(confirm(confirmText)){
@@ -350,18 +324,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			  success(function(data, status, headers, config) {
 					if(data === "success"){
 						if(templateName == "all"){
-							self.templateList.splice(0, self.templateList.length);
+							self.templateList.splice(1, self.templateList.length - 1);
 							$scope.templateListTableParams.reload();
 							$scope.kalinsAlertManager.addAlert("Templates deleted successfully", "success");
 						}else{
-							//figure out which item to delete out of our array
-							for(var i =0; i<self.templateList.length; i++){
-								if(templateName === self.templateList[i]['templateName']){
-									indexToDelete = i;
-									break;
-								}
-							}
-							
+							indexToDelete = self.getTemplateIndexByName(templateName);							
 							self.templateList.splice(indexToDelete, 1);
 	
 							var currentPage = $scope.templateListTableParams.page();
@@ -384,7 +351,13 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	}
 
 	self.loadTemplate = function(oTemplate){
-		self.oOptions = oTemplate;
+		if(typeof(oTemplate) === "string"){
+			//get our actual template if we just passed in the template name
+			oTemplate = self.templateList[self.getTemplateIndexByName(oTemplate)];
+		}
+
+		//make a copy of oTemplate so that our two instances of HTML databinding of templateName don't conflict with each other
+		self.oOptions = JSON.parse($filter('json')(oTemplate));
 
 		self.buildPostListByID = [];
 		var l = oTemplate.buildPostList.length;
@@ -485,10 +458,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			  });
 		}
 	}
-
-	//load our current options so that buildPostListByID is created properly
-	self.loadTemplate(self.oOptions);
 	
+	//load our current options
+	self.loadTemplate(self.sCurTemplate);
 }]);	
 </script>
 
@@ -657,7 +629,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 			    </div>
 			    
 			    <div class="row">
-					  <div class="form-group col-xs-12" >
+					  <div class="form-group col-xs-12 text-center" >
 				      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input></label>
 							&nbsp;
 				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input> .pdf </label>
@@ -666,20 +638,16 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 							&nbsp;|&nbsp;
 				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt </label>
 				      <k-help str="{{oHelpStrings['h_filenameTypes']}}"></k-help>
+				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
 						</div>
 					</div>
-
+					<hr>
 					<div class="row">
-				    <div class="form-group text-center">
-				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
-				      <button ng-click='InputCtrl.resetToDefaults();' class="btn btn-warning">Reset Defaults</button>
-				    </div>
-				    		    	<hr>
 				    <div class="form-group text-center">
 				      <k-help str="{{oHelpStrings['h_saveAsTemplate']}}"></k-help>
 		    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.templateName" ></input></label>
 		    	    &nbsp;
-		    	    <button ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
+		    	    <button ng-disabled="InputCtrl.oOptions.templateName === 'original defaults'" ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
 		    	  </div>
 			    </div>
 			    
@@ -725,7 +693,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	        </div>
 	        
 	        <table ng-table="templateListTableParams" show-filter="InputCtrl.templateList.length > 1" class="table">
-	          <tr ng-repeat="template in $data">
+	          <tr ng-repeat="template in $data" ng-class="{'active': InputCtrl.oOptions.templateName === template.templateName}">
 	            <td data-title="'Name'" sortable="'templateName'" filter="{ 'templateName': 'text' }">
 	            	{{template.templateName}}
 	            </td>
@@ -736,7 +704,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	             	<button ng-click="InputCtrl.loadTemplate(template);" class="btn btn-success btn-xs">Load</button>
 	            </td>
 	            <td data-title="'Delete'">
-	             	<button ng-click="InputCtrl.deleteTemplate(template.templateName);" class="btn btn-warning btn-xs">Delete</button>
+	             	<button ng-disabled="{{template.templateName === 'original defaults'}}" ng-click="InputCtrl.deleteTemplate(template.templateName);" class="btn btn-warning btn-xs">Delete</button>
 	            </td>
 	          </tr>
 	        </table>
