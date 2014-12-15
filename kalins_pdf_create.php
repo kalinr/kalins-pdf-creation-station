@@ -244,12 +244,10 @@ try{
 try{
 	$le = count($result);
 	
-	
-	
 	for($i = 0; $i < $le; $i++){
 		
 		if(!ini_get('safe_mode')){
-			set_time_limit(0);//set the timeout back to 0 so we can keep processing things that would normally choke with tons of pages and stuff
+			@set_time_limit(0);//set the timeout back to 0 so we can keep processing things that would normally choke with tons of pages and stuff (@ makes it ignore errors if this function is disabled)
 		}
 		
 		$objPost = $result[$i];
@@ -381,6 +379,8 @@ try{
 		
 		$objTcpdf->SetFont('Times', '', $fontSize );
 		
+		//TODO: figure out if title page is more than a single page and if so, insert TOC at correct location instead of on page 2
+		
 		// add a simple Table Of Content at first page
 		// (check the example n. 59 for the HTML version)
 		$objTcpdf->addTOC(2, 'courier', '.', 'INDEX');
@@ -388,6 +388,9 @@ try{
 		// end of TOC page
 		$objTcpdf->endTOCPage();
 	}
+	
+	//TODO: http://codex.wordpress.org/Function_Reference/wp_insert_attachment
+	//see if you can enter this new file into the site's media library
 	
 	//create and save the proper document(s)
 	if($isSingle){
