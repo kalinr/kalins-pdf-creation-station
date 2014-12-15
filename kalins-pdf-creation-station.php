@@ -461,8 +461,8 @@ function kalins_pdf_admin_save(){
 	check_ajax_referer( "kalins_pdf_admin_save" );
 	
 	//decode our JSON after stripping off the slashes that get added in the request
-	$kalinsPDFAdminOptions = json_decode(stripslashes($_REQUEST['oOptions']));
-	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);//save options to database
+	$request_body = json_decode(trim(file_get_contents('php://input')));	
+	update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $request_body->oOptions);//save options to database
 	
 	$pdfDir = KALINS_PDF_SINGLES_DIR;	
 	if ($handle = opendir($pdfDir)) {//open pdf directory
@@ -485,9 +485,9 @@ function kalins_pdf_tool_create(){//called from create button
 
 function kalins_pdf_tool_save(){//called from tool page save template button
 	check_ajax_referer( "kalins_pdf_tool_save" );
-		
-	//get the new template
-	$newTemplateSettings = json_decode(stripslashes($_REQUEST['oOptions']));
+	
+	$request_body = json_decode(trim(file_get_contents('php://input')));
+	$newTemplateSettings =  $request_body->oOptions;
 
 	$newTemplateSettings->date = date("Y-m-d H:i:s", time());//add save date
 	
@@ -524,13 +524,16 @@ function kalins_pdf_tool_save(){//called from tool page save template button
 
 function kalins_pdf_tool_template_delete(){//called from either the "Delete All" button or the individual delete buttons
 	check_ajax_referer( "kalins_pdf_tool_template_delete" );
-	$templateName = $_REQUEST["templateName"];
+	
+	$request_body = json_decode(trim(file_get_contents('php://input')));
+	$templateName =  $request_body->templateName;
 	
 	if($templateName === "all"){
 		//create new template object, list array and add its "original defaults" template back in
 		$templates = new stdClass();
 		$templates->aTemplates = array();
-		$templates->aTemlates["original defaults"] = kalins_pdf_getToolSettings();
+		$templates->aTemplates[0] = kalins_pdf_getToolSettings();
+		$templates->sCurTemplate = "original defaults";
 	}else{
 		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );		
 		$l = count($templates->aTemplates);
@@ -554,7 +557,9 @@ function kalins_pdf_tool_delete(){//called from either the "Delete All" button o
 	
 	check_ajax_referer( "kalins_pdf_tool_delete" );
 	$outputVar = new stdClass();
-	$filename = $_REQUEST["filename"];
+	
+	$request_body = json_decode(trim(file_get_contents('php://input')));	
+	$filename = $request_body->filename;
 	
 	$pdfDir = KALINS_PDF_DIR;
 		
