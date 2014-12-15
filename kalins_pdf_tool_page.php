@@ -4,6 +4,11 @@
 		echo "Hi there!  I'm just a plugin, not much I can do when called directly.";
 		exit;
 	}
+	
+	//TODO: is this how we add a pdf to the uploads library?
+	//$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
+	//found this in add-from-server plugin
+	
 		
 	kalinsPDF_createPDFDir();//make sure our PDF dir exists
 	
