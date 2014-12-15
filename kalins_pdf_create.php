@@ -295,7 +295,7 @@ try{
 			$content = apply_filters('the_content', $content);
 		}
 		
-		if($oOptions->includeImages){
+		if(!$oOptions->includeImages){
 			//remove all image tags if we don't want images
 			if(preg_match('/<img[^>]+./', $content)){
 				$content = preg_replace('/<img[^>]+./', '', $content);

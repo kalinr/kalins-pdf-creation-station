@@ -160,7 +160,7 @@ removed testing alerts
 *Added the ability to save documents on the tool page as templates for future use.
 *Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
 *Divided contextual help menus on settings and tool pages into two tabs.
-*Upgraded the TCPDF library from 6.0.061 to 6.0.099.
+*Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
 *YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
 *YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
 
