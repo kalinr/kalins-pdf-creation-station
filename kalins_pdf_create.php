@@ -67,8 +67,13 @@ if($isSingle){
 }else{
 	try{		
 		$pdfDir = KALINS_PDF_DIR;
+	
+		$request_body = json_decode(trim(file_get_contents('php://input')));
+		$oOptions =  $request_body->oOptions;
 		
-		$oOptions = json_decode(stripslashes($_REQUEST['oOptions']));
+		//$pageIDs are sent on the request instead of the oOptions object because they are not saved to the database
+		$pageIDs = $request_body->pageIDs;
+		$includeTOC = $oOptions->includeTOC;
 		
 		if($oOptions->filename != ""){
 			$filename = kalins_pdf_global_shortcode_replace($oOptions->filename);//&#039;
@@ -78,11 +83,6 @@ if($isSingle){
 			//if user did not enter a filename, we use the current timestamp as a filename (mostly just to streamline testing) 
 			$filename = time();
 		}
-		//$pageIDs are sent on the request instead of the oOptions object because they are not saved to the database
-		$pageIDs = stripslashes($_REQUEST["pageIDs"]);
-		
-		$includeTOC = $oOptions->includeTOC;
-		
 	} catch (Exception $e) {
 		$outputVar->status = "problem setting options. Be sure the text you have entered is compatible or try resetting to defaults.";
 		die(json_encode($outputVar));

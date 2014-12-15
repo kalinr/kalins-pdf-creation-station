@@ -43,11 +43,9 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 	self.saveData = function(){
 		//copy our data into new object
 		var data = {};
-		data.oOptions = JSON.stringify( self.oOptions );
-		data.action = 'kalins_pdf_admin_save';//tell wordpress what to call
-		data._ajax_nonce = saveNonce;//authorize it
+		data.oOptions = self.oOptions;
 
-		$http({method:"POST", url:ajaxurl, params: data}).
+		$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_admin_save', _ajax_nonce:saveNonce },  data:data}).
 		  success(function(data, status, headers, config) {				
 				if(data === "success"){
 					$scope.kalinsAlertManager.addAlert("Settings saved successfully.", "success");
@@ -62,9 +60,8 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 
 	self.resetToDefaults = function(){
 		if(confirm("Are you sure you want to reset all of your field values? You will lose all the information you have entered and your cache of PDF files will be cleared.")){
-			var data = { action: 'kalins_pdf_reset_admin_defaults', _ajax_nonce : resetNonce};
 
-			$http({method:"POST", url:ajaxurl, params: data}).
+			$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_reset_admin_defaults', _ajax_nonce:resetNonce }}).
 			  success(function(data, status, headers, config) {
 				  self.oOptions = data;
 				  $scope.kalinsAlertManager.addAlert("Defaults reset successfully.", "success");
@@ -78,15 +75,11 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
 	self.createAll = function(){
 		var creationInProcess = false;
 		
-		var data = { action: 'kalins_pdf_create_all',
-			_ajax_nonce : createAllNonce
-		}
-		
 		if(!creationInProcess){
 			$scope.kalinsAlertManager.addAlert("Creating PDF files for all pages and posts.", "success");
 		}
 
-		$http({method:"POST", url:ajaxurl, params: data}).
+		$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_create_all', _ajax_nonce:createAllNonce }}).
 		  success(function(data, status, headers, config) {
 				if(data.status == "success"){
 					if(data.existCount >= data.totalCount){

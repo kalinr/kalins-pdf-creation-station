@@ -206,9 +206,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 
 		var data = {};
-		data.oOptions = $filter('json')( self.oOptions );
-		data.action = 'kalins_pdf_tool_create';//tell wordpress what to call
-		data._ajax_nonce = createNonce;//authorize it
+		data.oOptions = self.oOptions;
 		data.pageIDs = "";
 		
 		//loop to compile a string of pa_ and po_ that tells php which pages/posts to compile and whether to treat them as a page or post
@@ -224,7 +222,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}
 		$scope.kalinsAlertManager.addAlert("Building PDF file. Wait time will depend on the length of the document, image complexity and current server load. Refreshing the page or navigating away will cancel the build.", "success");
 		
-		$http({method:"POST", url:ajaxurl, params: data}).
+		$http({method:"POST", url:ajaxurl, params: {"action":'kalins_pdf_tool_create', "_ajax_nonce":createNonce },  data: data}).
 		  success(function(data, status, headers, config) {
 				if(data.status == "success"){
 
@@ -275,17 +273,14 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				return;
 			}
 		}
-		
-		outData.action = 'kalins_pdf_tool_save';//tell wordpress what to call
-		outData._ajax_nonce = saveNonce;//authorize it
+
 		outData.pageIDs = "";
 		//copy our main object so we can mess with it
 		outData.oOptions = JSON.parse($filter('json')( self.oOptions ));
 		outData.oOptions.buildPostList = self.oOptions.buildPostList;
 		outData.oOptions.templateName = self.oOptions.templateName;
-		outData.oOptions = JSON.stringify( outData.oOptions );
 				
-		$http({method:"POST", url:ajaxurl, params: outData}).
+		$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_tool_save', _ajax_nonce:saveNonce },  data:outData}).
 		  success(function(inData, status, headers, config) {			  
 				if(inData.status === "success"){
 					if(nReplaceIndex >= 0){
@@ -315,12 +310,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		if(confirm(confirmText)){
 			var indexToDelete = 0;
 			
-			var data = { action: 'kalins_pdf_tool_template_delete',
-				templateName: templateName, 
-				_ajax_nonce : deleteTemplateNonce
+			var data = {
+				templateName: templateName
 			}
 	
-			$http({method:"POST", url:ajaxurl, params: data}).
+			$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_tool_template_delete', _ajax_nonce:deleteTemplateNonce },  data:data}).
 			  success(function(data, status, headers, config) {
 					if(data === "success"){
 						if(templateName == "all"){
@@ -361,7 +355,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 		self.buildPostListByID = [];
 		var l = oTemplate.buildPostList.length;
-		//loop to rebuild our buildPostList, which tells the page/post ng-table which items to highlight
+		//loop to rebuild our buildPostListByID, which tells the page/post ng-table which items to highlight
 		for(var i = 0; i<l; i++){
 			if(!self.buildPostListByID[oTemplate.buildPostList[i].ID]){
 				self.buildPostListByID[oTemplate.buildPostList[i].ID] = 1;
@@ -417,12 +411,11 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		if(confirm(confirmText)){
 			var indexToDelete = 0;
 			
-			var data = { action: 'kalins_pdf_tool_delete',
+			var data = {
 				filename: filename, 
-				_ajax_nonce : deleteNonce
 			}
 	
-			$http({method:"POST", url:ajaxurl, params: data}).
+			$http({method:"POST", url:ajaxurl, params: {action:'kalins_pdf_tool_delete', _ajax_nonce:deleteNonce },  data:data}).
 			  success(function(data, status, headers, config) {
 					if(data.status == "success"){
 						if(filename == "all"){
@@ -688,7 +681,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	      </accordion-heading>
 	    	<p ng-show="InputCtrl.templateList.length === 0">Find the Save as Template button in the Create Files section above to save your current document as your first template.</p>
 		    <div ng-show="InputCtrl.templateList.length > 0">
-		    	<div class="form-group">
+		    	<div class="form-group" ng-show="InputCtrl.templateList.length > 1">
 	          <button ng-click="InputCtrl.deleteTemplate('all');" class="btn btn-danger">Delete all</button>
 	        </div>
 	        
