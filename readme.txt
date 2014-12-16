@@ -157,7 +157,8 @@ removed testing alerts
 *Fixed a minor bug with apostrophes in the filename on the tool page.
 
 = 4.1 =
-*Added the ability to save documents on the tool page as templates for future use.
+*Added the ability to save documents on the tool page as templates for future use. Includes your selected pages.
+*Added tags and categories to the pages and posts datagrid on the tool page.
 *Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
 *Divided contextual help menus on settings and tool pages into two tabs.
 *Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
@@ -212,7 +213,7 @@ After all this time, finally releasing a small update. Should work a little fast
 Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
 
 = 4.1 =
-Added ability to save documents as templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions.
+Added ability to save templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions, added categories and tags to tool's post list.
 
 == About ==
 
