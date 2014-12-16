@@ -71,6 +71,11 @@ if($isSingle){
 		$request_body = json_decode(trim(file_get_contents('php://input')));
 		$oOptions =  $request_body->oOptions;
 		
+		//save this
+		$templates = kalins_pdf_get_options( KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME );
+		$templates->sCurTemplate = $oOptions->templateName;
+		update_option(KALINS_PDF_TOOL_TEMPLATE_OPTIONS_NAME, $templates);
+		
 		//$pageIDs are sent on the request instead of the oOptions object because they are not saved to the database
 		$pageIDs = $request_body->pageIDs;
 		$includeTOC = $oOptions->includeTOC;

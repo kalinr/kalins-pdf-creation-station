@@ -352,7 +352,12 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.loadTemplate = function(oTemplate){
 		if(typeof(oTemplate) === "string"){
 			//get our actual template if we just passed in the template name
-			oTemplate = self.templateList[self.getTemplateIndexByName(oTemplate)];
+			var templateIndex = self.getTemplateIndexByName(oTemplate);
+			if(templateIndex >= 0){
+				oTemplate = self.templateList[templateIndex];
+			}else{//if the template doesn't exist, load default values at 0 index
+				oTemplate = self.templateList[0];
+			}
 		}
 
 		//make a copy of oTemplate so that our two instances of HTML databinding of templateName don't conflict with each other
