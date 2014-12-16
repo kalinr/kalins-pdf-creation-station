@@ -135,7 +135,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	self.oOptions = {};//this is our currently active set of options that populates the entire page. It gets populated via loadTemplate()
 	
 	self.buildPostListByID = [];//associative array by postID to track which rows to highlight
-	
+
+	//setup for our page/post list table
   $scope.postListTableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
@@ -157,6 +158,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
     }
   });
 
+	//setup for our document list table
   $scope.pdfListTableParams = new ngTableParams({
     page: 1,            // show first page
     count: 10,          // count per page
@@ -178,6 +180,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
     }
   });
 
+	//setup for our template list table
   $scope.templateListTableParams = new ngTableParams({
 	    page: 1,            // show first page
 	    count: 10,          // count per page
@@ -362,6 +365,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 		//make a copy of oTemplate so that our two instances of HTML databinding of templateName don't conflict with each other
 		self.oOptions = JSON.parse($filter('json')(oTemplate));
+		
+		self.validateBuildPostList(self.oOptions.buildPostList);//check for missing pages and posts and make corrections accordingly
 
 		self.buildPostListByID = [];
 		var l = oTemplate.buildPostList.length;
@@ -373,6 +378,39 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				self.buildPostListByID[oTemplate.buildPostList[i].ID]++;
 			}
 		}
+	}
+
+	//checks our buildPostList to make sure all the pages and posts still exist. If any are found that don't exist, 
+	//they are removed and a warning is thrown at the user, but this doesn't actually break anything.
+	self.validateBuildPostList = function(list){
+		var sWarning = "The following pages or posts have been deleted from your website: ",//warning message to show to user
+	    l = self.postList.length, //inner loop max
+	    nWarningLength = sWarning.length; //current length of string. We check this later. If it hasn't changed, then nothing has been deleted so we don't need to show it to the user.
+
+		//loop backwards since we might be deleting items from the list array
+		for(var i = list.length - 1; i >= 0; i--){			
+			var bFound = false;
+			for(var j = 0; j<l; j++){
+				if(list[i].ID === self.postList[j].ID){
+					bFound = true;//if we find the post in the list, then it's all good
+					break;
+				}
+			}
+
+			if(!bFound){
+				//add the title of the missing post to the warning
+				sWarning += list[i].title + ", ";
+				//remove the list item from the array that was passed in
+				list.splice(i, 1);
+			}
+		}
+
+		//if the string has gotten bigger, it means we actually need to show it to the user
+		if(sWarning.length > nWarningLength){
+			sWarning = sWarning.replace(/, +$/, "");//use regex to trim off the trailing comma and space
+			sWarning += ". These have also been removed from your template. This change will not be saved until you save the template.";
+			$scope.kalinsAlertManager.addAlert(sWarning, "warning");
+		}		
 	}
 
 	self.addPost = function(postID){
