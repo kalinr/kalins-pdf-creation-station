@@ -669,7 +669,7 @@ function kalinsPDF_build_pdf( $post ){
 //this function basically serves as our database gateway for all our Creation Station options
 function kalins_pdf_get_options( $sOptionsName ) {
 	//get our previously saved settings
-	$devOptions = (object) get_option( $sOptionsName );
+	$devOptions = get_option( $sOptionsName );
 
 	if (empty($devOptions)) {
 		//if we don't have any saved settings (like this is the first time this plugin is used), then get our defaults
@@ -683,10 +683,11 @@ function kalins_pdf_get_options( $sOptionsName ) {
 				$devOptions->aTemplates[0] = kalins_pdf_getToolSettings();
 				$devOptions->aTemplates[0]->date = date("Y-m-d H:i:s", time());//add save date
 				
-				$oldOptions = (object)get_option( KALINS_PDF_TOOL_OPTIONS_NAME );
+				$oldOptions = get_option( KALINS_PDF_TOOL_OPTIONS_NAME );
 				
 				//if we have the old options object available, 
 				if(!empty($oldOptions)){
+					$oldOptions = (object) $oldOptions;//old options were an associative array so convert to object
 					$oldOptions->templateName = "previous settings";//give it a name that hopefully the user can understand
 					$oldOptions->buildPostList = array();//and give it its empty buildPostList which wasn't present on the main object in v4.0
 					$oldOptions->date = date("Y-m-d H:i:s", time());//add save date
@@ -697,14 +698,13 @@ function kalins_pdf_get_options( $sOptionsName ) {
 				}else{
 					//if there are no options saved from v 4.0 (i.e. when this is the first time they've ever been to the tools page), we set the default object from kalins_pdf_getToolSettings() to be our current template
 					$devOptions->sCurTemplate = "original defaults";
-				}
-				
+				}				
 				break;
 		}
 
 		update_option( $sOptionsName, $devOptions );
 	}
-	return $devOptions;
+	return (object) $devOptions;//typecast to object just in case we're using the one from <= v4.0
 }
 
 function kalins_pdf_getAdminSettings(){//simply returns all our default option values for settings page
