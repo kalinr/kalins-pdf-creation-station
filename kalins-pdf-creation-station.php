@@ -669,7 +669,7 @@ function kalinsPDF_build_pdf( $post ){
 //this function basically serves as our database gateway for all our Creation Station options
 function kalins_pdf_get_options( $sOptionsName ) {
 	//get our previously saved settings
-	$devOptions = get_option( $sOptionsName );
+	$devOptions = (object) get_option( $sOptionsName );
 
 	if (empty($devOptions)) {
 		//if we don't have any saved settings (like this is the first time this plugin is used), then get our defaults
@@ -683,12 +683,10 @@ function kalins_pdf_get_options( $sOptionsName ) {
 				$devOptions->aTemplates[0] = kalins_pdf_getToolSettings();
 				$devOptions->aTemplates[0]->date = date("Y-m-d H:i:s", time());//add save date
 				
-				$oldOptions = get_option( KALINS_PDF_TOOL_OPTIONS_NAME );
+				$oldOptions = (object)get_option( KALINS_PDF_TOOL_OPTIONS_NAME );
 				
 				//if we have the old options object available, 
 				if(!empty($oldOptions)){
-					//typecast it to object since we were previously using an associative array
-					$oldOptions = (object)$oldOptions;
 					$oldOptions->templateName = "previous settings";//give it a name that hopefully the user can understand
 					$oldOptions->buildPostList = array();//and give it its empty buildPostList which wasn't present on the main object in v4.0
 					$oldOptions->date = date("Y-m-d H:i:s", time());//add save date
@@ -777,9 +775,6 @@ function kalins_pdf_getToolSettings(){//simply returns all our default option va
 function kalins_pdf_cleanup() {//deactivation hook. Clear all traces of PDF Creation Station
 	
 	$adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
-	
-	//typecast to object, just in case user never saved new settings, this would still be an associative array
-	$adminOptions = (object)$adminOptions;
 		
 	if($adminOptions->doCleanup){//if user set cleanup to true, remove all options and post meta data
 		delete_option(KALINS_PDF_TOOL_OPTIONS_NAME);//keep this just in case they still have this and never went to the tool page to get it updated
