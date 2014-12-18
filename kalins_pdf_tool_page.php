@@ -415,14 +415,29 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 
 	//add all the posts that are currently showing in our page/post table
 	self.addAllPosts = function(){
-		
+		var l = $scope.postListTableParams.data.length;
+
+		for(var i = 0; i < l; i++){			
+			//add the item directly from the postListTableParams.data array, which contains only the posts currently displayed in the table grid
+			var newObj = JSON.parse($filter('json')( $scope.postListTableParams.data[i] ));
+			self.oOptions.buildPostList.push(newObj);
+
+			//add count to the tracking array to support adding same post multiple times
+			if(!self.buildPostListByID[newObj.ID]){
+				self.buildPostListByID[newObj.ID] = 1;
+			}else{
+				self.buildPostListByID[newObj.ID]++;
+			}
+		}
 	}
 
-	//remove all our posts from our current document
+	//remove all posts from our current document
 	self.removeAllPosts = function(){
-		
+		self.buildPostListByID = [];
+		self.oOptions.buildPostList = [];
 	}
 
+	//add a single post to our current document
 	self.addPost = function(postID){
 		if(self.buildPostListByID[postID]){
 			if(!confirm("This post has already been added at least once. Are you sure you want to add it again?")){
