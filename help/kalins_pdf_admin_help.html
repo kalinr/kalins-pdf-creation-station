@@ -5,68 +5,67 @@
 <p>If you are looking for the utility to create PDF files from multiple pages and posts, you can find it under the Tools menu to the left.</p>
  
 <ul>
-	<li>
-    	<b>Insert HTML:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-        You may customize many aspects of the generated PDF files by inserting text or HTML snippets into the first six text fields on this page. The HTML will be rendered and saved into the PDF file. If you do not know HTML, you can simply leave the default HTML as is, which will give you a standard title header with the post title, author, date and link.
-        <br/>&nbsp;&nbsp;&nbsp;&nbsp;
-        A list of allowable HTML tags can be found in the Shortcodes section below.
-        <br/>&nbsp;&nbsp;&nbsp;&nbsp;
-        If you do not want a Title or Final page, you may leave those fields blank and the page will not be created. If you would like a blank Title or Final page, enter a spacebar character.
-        <br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>Note:</b> Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.
-    </li>
-    <li>
-    	<b>Options:</b>
-         <ol>
-        	<li><b>Header Title and Header Sub Title:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            This is the text that will display as the header at the top of every page within your generated PDF files. Shortcodes (explained below) are allowed here, but HTML is not.
-            
-            </li>
-            <li><b>Link Text:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            This is the text that will be used to link to the PDF document. HTML may be used here, for example, if you wish to link using an image. For more customization there are fields allowing you to insert HTML before and after the link.
-            </li>
-            <li><b>Include Images:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            You can choose whether or not to include images in the PDF. This is turned off by default because there are bugs with displaying images. If you turn this on, be sure to check that your images are displayed properly.
-            </li>
-            <li><b>Content Font Size:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Set the font size for the main content of the PDF files. You MUST enter a number into this field. You may use font tags to override this in inserted HTML.
-            </li>
-            <li><b>Run other plugin shortcodes:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Select whether or not you want other plugins to run their shortcode functions on the content before PDF generation. If not selected, shortcodes will be removed from the content. This feature may be hit or miss, as there's lots of crazy things a plugin shortcode might try to do. If you find a plugin that doesn't work for you, please let me know.
-            </li>
-            <li><b>and plugin filters:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Select whether or not you want other plugins to be able to filter the post content. This also can be hit or miss and if a specific plugin won't work for you, let me know and I might be able to fix it.
-            </li>
-            <li><b>Convert videos to links:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Select to convert any YouTube, Vimeo or Ted Talk videos in your pages/posts into a link to the correct page, since we can't embed a video in the PDF. If not selected, videos will be removed. If anyone knows how to extract a correct page url from a Hulu embed code or video ID, please let me know so I can get this to work for Hulu as well. If you have another video provider for which you'd like to see this working, please let me know.
-            </li>
-            <li><b>Default Link Placement:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Choose where on the blog page you would like the PDF link displayed: top, bottom, or not at all. This setting can be overridden on the individual page/post edit pages, allowing you to create PDF files for some pages and not for others.
-            </li>
-            <li><b>Minimum Post Word Count</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
-            Set the minimum number of words a page/post can have before it receives a PDF link. There's often no need to create a PDF for a post that's only a paragraph or two. This can be overridden on the page/post edit screen.
-            </li>
-            <li><b>Use post slug for PDF filename</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
-            Check this to use post slugs for filenames instead of ID numbers.
-            </li>
-            <li><b>Show on home, category and tag pages</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
-            Check this only if you are using the entire post content on all these pages. If you use excerpts, the link will still be applied but will be stripped of it's HTML, making the excerpt rather ugly. Your theme normally handles the loop on these pages so I can't figure out a way to allow a plugin to have reliable control over the display on these pages. However, if you know a little about themes and PHP, it should be relatively easy to hack your theme to show the link on these pages. I wrote a <a href="http://kalinbooks.com/2010/pdf-creation-station-hard-code-link/">blog post</a> that should help.
-            </li>
-            <li><b>Automatically generate PDFs on publish and update</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
-            Select this option if you want the PDF to be automatically generated when the page/post is published/updated instead of waiting until someone clicks on the link in the page. This will ensure you have a complete set of PDFs for all pages and posts. Note that this will create PDFs even for pages/posts that do not have a PDF link. PDFs are located in the uploads/kalins-pdf/singles folder.
-            </li>
-            <li><b>Save Settings:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Remember to click this button to save all your settings.
-            </li>
-            <li><b>Reset Defaults:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            Reset all your form values back to the originals that shipped with the plugin.
-            </li>
-            <li><b>Create All:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
-            This button will build a PDF for every page/post on your site, including ones without a PDF link, and include them in the uploads/kalins-pdf/singles folder so that all PDFs are cached and ready to go for viewing or archiving. Normally this button isn't necessary unless you have a specific reason to need all your PDFs pre-generated. Beware that all PDFs are deleted when you save settings so you will need to run this again. Also, PDFs created this way will still be deleted when a post is updated unless "Automatically generate PDFs on publish and update" is selected.
-            </li>
-        </ol>
+  <li>
+    <b>Insert HTML:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+    You may customize many aspects of the generated PDF files by inserting text or HTML snippets into the first six text fields on this page. The HTML will be rendered and saved into the PDF file. If you do not know HTML, you can simply leave the default HTML as is, which will give you a standard title header with the post title, author, date and link.
+    <br/>&nbsp;&nbsp;&nbsp;&nbsp;
+    A list of allowable HTML tags can be found in the Shortcodes section below.
+    <br/>&nbsp;&nbsp;&nbsp;&nbsp;
+    If you do not want a Title or Final page, you may leave those fields blank and the page will not be created. If you would like a blank Title or Final page, enter a spacebar character.
+    <br/>&nbsp;&nbsp;&nbsp;&nbsp;<b>Note:</b> Please use double quotes (") in HTML attributes such as font size or href, due to a bug with single quotes.
   </li>
   <li>
-  	<b>Shortcodes:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+    <b>Options:</b>
+    <ol>
+      <li><b>Header Title and Header Sub Title:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      This is the text that will display as the header at the top of every page within your generated PDF files. Shortcodes (explained below) are allowed here, but HTML is not.
+      </li>
+      <li><b>Link Text:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      This is the text that will be used to link to the PDF document. HTML may be used here, for example, if you wish to link using an image. For more customization there are fields allowing you to insert HTML before and after the link.
+      </li>
+      <li><b>Include Images:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      You can choose whether or not to include images in the PDF. This is turned off by default because there are bugs with displaying images. If you turn this on, be sure to check that your images are displayed properly.
+      </li>
+      <li><b>Content Font Size:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Set the font size for the main content of the PDF files. You MUST enter a number into this field. You may use font tags to override this in inserted HTML.
+      </li>
+      <li><b>Run other plugin shortcodes:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Select whether or not you want other plugins to run their shortcode functions on the content before PDF generation. If not selected, shortcodes will be removed from the content. This feature may be hit or miss, as there's lots of crazy things a plugin shortcode might try to do. If you find a plugin that doesn't work for you, please let me know.
+      </li>
+      <li><b>and plugin filters:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Select whether or not you want other plugins to be able to filter the post content. This also can be hit or miss and if a specific plugin won't work for you, let me know and I might be able to fix it.
+      </li>
+      <li><b>Convert videos to links:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Select to convert any YouTube, Vimeo or Ted Talk videos in your pages/posts into a link to the correct page, since we can't embed a video in the PDF. If not selected, videos will be removed. If anyone knows how to extract a correct page url from a Hulu embed code or video ID, please let me know so I can get this to work for Hulu as well. If you have another video provider for which you'd like to see this working, please let me know.
+      </li>
+      <li><b>Default Link Placement:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Choose where on the blog page you would like the PDF link displayed: top, bottom, or not at all. This setting can be overridden on the individual page/post edit pages, allowing you to create PDF files for some pages and not for others.
+      </li>
+      <li><b>Minimum Post Word Count</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
+      Set the minimum number of words a page/post can have before it receives a PDF link. There's often no need to create a PDF for a post that's only a paragraph or two. This can be overridden on the page/post edit screen.
+      </li>
+      <li><b>Use post slug for PDF filename</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
+      Check this to use post slugs for filenames instead of ID numbers.
+      </li>
+      <li><b>Show on home, category and tag pages</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
+      Check this only if you are using the entire post content on all these pages. If you use excerpts, the link will still be applied but will be stripped of it's HTML, making the excerpt rather ugly. Your theme normally handles the loop on these pages so I can't figure out a way to allow a plugin to have reliable control over the display on these pages. However, if you know a little about themes and PHP, it should be relatively easy to hack your theme to show the link on these pages. I wrote a <a href="http://kalinbooks.com/2010/pdf-creation-station-hard-code-link/">blog post</a> that should help.
+      </li>
+      <li><b>Automatically generate PDFs on publish and update</b><br />&nbsp;&nbsp;&nbsp;&nbsp;
+      Select this option if you want the PDF to be automatically generated when the page/post is published/updated instead of waiting until someone clicks on the link in the page. This will ensure you have a complete set of PDFs for all pages and posts. Note that this will create PDFs even for pages/posts that do not have a PDF link. PDFs are located in the uploads/kalins-pdf/singles folder.
+      </li>
+      <li><b>Save Settings:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Remember to click this button to save all your settings.
+      </li>
+      <li><b>Reset Defaults:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      Reset all your form values back to the originals that shipped with the plugin.
+      </li>
+      <li><b>Create All:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
+      This button will build a PDF for every page/post on your site, including ones without a PDF link, and include them in the uploads/kalins-pdf/singles folder so that all PDFs are cached and ready to go for viewing or archiving. Normally this button isn't necessary unless you have a specific reason to need all your PDFs pre-generated. Beware that all PDFs are deleted when you save settings so you will need to run this again. Also, PDFs created this way will still be deleted when a post is updated unless "Automatically generate PDFs on publish and update" is selected.
+      </li>
+    </ol>
+  </li>
+  <li>
+    <b>Shortcodes:</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
      Shortcodes are snippets of text starting with "[" and ending with "]" that will be automatically replaced with the appropriate information. You may insert these codes into any fields on this page to be replaced with information like blog name, post title, author, date, etc.<br/>&nbsp;&nbsp;&nbsp;&nbsp;
      The date/time shortcodes all have an optional format parameter allowing you to format the date/time very specifically using tokens such as: m=month, M=text month, F=full text month, d=day, D=short text Day Y=4 digit year, y=2 digit year, H=hour, i=minute, s=seconds. For a full list of options look at the format parameters section of this page: <a href="http://php.net/manual/en/function.date.php" target="_blank">http://php.net/manual/en/function.date.php.</a>
      <br/>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -87,31 +86,31 @@
     At the bottom of this page is a little checkbox labeled "Upon plugin deletion clean up all database entries." This applies to this page, the tool page and the page/post meta. Un-check this only if you plan on uninstalling this plugin and want to be able to reinstall it later without all the settings reverting to their defaults.
   </li>
   <li>
-  	<b>Notes about Caching:</b><br/>
-  	&nbsp;&nbsp;&nbsp;&nbsp;
-  	To minimize server CPU usage, PDF files are cached within uploads/kalins-pdf/singles/. To change this directory, refer to <a href="http://kalinbooks.com/2011/change-default-pdf-directory">this blog post.</a> (Requires a little PHP hacking.) When a user clicks on a link to a PDF file, the script will first check if the file exists, and if so, it will redirect the user. If there is no file, a brand new PDF will be generated. Individual cached PDF files will be automatically deleted whenever a page or post is updated, ensuring that the files are always up-to-date. All the cached files will be deleted whenever you change the settings on this page. 
+    <b>Notes about Caching:</b><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    To minimize server CPU usage, PDF files are cached within uploads/kalins-pdf/singles/. To change this directory, refer to <a href="http://kalinbooks.com/2011/change-default-pdf-directory">this blog post.</a> (Requires a little PHP hacking.) When a user clicks on a link to a PDF file, the script will first check if the file exists, and if so, it will redirect the user. If there is no file, a brand new PDF will be generated. Individual cached PDF files will be automatically deleted whenever a page or post is updated, ensuring that the files are always up-to-date. All the cached files will be deleted whenever you change the settings on this page. 
   </li>
   <li>
   <b>Hard-code link into theme</b><br/>&nbsp;&nbsp;&nbsp;&nbsp;
   If you would like to add the PDF link directly into your theme, follow the instructions in <a href="http://kalinbooks.com/2010/pdf-creation-station-hard-code-link/">this blog post.</a> This will give you more flexibility on where in the page to display the link. Requires some HTML knowledge (naturally you need to be able to understand your theme).
   </li>
-<li> <b>File Locations</b><br/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  PDF files are saved into the uploads directory in the kalins-pdf/singles folder. You will need to delete this directory manually if you wish to remove it. To change this directory, refer to <a href="http://kalinbooks.com/2011/change-default-pdf-directory">this blog post.</a> (Requires a little PHP hacking.) 
-</li>
+  <li> <b>File Locations</b><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    PDF files are saved into the uploads directory in the kalins-pdf/singles folder. You will need to delete this directory manually if you wish to remove it. To change this directory, refer to <a href="http://kalinbooks.com/2011/change-default-pdf-directory">this blog post.</a> (Requires a little PHP hacking.) 
+  </li>
   <li>
     <b>wp-config in non-standard location?</b><br/>
     &nbsp;&nbsp;&nbsp;&nbsp;
     Refer to this <a href="http://kalinbooks.com/2010/creation-station-non-standard-location/">blog post</a> if your wp-config.php is in a non-standard location.
   </li>
-      <li>
-      	<b>Foreign Characters? Want to change a font?</b><br/>
-      	&nbsp;&nbsp;&nbsp;&nbsp;
-      	Refer to this <a href="http://kalinbooks.com/2010/foreign-characters-pdf-creation-station/">blog post</a> if you are having problems with foreign characters or otherwise wish to change the default font of the generated PDF files.
-      </li>
-      <li>
-      	<b>Customize/translate the word 'page'</b><br/>
-      	&nbsp;&nbsp;&nbsp;&nbsp;
-      	Refer to this <a href="http://kalinbooks.com/2011/customize-word-page-pdf-creation-station/">blog post</a> if you would like to translate or change the word 'page' which appears at the bottom of every page before the page numbers.
-      </li>
-  </ul>
+  <li>
+    <b>Foreign Characters? Want to change a font?</b><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    Refer to this <a href="http://kalinbooks.com/2010/foreign-characters-pdf-creation-station/">blog post</a> if you are having problems with foreign characters or otherwise wish to change the default font of the generated PDF files.
+  </li>
+  <li>
+    <b>Customize/translate the word 'page'</b><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    Refer to this <a href="http://kalinbooks.com/2011/customize-word-page-pdf-creation-station/">blog post</a> if you would like to translate or change the word 'page' which appears at the bottom of every page before the page numbers.
+  </li>
+</ul>
