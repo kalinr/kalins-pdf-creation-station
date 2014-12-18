@@ -72,23 +72,23 @@ Make sure to use double quotes instead of single quotes when inserting arbitrary
 == Changelog ==
 
 = 0.7 =
-* First version. Beta. Includes basic functionality for tool menu and settings menu including page order, title page, include images, font size, ajaxified interface, shortcodes, etc.
+*  First version. Beta. Includes basic functionality for tool menu and settings menu including page order, title page, include images, font size, ajaxified interface, shortcodes, etc.
 
 = 0.8 =
-* Added a create now button for someone who had trouble getting the jquery page-ordering popup to work.
+*  Added a create now button for someone who had trouble getting the jquery page-ordering popup to work.
 
 = 0.9 =
-*Moved some initialization functions into kalins_pdf_init() so that they are only run in the admin.
-*Added new security check to make sure the plugin pages are only being run from within wordpress.
-*Added 'default' option to page/post edit box so you aren't forced to make a permanent choice when saving a page/post.
-*Added checkbox at the bottom of settings page to turn off the plugin's deactivation routine.
-*changed default link placement to 'none' so that links are not added to pages/posts until the user authorizes it
+* Moved some initialization functions into kalins_pdf_init() so that they are only run in the admin.
+* Added new security check to make sure the plugin pages are only being run from within wordpress.
+* Added 'default' option to page/post edit box so you aren't forced to make a permanent choice when saving a page/post.
+* Added checkbox at the bottom of settings page to turn off the plugin's deactivation routine.
+* changed default link placement to 'none' so that links are not added to pages/posts until the user authorizes it
 
 = 0.9.1 =
-*Changed all code to direct, and/or create the kalins-pdf folder inside the uploads directory instead of placing the PDF files in the plugin directory to squash the bug where files were deleted upon plugin upgrade.
+* Changed all code to direct, and/or create the kalins-pdf folder inside the uploads directory instead of placing the PDF files in the plugin directory to squash the bug where files were deleted upon plugin upgrade.
 
 = 0.9.2 =
-*Fixed a PHP error thrown on the Menus page when in debug mode. Got rid of warnings for previous upgrade problem.
+* Fixed a PHP error thrown on the Menus page when in debug mode. Got rid of warnings for previous upgrade problem.
 
 = 1.0 =
 Added [post_permalink] shortcode. Also added "Use post slug for PDF filename" and "Show on home, category, tag and search pages" options on settings page. Changed the clunky character count to word count, which should now function more accurately.
@@ -100,70 +100,77 @@ Bug fix. I broke the PDF creation popup with v 1.0 and had to make an emergency 
 removed testing alerts
 
 = 2.0 =
-*Added support for custom post types
-*moved the code identifying the default PDF directory and URL into a few constants at the top of kalins-pdf-creation-station.pdf, so that hackers can easily change them to whatever they want. Added example code that can be un-commented to change the PDF directory to use the base domain of your site instead of the wordpress uploads directory.
-*Fixed minor bug where 'reset defaults' on the settings page wasn't refreshing the 'post slug' and 'show on home' checkboxes
-*Added "create all" button on settings page
-*Added "automatically generate PDFs on publish and update" option on settings page
-*changed blockquote code so it uses the 'pre' tag because it was the only way to get TCPDF to actually display anything since it doesn't want to render blockquotes or tables properly
-*added post_excerpt code to use "wp_trim_excerpt", which doesn't appear to be functioning anymore -- then changed to manually extract 250 characters from the page content
-*added option to run other plugin shortcodes to both settings and tool pages
-*added option to convert embedded youtube videos into a link to that video
-*added 'format' parameter to all time shortcodes for total custom date/time formatting
-*added 'length' parameter to the post_excerpt shortcode to set character count of the excerpt
+* Added support for custom post types
+* moved the code identifying the default PDF directory and URL into a few constants at the top of kalins-pdf-creation-station.pdf, so that hackers can easily change them to whatever they want. Added example code that can be un-commented to change the PDF directory to use the base domain of your site instead of the wordpress uploads directory.
+* Fixed minor bug where 'reset defaults' on the settings page wasn't refreshing the 'post slug' and 'show on home' checkboxes
+* Added "create all" button on settings page
+* Added "automatically generate PDFs on publish and update" option on settings page
+* changed blockquote code so it uses the 'pre' tag because it was the only way to get TCPDF to actually display anything since it doesn't want to render blockquotes or tables properly
+* added post_excerpt code to use "wp_trim_excerpt", which doesn't appear to be functioning anymore -- then changed to manually extract 250 characters from the page content
+* added option to run other plugin shortcodes to both settings and tool pages
+* added option to convert embedded youtube videos into a link to that video
+* added 'format' parameter to all time shortcodes for total custom date/time formatting
+* added 'length' parameter to the post_excerpt shortcode to set character count of the excerpt
 
 = 2.0.1 =
-*Bug fix. This plugin no longer destroys all other admin help menus.
+* Bug fix. This plugin no longer destroys all other admin help menus.
 
 = 2.0.2 =
-*Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
+* Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
 
 = 3.0 =
-*upgraded TCPDF engine. This should improve image handling and also fixes the blockquotes issue, so blockquotes no longer need to use a monospaced font
-*added option to automatically construct a Table of Contents page in the creator tool
-*added post_meta shortcode for post's custom fields
-*added option on Tool page to turn off automatic page breaks between posts
-*added ability for hackers to translate/change the word 'page' to whatever they want
-*added option to run other plugin content filters
-*added post category(s) shortcode
-*added post tags shortcode
-*added option to convert Vimeo videos (both object and iframe style embeds)
-*added Ted Talk video link conversion option
-*YouTube link conversion now works for iframe style embeds as well as objects
-*added ability for hackers to change the order of the post list on the tool page
-*added post comments shortcode. Includes easy way for PHP coders to fully customize the display
-*added post parent shortcode
-*added post thumbnail shortcode
+* upgraded TCPDF engine. This should improve image handling and also fixes the blockquotes issue, so blockquotes no longer need to use a monospaced font
+* added option to automatically construct a Table of Contents page in the creator tool
+* added post_meta shortcode for post's custom fields
+* added option on Tool page to turn off automatic page breaks between posts
+* added ability for hackers to translate/change the word 'page' to whatever they want
+* added option to run other plugin content filters
+* added post category(s) shortcode
+* added post tags shortcode
+* added option to convert Vimeo videos (both object and iframe style embeds)
+* added Ted Talk video link conversion option
+* YouTube link conversion now works for iframe style embeds as well as objects
+* added ability for hackers to change the order of the post list on the tool page
+* added post comments shortcode. Includes easy way for PHP coders to fully customize the display
+* added post parent shortcode
+* added post thumbnail shortcode
 
 = 3.1 =
-*Fixed 'create PDF' popup in Firefox
-*Changed default font to Times and default size to 12, which improves overall look/feel of documents
+* Fixed 'create PDF' popup in Firefox
+* Changed default font to Times and default size to 12, which improves overall look/feel of documents
 
 = 3.2 =
-*Upgraded TCPDF engine to 6.0.061. PDF compiling should be faster and more reliable now. We may get other bonuses with this upgrade as well.
-*Added new options for post author so you are no longer stuck with just the login name
-*Expanded functionality for post thumbnail shortcode
+* Upgraded TCPDF engine to 6.0.061. PDF compiling should be faster and more reliable now. We may get other bonuses with this upgrade as well.
+* Added new options for post author so you are no longer stuck with just the login name
+* Expanded functionality for post thumbnail shortcode
 
 = 4.0 =
-*Migrated front-end into AngularJS and Bootstrap, away from jQuery.
-*Improved appearance of user interface for both tool and settings pages.
-*UI should now function much better on mobile devices.
-*Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
-*Sorting of pages in document on tool page has been improved.
-*Added same dynamic sorting and filtering to the list of created documents.
-*Added ability to create .txt and .html files as well as .pdfs in the tool page.
-*Added a widget to allow you to have the post's link in the sidebar without hacking your theme.
-*Added a box in the menu section to allow you to easily link to your files created in the tool page.
-*Fixed a minor bug with apostrophes in the filename on the tool page.
+* Migrated front-end into AngularJS and Bootstrap, away from jQuery.
+* Improved appearance of user interface for both tool and settings pages.
+* UI should now function much better on mobile devices.
+* Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
+* Sorting of pages in document on tool page has been improved.
+* Added same dynamic sorting and filtering to the list of created documents.
+* Added ability to create .txt and .html files as well as .pdfs in the tool page.
+* Added a widget to allow you to have the post's link in the sidebar without hacking your theme.
+* Added a box in the menu section to allow you to easily link to your files created in the tool page.
+* Fixed a minor bug with apostrophes in the filename on the tool page.
 
 = 4.1 =
-*Added the ability to save documents on the tool page as templates for future use. Includes your selected pages.
-*Added tags and categories to the pages and posts datagrid on the tool page.
-*Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
-*Divided contextual help menus on settings and tool pages into two tabs.
-*Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
-*YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
-*YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
+* Added the ability to save documents on the tool page as templates for future use. Includes your selected pages.
+* Added tags and categories to the pages and posts datagrid on the tool page.
+* Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
+* Divided contextual help menus on settings and tool pages into two tabs.
+* Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
+* YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
+* YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
+
+= 4.2 =
+* Table of Contents is no longer hardcoded to page 2, so you can now have a multi-page title page and empty title pages now work correctly.
+* Added an Add All button to tool page's page and post list.
+* Added a Remove All button to tool page's My Document section.
+* Added selector checkboxes so you can choose which columns to display in your post list on the tool page.
+* Added 'Author' as a post list column.
 
 == Upgrade Notice ==
 
@@ -214,6 +221,9 @@ Major user interface redesign. Improved page/post sorting on the tool page. Adde
 
 = 4.1 =
 Added ability to save templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions, added categories and tags to tool's post list.
+
+= 4.2 =
+Improved handling of multi-page and empty title pages. Added convenience features for sorting and adding posts on the tool page.
 
 == About ==
 

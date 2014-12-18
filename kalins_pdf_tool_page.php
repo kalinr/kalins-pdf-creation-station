@@ -413,6 +413,16 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		}		
 	}
 
+	//add all the posts that are currently showing in our page/post table
+	self.addAllPosts = function(){
+		
+	}
+
+	//remove all our posts from our current document
+	self.removeAllPosts = function(){
+		
+	}
+
 	self.addPost = function(postID){
 		if(self.buildPostListByID[postID]){
 			if(!confirm("This post has already been added at least once. Are you sure you want to add it again?")){
@@ -528,6 +538,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    <accordion-heading>
 		      <div><strong>Add pages and posts</strong><k-help str="{{oHelpStrings['h_addPages']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
+	      	<div class="form-group text-right">
+	      		<button ng-click="InputCtrl.addAllPosts();" class="btn btn-success">Add all</button>
+	      	</div>
 				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
 		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
 		          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
@@ -542,15 +555,12 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		          <td data-title="'Status'" sortable="'status'" filter="{ 'status': 'text' }">
 		            {{post.status}}
 		          </td>
-		          
 		          <td data-title="'Categories'" sortable="'cats'" filter="{ 'cats': 'text' }">
 		            {{post.cats}}
 		          </td>
-		          
 		          <td data-title="'Tags'" sortable="'tags'" filter="{ 'tags': 'text' }">
 		            {{post.tags}}
 		          </td>
-		          
 		          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
 		            <button class="btn btn-success btn-xs">Add</button>
 		          </td>
@@ -563,21 +573,26 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		      <div><strong>My document</strong><k-help str="{{oHelpStrings['h_myDocument']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[1], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[1]}"></i></div>
 	      </accordion-heading>
 				<p ng-show="InputCtrl.oOptions.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
-				<table ng-show="InputCtrl.oOptions.buildPostList.length > 0" class="table">
-					<tbody ui:sortable ng-model="InputCtrl.oOptions.buildPostList">
-		        <tr ng-repeat="post in InputCtrl.oOptions.buildPostList">
-		          <td>
-		          	{{post.title}}
-		          </td>
-		          <td>
-		            {{post.date}}
-		          </td>
-		          <td>
-		            <button class="btn btn-warning btn-xs" ng-click="InputCtrl.removePost(post.ID);">Remove</button>
-		          </td>
-		        </tr>
-		      </tbody>
-	      </table>
+				<div ng-show="InputCtrl.oOptions.buildPostList.length > 0">
+					<div class="form-group text-right">
+						<button ng-click="InputCtrl.removeAllPosts();" class="btn btn-warning">Remove All</button>
+			    </div>
+					<table class="table">
+						<tbody ui:sortable ng-model="InputCtrl.oOptions.buildPostList">
+			        <tr ng-repeat="post in InputCtrl.oOptions.buildPostList">
+			          <td>
+			          	{{post.title}}
+			          </td>
+			          <td>
+			            {{post.date}}
+			          </td>
+			          <td>
+			            <button class="btn btn-warning btn-xs" ng-click="InputCtrl.removePost(post.ID);">Remove</button>
+			          </td>
+			        </tr>
+			      </tbody>
+		      </table>
+	      </div>
 			</accordion-group>
 
 	    <accordion-group is-open="kalinsToggles.aBooleans[2]">

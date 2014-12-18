@@ -243,6 +243,9 @@ try{
 	die(json_encode($outputVar));
 }
 
+//record the location of the TOC so it can be injected at the proper place once all pages have been added
+$TOCIndex = $objTcpdf->getNumPages() + 1;
+
 //global $proBar;
 //$proBar->setMessage('loading - this is a simulation ...');
 
@@ -330,7 +333,6 @@ try{
 		
 		if($includeTOC){//if we're including a TOC, add the bookmark. Pretty sweet that this still works if we're not adding new pages for each post
 			$objTcpdf->Bookmark($objPost->post_title, 0, 0);
-			//$objTcpdf->Cell(0, 10, '', 0, 1, 'L');
 		}
 	
 		$strHtml = wpautop($content, true );
@@ -388,7 +390,7 @@ try{
 		
 		// add a simple Table Of Content at first page
 		// (check the example n. 59 for the HTML version)
-		$objTcpdf->addTOC(2, 'courier', '.', 'INDEX');
+		$objTcpdf->addTOC($TOCIndex, 'courier', '.', 'INDEX');
 		
 		// end of TOC page
 		$objTcpdf->endTOCPage();
