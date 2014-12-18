@@ -16,6 +16,18 @@
   width:auto; 
 }
 
+.k-checkbox{
+  font-weight: normal;
+}
+
+.k-small-width{
+  width: 70px;
+}
+
+.k-med-width{
+  width: 100px;
+}
+
 /*wordpress uses the 'hidden' class differently than bootstrap expects, so adding bootstrap prevents the contextual help 
 from showing. This overrides that on just the contextual_help_wrap div.*/
 #contextual-help-wrap{

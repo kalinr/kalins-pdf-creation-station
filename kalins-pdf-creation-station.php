@@ -201,7 +201,7 @@ function kalins_admin_page_loaded(){
 	
 	add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
 	
-	wp_register_style('kalinPDFBootstrapStyle', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css');
+	wp_register_style('kalinPDFBootstrapStyle', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css');
 	
 	wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
 	

@@ -33,6 +33,7 @@
 		$newItem->type = $allPostList[$i]->post_type;
 		$newItem->date = substr($allPostList[$i]->post_date, 0, strpos($allPostList[$i]->post_date, " "));
 		$newItem->status = $allPostList[$i]->post_status;
+		$newItem->author = get_the_author_meta("display_name", $allPostList[$i]->post_author);
 		
 		$newItem->cats = "";//create empty properties for our cats and tags
 		$newItem->tags = "";
@@ -113,8 +114,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 	//TODO: angular's ui-sortable actually uses jQuery. replace it with what we find here to eliminate jQuery:
 	//http://amnah.net/2014/02/18/how-to-set-up-sortable-in-angularjs-without-jquery/
 	
-	//build our toggle manager for the accordion's toggle all button
+	//build our toggle manager for the accordion and post list show/hide options. Includes "all" button management and local storage.
 	$scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true, true], "Close All", "Open All", "kalinsToolPageAccordionToggles");
+	$scope.oPostToggles = new kalinsToggles([false, true, false, true, true, false, false], "Show None", "Show All", "kalinsToolPagePostViewToggles");
 
 	//set up the alerts that show under the form buttons
 	$scope.kalinsAlertManager = new kalinsAlertManager(4);
@@ -553,34 +555,59 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 		    <accordion-heading>
 		      <div><strong>Add pages and posts</strong><k-help str="{{oHelpStrings['h_addPages']}}"></k-help><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[0], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[0]}"></i></div>
 	      </accordion-heading>
-	      	<div class="form-group text-right">
-	      		<button ng-click="InputCtrl.addAllPosts();" class="btn btn-success">Add all</button>
-	      	</div>
-				  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
-		        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
-		          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
-		          	{{post.title}}
-		          </td>
-		          <td data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }">
-		            {{post.date}}
-		          </td>
-		          <td data-title="'Type'" sortable="'type'" filter="{ 'type': 'text' }">
-		            {{post.type}}
-		          </td>
-		          <td data-title="'Status'" sortable="'status'" filter="{ 'status': 'text' }">
-		            {{post.status}}
-		          </td>
-		          <td data-title="'Categories'" sortable="'cats'" filter="{ 'cats': 'text' }">
-		            {{post.cats}}
-		          </td>
-		          <td data-title="'Tags'" sortable="'tags'" filter="{ 'tags': 'text' }">
-		            {{post.tags}}
-		          </td>
-		          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
-		            <button class="btn btn-success btn-xs">Add</button>
-		          </td>
-		        </tr>
-		      </table>
+      	<div class="form-group text-right">
+      		<button ng-click="InputCtrl.addAllPosts();" class="btn btn-success">Add all</button>
+      	</div>
+			  <table ng-table="postListTableParams" show-filter="InputCtrl.postList.length > 1" class="table">
+	        <tr ng-repeat="post in $data" ng-class="{'active': InputCtrl.buildPostListByID[post.ID]>0}">
+	        	<td class="k-small-width" data-title="'ID'" sortable="'ID'" filter="{ 'ID': 'text' }" ng-show="oPostToggles.aBooleans[0]">
+	            {{post.ID}}
+	          </td>
+	          <td data-title="'Title'" sortable="'title'" filter="{ 'title': 'text' }">
+	          	{{post.title}}
+	          </td>
+	          <td class="k-med-width" data-title="'Date'" sortable="'date'" filter="{ 'date': 'text' }" ng-show="oPostToggles.aBooleans[1]">
+	            {{post.date}}
+	          </td>
+	          <td class="k-small-width" data-title="'Type'" sortable="'type'" filter="{ 'type': 'text' }" ng-show="oPostToggles.aBooleans[2]">
+	            {{post.type}}
+	          </td>
+	          <td class="k-small-width" data-title="'Status'" sortable="'status'" filter="{ 'status': 'text' }" ng-show="oPostToggles.aBooleans[3]">
+	            {{post.status}}
+	          </td>
+	          <td data-title="'Categories'" sortable="'cats'" filter="{ 'cats': 'text' }" ng-show="oPostToggles.aBooleans[4]">
+	            {{post.cats}}
+	          </td>
+	          <td data-title="'Tags'" sortable="'tags'" filter="{ 'tags': 'text' }" ng-show="oPostToggles.aBooleans[5]">
+	            {{post.tags}}
+	          </td>
+	          <td data-title="'Author'" sortable="'author'" filter="{ 'author': 'text' }" ng-show="oPostToggles.aBooleans[6]">
+	            {{post.author}}
+	          </td>
+	          <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
+	            <button class="btn btn-success btn-xs">Add</button>
+	          </td>
+	        </tr>
+	      </table>
+		    
+		    <p class="alert alert-info">
+			    <b>Display: </b>&nbsp;
+			    <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[0]"></input> ID </label>
+					&nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[1]"></input> Date </label>
+					&nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[2]"></input> Type </label>
+		      &nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[3]"></input> Status </label>
+		      &nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[4]"></input> Categories </label>
+		      &nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[5]"></input> Tags </label>
+		      &nbsp;|&nbsp;
+		      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[6]"></input> Author </label>
+		      &nbsp;|&nbsp;
+		      <a href="" ng-click="oPostToggles.toggleAll();">{{oPostToggles.sToggleAll}}</a>
+	      </p>
 			</accordion-group>
 			
 	    <accordion-group is-open="kalinsToggles.aBooleans[1]">
@@ -590,7 +617,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				<p ng-show="InputCtrl.oOptions.buildPostList.length === 0">Your page list will appear here. Click an Add button above to start adding pages.</p>
 				<div ng-show="InputCtrl.oOptions.buildPostList.length > 0">
 					<div class="form-group text-right">
-						<button ng-click="InputCtrl.removeAllPosts();" class="btn btn-warning">Remove All</button>
+						<button ng-click="InputCtrl.removeAllPosts();" class="btn btn-danger">Remove All</button>
 			    </div>
 					<table class="table">
 						<tbody ui:sortable ng-model="InputCtrl.oOptions.buildPostList">
@@ -689,7 +716,6 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				      <div class="checkbox">
 				      	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertYoutube"></input> YouTube</label>
 				      </div>
-				      
 					    <div class="checkbox">
 				       	<label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.convertVimeo"></input> Vimeo</label>
 				      </div>
@@ -698,30 +724,27 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
 				      </div>
 				    </div>
 			    </div>
+
+			    <p class="alert alert-success text-center">
+				    <k-help str="{{oHelpStrings['h_filenameTypes']}}"></k-help>
+			      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input></label>
+						&nbsp;
+			      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input> .pdf </label>
+						&nbsp;|&nbsp;
+			      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input> .html </label>
+						&nbsp;|&nbsp;
+			      <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt </label>
+			      &nbsp;
+			      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
+					</p>				
 			    
-			    <div class="row">
-					  <div class="form-group col-xs-12 text-center" >
-				      <label>File name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.filename" ></input></label>
-							&nbsp;
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreatePDF"></input> .pdf </label>
-							&nbsp;|&nbsp;
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateHTML"></input> .html </label>
-							&nbsp;|&nbsp;
-				      <label><input type='checkbox' class="form-control" ng-model="InputCtrl.oOptions.bCreateTXT"></input> .txt </label>
-				      <k-help str="{{oHelpStrings['h_filenameTypes']}}"></k-help>
-				      <button ng-click="InputCtrl.createDocument();" class="btn btn-success">Create Documents!</button>
-						</div>
-					</div>
-					<hr>
-					<div class="row">
-				    <div class="form-group text-center">
-				      <k-help str="{{oHelpStrings['h_saveAsTemplate']}}"></k-help>
-		    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.templateName" ></input></label>
-		    	    &nbsp;
-		    	    <button ng-disabled="InputCtrl.oOptions.templateName === 'original defaults'" ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
-		    	  </div>
-			    </div>
-			    
+			    <p class="alert alert-info text-center">
+			      <k-help str="{{oHelpStrings['h_saveAsTemplate']}}"></k-help>
+	    	    <label>Name: <input type="text" class="form-control k-inline-text-input" ng-model="InputCtrl.oOptions.templateName" ></input></label>
+	    	    &nbsp;
+	    	    <button ng-disabled="InputCtrl.oOptions.templateName === 'original defaults'" ng-click='InputCtrl.saveTemplate();' class="btn btn-success">Save as Template</button>
+	    	  </p>
+
 			    <div class="row">
 		      	<div class="col-md-offset-1 col-md-10">
 					  	<alert ng-repeat="alert in kalinsAlertManager.aAlerts" type="{{alert.type}}" close="kalinsAlertManager.closeAlert($index)">{{alert.index}} - {{alert.msg}}</alert>
