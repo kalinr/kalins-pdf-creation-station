@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/kalinr/kalins-pdf-creation-station",
   "devDependencies": {
+    "bower": "^1.3.12",
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.0",
     "grunt-contrib-jshint": "^0.10.0",

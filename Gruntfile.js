@@ -6,11 +6,12 @@ module.exports = function(grunt) {
     
     concat: {
       options: {
-        separator: ';',
+        separator: '',
       },
       dist: {
-        src: ['vendor/angular.js', 'vendor/angular-ui-sortable.js',  'vendor/ng-table.js', 'vendor/ui-bootstrap-tpls-0.11.2.js'],
-        dest: 'vendor/allVendorsConcatenated.js',
+        //src: ['vendor/angular.js', 'vendor/ui-bootstrap-tpls-0.11.2.js', 'vendor/angular-ui-sortable.js', 'vendor/ng-table.js'],
+        src: ['bower_components/angular/angular.js', 'bower_components/angular-ui-sortable/sortable.js',  'bower_components/ng-table/ng-table.js', 'bower_components/angular-bootstrap/ui-bootstrap-tpls.js'],
+        dest: 'dev/vendor.js'
       },
     },
     
@@ -19,7 +20,7 @@ module.exports = function(grunt) {
         banner: '/*! \nKalin\'s PDF Creation Station <%= grunt.template.today("yyyy-mm-dd") %> \nThis JavaScript file contains: angular.js, ng-table.js, ui-bootstrap-tpls-0.11.2.js, angular-ui-sortable.js*/ \n'
       },
       build: {
-        src: 'vendor/allVendorsConcatenated.js',
+        src: 'dev/vendor.js',
         dest: 'vendor.min.js'
       }
     }
