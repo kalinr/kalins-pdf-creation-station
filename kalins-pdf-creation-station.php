@@ -202,14 +202,9 @@ function kalins_admin_page_loaded(){
   add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
   
   wp_register_style('kalinPDFBootstrapStyle', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css');
-  
   wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
-  
-  wp_register_script( 'kalinPDFAngularJS', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular.js' );
-  wp_register_script( 'kalinPDF_ng-table', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ng-table.js' );
-  wp_register_script( 'kalinPDF_angular-ui', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/angular-ui-sortable.js' );
-  
-  wp_register_script( 'kalinPDF_angular-bootstrap', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor/ui-bootstrap-tpls-0.11.2.js' );
+
+  wp_register_script( 'kalinPDFVendors', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor.min.js' );
   
   wp_register_script( 'kalinPDF_KalinsUIService', WP_PLUGIN_URL . '/kalins-pdf-creation-station/KalinsUIService.js' );
 }
@@ -217,10 +212,7 @@ function kalins_admin_page_loaded(){
 function kalins_pdf_admin_head() {  
   wp_enqueue_script( "jquery-ui-sortable");
   wp_enqueue_script( 'kalinPDFAngularJS' );
-  wp_enqueue_script( 'kalinPDF_ng-table' );
   wp_enqueue_script( 'kalinPDF_KalinsUIService' );
-  wp_enqueue_script( 'kalinPDF_angular-ui' );
-  wp_enqueue_script( 'kalinPDF_angular-bootstrap' );
 }
 
 function kalins_pdf_admin_styles(){//not sure why this didn't work if called from pdf_admin_head    

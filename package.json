@@ -1,0 +1,36 @@
+{
+  "name": "kalins-pdf-creation-station",
+  "version": "1.0.0",
+  "description": "WordPress plugin to build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.",
+  "main": "KalinsUIService.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kalinr/kalins-pdf-creation-station.git"
+  },
+  "keywords": [
+    "WordPress",
+    "PDF",
+    "document",
+    "export",
+    "print",
+    "pdf",
+    "creation",
+    "widget",
+    "TCPDF"
+  ],
+  "author": "Kalin Ringkvist",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kalinr/kalins-pdf-creation-station/issues"
+  },
+  "homepage": "https://github.com/kalinr/kalins-pdf-creation-station",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^0.5.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-uglify": "^0.6.0"
+  }
+}
