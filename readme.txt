@@ -166,9 +166,9 @@ removed testing alerts
 * YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
 
 = 4.2 =
-* Table of Contents is no longer hardcoded to page 2, so you can now have a multi-page title page and empty title pages now work correctly.
-* Added an Add All button to tool page's page and post list.
-* Added a Remove All button to tool page's My Document section.
+* Table of Contents is no longer hardcoded to page 2, so multi-page title pages and empty title pages now work correctly.
+* Added an Add All button to the tool page's post list.
+* Added a Remove All button to tool page's My Document post list.
 * Added selector checkboxes so you can choose which columns to display in your post list on the tool page.
 * Added 'Author' as a post list column.
 
