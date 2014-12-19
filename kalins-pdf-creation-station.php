@@ -211,7 +211,7 @@ function kalins_admin_page_loaded(){
 
 function kalins_pdf_admin_head() {  
   wp_enqueue_script( "jquery-ui-sortable");
-  wp_enqueue_script( 'kalinPDFAngularJS' );
+  wp_enqueue_script( 'kalinPDFVendors' );
   wp_enqueue_script( 'kalinPDF_KalinsUIService' );
 }
 
