@@ -17,7 +17,7 @@ module.exports = function(grunt) {
     
     uglify: {
       options: {
-        banner: '/*! \nKalin\'s PDF Creation Station <%= grunt.template.today("yyyy-mm-dd") %> \nThis JavaScript file contains: angular.js, ng-table.js, ui-bootstrap-tpls-0.11.2.js, angular-ui-sortable.js*/ \n'
+        banner: '/*! \nKalin\'s PDF Creation Station <%= grunt.template.today("yyyy-mm-dd") %> \nThis JavaScript file contains: angular.js, ng-table.js, ui-bootstrap-tpls.js and angular-ui-sortable.js*/ \n'
       },
       build: {
         src: 'dev/vendor.js',
@@ -27,11 +27,14 @@ module.exports = function(grunt) {
     
   });
 
-  // Load the plugin that provides the "uglify" task.
-  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  
+  grunt.registerTask('cleanup', 'delete our temp vendor file', function() {
+	grunt.file.delete('dev/vendor.js');
+  });
 
-  // Default task(s).
-  grunt.registerTask('vendor', ['concat', 'uglify']);
+  //vendor tasks -- compile and minify the vendor js
+  grunt.registerTask('vendor', ['concat', 'uglify', 'cleanup']);
 
 };
