@@ -23,18 +23,25 @@ module.exports = function(grunt) {
         src: 'dev/vendor.js',
         dest: 'vendor.min.js'
       }
-    }
+    },
+    
+    jslint: {
+        src: ['KalinsUIService.js']    // 'src/**/*.js', 'test/**/*.js']
+      }
     
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   
+  grunt.loadNpmTasks('grunt-jslint');
+  
   grunt.registerTask('cleanup', 'delete our temp vendor file', function() {
 	grunt.file.delete('dev/vendor.js');
   });
 
-  //vendor tasks -- compile and minify the vendor js
-  grunt.registerTask('vendor', ['concat', 'uglify', 'cleanup']);
+  grunt.registerTask('vendor', "vendor tasks -- compile and minify the vendor js", ['concat', 'uglify', 'cleanup']);
+  
+  grunt.registerTask('lint', "validate our JS and PHP", ['jslint']);
 
 };

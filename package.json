@@ -1,6 +1,6 @@
 {
   "name": "kalins-pdf-creation-station",
-  "version": "1.0.0",
+  "version": "4.2.0",
   "description": "WordPress plugin to build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.",
   "main": "KalinsUIService.js",
   "scripts": {
@@ -24,15 +24,15 @@
   "author": "Kalin Ringkvist",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kalinr/kalins-pdf-creation-station/issues"
+    "url": "http://kalinbooks.com/pdf-creation-station/known-bugs/"
   },
-  "homepage": "https://github.com/kalinr/kalins-pdf-creation-station",
+  "homepage": "http://kalinbooks.com/pdf-creation-station/",
   "devDependencies": {
     "bower": "^1.3.12",
     "grunt": "^0.4.5",
     "grunt-contrib-concat": "^0.5.0",
-    "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.6.0",
+    "grunt-jslint": "^1.1.12",
     "grunt-phplint": "0.0.5"
   },
   "dependencies": {}
