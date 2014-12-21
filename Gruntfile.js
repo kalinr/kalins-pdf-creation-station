@@ -26,22 +26,29 @@ module.exports = function(grunt) {
     },
     
     jslint: {
-        src: ['KalinsUIService.js']    // 'src/**/*.js', 'test/**/*.js']
-      }
+      //TODO: pull js code out of tool and admin pages into their own files so we can lint them
+      src: ['KalinsUIService.js']    // 'src/**/*.js', 'test/**/*.js']
+    },
+    
+    //phplint runs but does nothing. Can't figure out 
+    phplint: {
+      main: ['kalins-pdf-creation-station.php', 'kalins_pdf_admin_page.php', 'kalins_pdf_tool_page.php', 'kalins_pdf_create.php']
+    }
     
   });
 
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  
+
   grunt.loadNpmTasks('grunt-jslint');
-  
+  grunt.loadNpmTasks('grunt-phplint');
+
   grunt.registerTask('cleanup', 'delete our temp vendor file', function() {
 	grunt.file.delete('dev/vendor.js');
   });
 
-  grunt.registerTask('vendor', "vendor tasks -- compile and minify the vendor js", ['concat', 'uglify', 'cleanup']);
-  
-  grunt.registerTask('lint', "validate our JS and PHP", ['jslint']);
+  grunt.registerTask('vendor', 'vendor tasks -- compile and minify the vendor js', ['concat', 'uglify', 'cleanup']);
+
+  grunt.registerTask('lint', 'validate our JS and PHP', ['jslint', 'phplint:main']);
 
 };
