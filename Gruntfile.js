@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
-
+  var pkg = grunt.file.readJSON('package.json');
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: pkg,
     
     concat: {
       options: {
@@ -37,8 +37,7 @@ module.exports = function(grunt) {
   //function used for the 'release' task
   var releaseFunc = function (){
     var i = 0,
-      svnPath = "E:/stuff/Flash/WordPress Dev/kalins-pdf-creation-station/", //the root of your WordPress SVN repositiory
-      svnTrunk = svnPath + 'trunk/', //the trunk folder in our svn repository
+      svnTrunk = pkg.svnRepository + 'trunk/', //the trunk folder in our svn repository
       aFolders = ['help', 'tcpdf'], //list of folders we need copied
       aFiles = ['kalins_pdf_admin_page.php', 'kalins_pdf_create.php', 'kalins_pdf_styles.css', 'kalins_pdf_tool_page.php', 'kalins-pdf-creation-station.php', 
                'KalinsUIService.js', 'readme.txt', 'vendor.min.js']; //list of files we need copied
@@ -63,7 +62,7 @@ module.exports = function(grunt) {
 
     //Finally, copy over the wordpress.org assets to the root of the svn repository, one level up from the trunk directory
     grunt.file.recurse('assets', function(abspath, rootdir, subdir, filename){
-      grunt.file.copy(abspath, svnPath + abspath);
+      grunt.file.copy(abspath, pkg.svnRepository + abspath);
     });
   }
   
