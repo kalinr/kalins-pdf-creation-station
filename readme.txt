@@ -165,7 +165,7 @@ removed testing alerts
 * YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
 * YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
 
-= 4.2 =
+= 4.2.0 =
 * Table of Contents is no longer hardcoded to page 2, so multi-page title pages and empty title pages now work correctly.
 * Added an Add All button to the tool page's post list.
 * Added a Remove All button to tool page's My Document post list.
@@ -222,7 +222,7 @@ Major user interface redesign. Improved page/post sorting on the tool page. Adde
 = 4.1 =
 Added ability to save templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions, added categories and tags to tool's post list.
 
-= 4.2 =
+= 4.2.0 =
 Improved handling of multi-page and empty title pages. Added convenience features for sorting and adding posts on the tool page.
 
 == About ==

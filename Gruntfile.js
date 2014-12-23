@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     verifyFiles();
     
     verifyVersion();
-    
+        
     grunt.log.writeln('Copying main folders...');
 
     //loop into all our folders that we need moving
@@ -125,12 +125,58 @@ module.exports = function(grunt) {
 
     grunt.log.ok("Good to go: no top-level files or folders added or missing.");
   }
-
+  
+  //Verify that we have updated the version number in kalins-pdf-creation-station.php, bower.json, package.json and readme.txt
   var verifyVersion = function (){
+    var sOldMainFile = grunt.file.read( svnTrunk + 'kalins-pdf-creation-station.php' ),
+      aOldVersion = new RegExp("Version: ([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9])", "g").exec(sOldMainFile),
+      sOldVersion,
+      sNewMainFile = grunt.file.read( 'kalins-pdf-creation-station.php' ),
+      aNewVersion = new RegExp("Version: ([0-9]?[0-9]\.[0-9]?[0-9]\.[0-9]?[0-9])", "g").exec(sNewMainFile),
+      sNewVersion,
+      oBower,
+      sReadme,
+      nUpdateIndex;
+    
     grunt.log.writeln('Verifying version numbers...');
-    grunt.log.oklns("Good to go: version number has been properly updated in all the right places.");
+    if(!aOldVersion){
+      grunt.fail.warn( "The old version number in the SVN repository (trunk/kalins-pdf-creation-station.php) is not formatted correctly. This should be like this example: 'Version: 4.0.0' or 'Version: 05.02.0'");
+    }
+    
+    sOldVersion = aOldVersion[1];
+        
+    if(!aNewVersion){
+      grunt.fail.warn( "The new version number in the git repository (current directory: kalins-pdf-creation-station.php) is not formatted correctly. It should be like this example: 'Version: 4.0.0' or 'Version: 05.2.0'");
+    }
 
-    return true;
+    sNewVersion = aNewVersion[1];
+    
+    if(sNewVersion === sOldVersion){
+      grunt.fail.warn( "The new version number has not been updated in the git repository (current directory: kalins-pdf-creation-station.php).");
+    }
+    
+    if(pkg.version != sNewVersion){
+      grunt.fail.warn( "The version number in package.json has not been updated or does not properly match the new version number in kalins-pdf-creation-station.php." );
+    }
+    
+    oBower = grunt.file.readJSON('bower.json');
+    
+    if(oBower.version != sNewVersion){
+      grunt.fail.warn( "The version number in bower.json has not been updated or does not properly match the new version number in kalins-pdf-creation-station.php." );
+    }
+    
+    sReadme = grunt.file.read( 'readme.txt' );
+    nUpdateIndex = sReadme.indexOf("= " + sNewVersion + " =");
+    
+    if(nUpdateIndex === -1){
+      grunt.fail.warn( "A Changelog entry for this version has not been properly entered into readme.txt." );
+    }
+    
+    if(sReadme.indexOf("= " + sNewVersion + " =", nUpdateIndex + 5) === -1 ){
+      grunt.fail.warn( "An Upgrade Notice entry for this version has not been properly entered into readme.txt." );
+    }
+     
+    grunt.log.oklns("Good to go: version number has been properly updated in all the right places.");
   }
 
   //listen for our any changed files so we can move them to the proper location in our dev wordpress installation
