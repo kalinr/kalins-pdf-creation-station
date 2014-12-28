@@ -1,8 +1,8 @@
 === Kalin's PDF Creation Station ===
 Contributors: kalinbooks
-Tags: PDF, document, export, print, pdf, creation, widget, TCPDF
+Tags: PDF, document, export, print, pdf, creation, widget, TCPDF, backup
 Requires at least: 3.0
-Tested up to: 4.0.1
+Tested up to: 4.1
 Stable tag: trunk
 
 Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.

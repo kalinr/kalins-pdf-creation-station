@@ -1,4 +1,4 @@
-/*jslint indent: 2, plusplus: true */
+/*jslint indent: 2, plusplus: true, unparam:true*/
 /*global angular, localStorage*/
 
 (function () {
@@ -100,7 +100,6 @@
     return {
       restrict: 'A',
       link: function (scope, element, attr) {
-        undefined(scope);//force jslint to be okay with unused parameter
         element.bind(attr.stopEvent, function (e) {
           e.stopPropagation();
         });
