@@ -5,10 +5,10 @@ module.exports = function (grunt) {
   "use strict";
   var pkg = grunt.file.readJSON('package.json'),
     svnTrunk = pkg.svnRepository + 'trunk/', //the trunk folder in our svn repository
-    aFolders = ['help', 'tcpdf'], //list of folders we need copied
+    aFolders = ['help', 'tcpdf', 'images'], //list of folders we need copied
     aFiles = ['kalins_pdf_admin_page.php', 'kalins_pdf_create.php', 'kalins_pdf_styles.css', 'kalins_pdf_tool_page.php', 'kalins-pdf-creation-station.php',
       'KalinsUIService.js', 'readme.txt', 'vendor.min.js'], //list of files actually used in the plugin
-    aWatchList = aFiles.concat(['help/*', 'tcpdf/**/*']),//take our list of files and concat it with our list of folders with wildcards indicating all child files or folders and files.
+    aWatchList = aFiles.concat(['images/*', 'help/*', 'tcpdf/**/*']),//take our list of files and concat it with our list of folders with wildcards indicating all child files or folders and files.
     aDevFiles = ['bower.json', 'Gruntfile.js', 'npm-debug.log', 'package.json'],//files used only in development
     aDevFolders = ['assets', 'bower_components', 'dev', 'node_modules'];//folders used only for developement
 

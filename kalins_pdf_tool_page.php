@@ -853,7 +853,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
         <accordion-heading>
           <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[9], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[9]}"></i></div>
         </accordion-heading>
-        <p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
+        <p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. </p>
+        <p>You may also like <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
+        <p>If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
         <p>
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
           <input type="hidden" name="cmd" value="_s-xclick">
@@ -862,8 +864,12 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
           <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
           </form>
         </p><br/>
-        <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>
-        <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
+        <p>Or you can read one of my books, available on Amazon. I know this is totally unrelated, but hey, maybe you like science fiction.</p>
+        <a href="http://www.amazon.com/dp/B00HTXSCQU" ><img src="../wp-content/plugins/kalins-pdf-creation-station/images/against_a_rock_cover.jpg" tooltip-html-unsafe="<h4>Against A Rock</h4><p align=left>A racist cyborg commits mutiny on an advanced, deep-space battleship.</p>" tooltip-placement="top" tooltip-trigger tooltip-popup-delay="500" ></img></a>
+        <a href="http://www.amazon.com/dp/B00JPJYB8E" ><img src="../wp-content/plugins/kalins-pdf-creation-station/images/new_beginnings_cover.jpg" tooltip-html-unsafe="<h4>Stories of New Beginnings</h4><p align=left>10 science fiction stories I wrote in high school.</p>" tooltip-placement="top" tooltip-trigger tooltip-popup-delay="500" ></img></a>
+        <a href="http://www.amazon.com/dp/B00KEY4GZ2" ><img src="../wp-content/plugins/kalins-pdf-creation-station/images/pioneers_cover.jpg" tooltip-html-unsafe="<h4>The Pioneers</h4><p align=left>An outpost 50 light-years from civilization is inhabited by children who must survive and build a new world.</p>" tooltip-placement="top" tooltip-trigger tooltip-popup-delay="500" ></img></a>
+        <a href="http://www.amazon.com/dp/B00M17OYJS" ><img src="../wp-content/plugins/kalins-pdf-creation-station/images/violence_cover.jpg" tooltip-html-unsafe="<h4>Violence in New Eden</h4><p align=left>Four stories of blood and brutality in the universe of EVE Online.</p>" tooltip-placement="top" tooltip-trigger tooltip-popup-delay="500" ></img></a>
+        <a href="http://www.amazon.com/dp/B00M9I8WC4" ><img src="../wp-content/plugins/kalins-pdf-creation-station/images/water-glass_cover.jpg" tooltip-html-unsafe="<h4>The Water Glass Collection</h4><p align=left>A collection of contemporary short stories.</p>" tooltip-placement="top" tooltip-trigger tooltip-popup-delay="500" ></img></a>
       </accordion-group>
 
     </accordion>
