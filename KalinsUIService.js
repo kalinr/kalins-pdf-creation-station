@@ -117,7 +117,7 @@
       str : "@"
     };
 
-    directive.template = '<span tooltip-html-unsafe="<p align=left>{{str}}</p>" tooltip-placement="right" tooltip-popup-delay="500" class="glyphicon glyphicon-info-sign kInfoIcon"></span>';
+    directive.template = '<span tooltip-html-unsafe="<p align=left>{{str}}</p>" tooltip-placement="right" tooltip-trigger tooltip-popup-delay="500" class="glyphicon glyphicon-info-sign kInfoIcon"></span>';
     return directive;
   });
 }());
