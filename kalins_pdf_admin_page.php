@@ -4,18 +4,17 @@
     echo "Hi there!  I'm just a plugin, not much I can do when called directly.";
     exit;
   }
-  
+
   kalinsPDF_createPDFDir();
-  
+
   $save_nonce = wp_create_nonce( 'kalins_pdf_admin_save' );
   $reset_nonce = wp_create_nonce( 'kalins_pdf_admin_reset' );
   $create_nonce = wp_create_nonce( 'kalins_pdf_create_all' );
-  
+
   $adminOptions = kalins_pdf_get_options(KALINS_PDF_ADMIN_OPTIONS_NAME);
-  
+
   $adminStrings = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/adminStrings.json');
 ?>
-
 
 <script type='text/javascript'>
 "use strict";
@@ -31,13 +30,13 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
   $scope.kalinsAlertManager = new kalinsAlertManager(4);
 
   $scope.oHelpStrings = <?php echo $adminStrings ?>;
-  
+
   var self = this;
 
   var saveNonce = '<?php echo $save_nonce; //pass a different nonce security string for each possible ajax action?>';
   var resetNonce = '<?php echo $reset_nonce; ?>';
   var createAllNonce = '<?php echo $create_nonce; ?>';
-    
+
   self.oOptions = <?php echo json_encode($adminOptions); ?>;
 
   self.saveData = function(){
@@ -304,20 +303,10 @@ app.controller("InputController",["$scope", "$http", "kalinsToggles", "kalinsAle
         <accordion-heading>
           <div><strong>About</strong><i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': kalinsToggles.aBooleans[5], 'glyphicon-chevron-right': !kalinsToggles.aBooleans[5]}"></i></div>
         </accordion-heading>
-        <p>Thank you for using PDF Creation Station. To report bugs, request help or suggest features, visit <a href="http://kalinbooks.com/pdf-creation-station/" target="_blank">KalinBooks.com/pdf-creation-station</a>. If you find this plugin useful, please consider <A href="http://wordpress.org/extend/plugins/kalins-pdf-creation-station/">rating this plugin on WordPress.org</A> or making a PayPal donation:</p>
-           
-        <p>
-          <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
-            <input type="hidden" name="cmd" value="_s-xclick">
-            <input type="hidden" name="hosted_button_id" value="C6KPVS6HQRZJS">
-            <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="Donate to Kalin Ringkvist's WordPress plugin development.">
-            <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
-          </form>
-        </p>
-        <br/>
-        <p><input type='checkbox' ng-model="InputCtrl.oOptions.doCleanup"></input> Upon plugin deletion clean up all database entries</p>
-        <p>You may also like <a href="http://kalinbooks.com/easy-edit-links-wordpress-plugin/" target="_blank">Kalin's Easy Edit Links</a> - <br /> Adds a box to your page/post edit screen with links and edit buttons for all pages, posts, tags, categories, and links for convenient edit-switching and internal linking.</p>       
-        <p>Or <a href="http://kalinbooks.com/post-list-wordpress-plugin/" target="_blank">Kalin's Post List</a> - <br /> Use a shortcode in your posts to insert dynamic, highly customizable lists of posts, pages, images, or attachments based on categories and tags. Works for table-of-contents pages or as a related posts plugin.</p>
+        <?php
+          $sAbout = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/about.html');
+          echo $sAbout;
+        ?>
       </accordion-group>
     </accordion>
   </div>

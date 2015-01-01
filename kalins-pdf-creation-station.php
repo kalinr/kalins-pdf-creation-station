@@ -384,47 +384,55 @@ function kalins_pdf_contextual_help($contextual_help, $screen_id, $screen) {
   global $kPDFadminPage;
   if($screen_id == $kPDFadminPage){
     $sAdminHelp = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/kalins_pdf_admin_help.html');
-      
+
     //split the file in two based on the marker I put in the html file
     $sOverview = substr($sAdminHelp, 0, strpos($sAdminHelp, "<!--0-->"));
     $sAdvanced = substr($sAdminHelp, strpos($sAdminHelp, "<!--0-->") + 8);
-      
+
     $screen = get_current_screen();
     $screen->add_help_tab( array(
-        'id' => "kAdminHelp1",            //unique id for the tab
-        'title' => "Overview",      //unique visible title for the tab
+        'id' => "kAdminHelp1",   //unique id for the tab
+        'title' => "Overview",   //unique visible title for the tab
         'content' => $sOverview  //actual help text
     ) );
-      
+
     $screen->add_help_tab( array(
-        'id' => "kAdminHelp2",            //unique id for the tab
-        'title' => "Advanced",      //unique visible title for the tab
+        'id' => "kAdminHelp2",   //unique id for the tab
+        'title' => "Advanced",   //unique visible title for the tab
         'content' => $sAdvanced  //actual help text
     ) );
   }else{
     global $kPDFtoolPage;
     if($screen_id == $kPDFtoolPage){
       $sToolHelp = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/kalins_pdf_tool_help.html');
-      
+
       //split the file in two based on the marker I put in the html file
       $sOverview = substr($sToolHelp, 0, strpos($sToolHelp, "<!--0-->"));
       $sAdvanced = substr($sToolHelp, strpos($sToolHelp, "<!--0-->") + 8);
-      
+
       $screen = get_current_screen();
       $screen->add_help_tab( array(
-          'id' => "kToolHelp1",            //unique id for the tab
-          'title' => "Overview",      //unique visible title for the tab
-          'content' => $sOverview  //actual help text
+          'id' => "kToolHelp1",     //unique id for the tab
+          'title' => "Overview",    //unique visible title for the tab
+          'content' => $sOverview   //actual help text
       ) );
-      
+
       $screen->add_help_tab( array(
-          'id' => "kToolHelp2",            //unique id for the tab
-          'title' => "Advanced",      //unique visible title for the tab
-          'content' => $sAdvanced  //actual help text
+          'id' => "kToolHelp2",     //unique id for the tab
+          'title' => "Advanced",    //unique visible title for the tab
+          'content' => $sAdvanced   //actual help text
       ) );
       
     }
   }
+  
+  $sAbout = file_get_contents(WP_PLUGIN_DIR . '/kalins-pdf-creation-station/help/about.html');
+  $screen->add_help_tab( array(
+  		'id' => "kAboutHelp",     //unique id for the tab
+  		'title' => "About",      //unique visible title for the tab
+  		'content' => $sAbout  //actual help text
+  ) );
+  
   return $contextual_help;
 }
 
@@ -435,7 +443,7 @@ function kalins_pdf_reset_admin_defaults(){//called when user clicks the reset b
   check_ajax_referer( "kalins_pdf_admin_reset" );
   $kalinsPDFAdminOptions = kalins_pdf_getAdminSettings();
   update_option(KALINS_PDF_ADMIN_OPTIONS_NAME, $kalinsPDFAdminOptions);
-  
+
   $pdfDir = KALINS_PDF_SINGLES_DIR;
   
   if ($handle = opendir($pdfDir)) {//open pdf directory
