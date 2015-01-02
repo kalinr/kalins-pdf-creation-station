@@ -1,6 +1,6 @@
 {
   "name": "kalins-pdf-creation-station",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "WordPress plugin to build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.",
   "main": "KalinsUIService.js",
   "scripts": {

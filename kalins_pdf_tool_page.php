@@ -541,7 +541,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
     <p><a href="#" ng-click="showVideo = !showVideo">Watch a tutorial video</a></p>
     <div class="text-center" ng-show="showVideo">
       <hr>
-      <iframe width="420" height="315" src="//www.youtube.com/embed/zLHpr-8aYVw" frameborder="0" allowfullscreen></iframe>
+      <iframe width="420" height="315" src="//www.youtube.com/embed/cPaz3X4RXbQ" frameborder="0" allowfullscreen></iframe>
       <p><a href="#" ng-click="showVideo = false">Close video</a></p>
       <hr>
     </div>

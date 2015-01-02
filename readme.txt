@@ -172,6 +172,10 @@ removed testing alerts
 * Added selector checkboxes so you can choose which columns to display in your post list on the tool page.
 * Added 'Author' as a post list column.
 
+= 4.2.1 =
+* Now showing the correct YouTube demo video for version 4.2 on the tools page. I thought YouTube would let me overwrite the old video when I released 4.2 but it forced me to create a new one.
+* Updated the screenshots for WordPress.org.
+
 == Upgrade Notice ==
 
 = 0.7 =
@@ -224,6 +228,9 @@ Added ability to save templates for future use. Also: code cleanup; updated TCPD
 
 = 4.2.0 =
 Improved handling of multi-page and empty title pages. Added convenience features for sorting and adding posts on the tool page.
+
+= 4.2.1 =
+Nothing important unless you didn't get the 4.2 update. This one is just a fix for the link to the demo YouTube video on the tools page.
 
 == About ==
 
