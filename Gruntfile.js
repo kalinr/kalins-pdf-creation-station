@@ -71,7 +71,7 @@ module.exports = function (grunt) {
       }
     }
 
-    grunt.log.writeln('VerifyFiles: Looking for new files or folders...asdf');
+    grunt.log.writeln('VerifyFiles: Looking for new files or folders...');
     grunt.file.recurse('.', function (abspath, rootdir, subdir, filename) {
       if (abspath.indexOf('.') === 0) {
         return;//ignore everything that starts with a ".", which means it's a hidden file or folder, such as .gitignore or .project
