@@ -33,8 +33,8 @@ Future features: http://kalinbooks.com/pdf-creation-station/pdf-creation-possibl
 </p>
 
 <p>
-Tools page demo (note this is for 4.0, so it's missing the new template saving feature):
-[youtube http://www.youtube.com/watch?v=zLHpr-8aYVw]
+Tools page demo:
+[youtube http://www.youtube.com/watch?v=cPaz3X4RXbQ]
 </p>
 
 <p>
@@ -176,6 +176,9 @@ removed testing alerts
 * Now showing the correct YouTube demo video for version 4.2 on the tools page. I thought YouTube would let me overwrite the old video when I released 4.2 but it forced me to create a new one.
 * Updated the screenshots for WordPress.org.
 
+= 4.2.2 =
+* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
+
 == Upgrade Notice ==
 
 = 0.7 =
@@ -231,6 +234,9 @@ Improved handling of multi-page and empty title pages. Added convenience feature
 
 = 4.2.1 =
 Nothing important unless you didn't get the 4.2 update. This one is just a fix for the link to the demo YouTube video on the tools page.
+
+= 4.2.2 =
+* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
 
 == About ==
 

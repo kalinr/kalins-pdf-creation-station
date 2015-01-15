@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Kalin's PDF Creation Station
-Version: 4.2.1
+Version: 4.2.2
 Plugin URI: http://kalinbooks.com/pdf-creation-station/
 Description: Build highly customizable PDF documents from any combination of pages and posts, or add a link to any page to download a PDF of that post.
 Author: Kalin Ringkvist
@@ -202,11 +202,10 @@ function kalins_admin_page_loaded(){
   add_filter('contextual_help', 'kalins_pdf_contextual_help', 10, 3);
   
   wp_register_style('kalinPDFBootstrapStyle', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css');
-  wp_register_style('kalinPDFStyle', WP_PLUGIN_URL . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
-
-  wp_register_script( 'kalinPDFVendors', WP_PLUGIN_URL . '/kalins-pdf-creation-station/vendor.min.js' );
   
-  wp_register_script( 'kalinPDF_KalinsUIService', WP_PLUGIN_URL . '/kalins-pdf-creation-station/KalinsUIService.js' );
+  wp_register_style('kalinPDFStyle', plugins_url('kalins_pdf_styles.css', __FILE__));// . '/kalins-pdf-creation-station/kalins_pdf_styles.css');
+  wp_register_script( 'kalinPDFVendors', plugins_url('vendor.min.js', __FILE__ )); 
+  wp_register_script( 'kalinPDF_KalinsUIService', plugins_url('KalinsUIService.js', __FILE__));
 }
 
 function kalins_pdf_admin_head() {  
