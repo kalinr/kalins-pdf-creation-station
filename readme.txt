@@ -71,52 +71,49 @@ Make sure to use double quotes instead of single quotes when inserting arbitrary
 
 == Changelog ==
 
-= 0.7 =
-*  First version. Beta. Includes basic functionality for tool menu and settings menu including page order, title page, include images, font size, ajaxified interface, shortcodes, etc.
+= 4.2.2 =
+* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
 
-= 0.8 =
-*  Added a create now button for someone who had trouble getting the jquery page-ordering popup to work.
+= 4.2.1 =
+* Now showing the correct YouTube demo video for version 4.2 on the tools page. I thought YouTube would let me overwrite the old video when I released 4.2 but it forced me to create a new one.
+* Updated the screenshots for WordPress.org.
 
-= 0.9 =
-* Moved some initialization functions into kalins_pdf_init() so that they are only run in the admin.
-* Added new security check to make sure the plugin pages are only being run from within wordpress.
-* Added 'default' option to page/post edit box so you aren't forced to make a permanent choice when saving a page/post.
-* Added checkbox at the bottom of settings page to turn off the plugin's deactivation routine.
-* changed default link placement to 'none' so that links are not added to pages/posts until the user authorizes it
+= 4.2.0 =
+* Table of Contents is no longer hardcoded to page 2, so multi-page title pages and empty title pages now work correctly.
+* Added an Add All button to the tool page's post list.
+* Added a Remove All button to tool page's My Document post list.
+* Added selector checkboxes so you can choose which columns to display in your post list on the tool page.
+* Added 'Author' as a post list column.
 
-= 0.9.1 =
-* Changed all code to direct, and/or create the kalins-pdf folder inside the uploads directory instead of placing the PDF files in the plugin directory to squash the bug where files were deleted upon plugin upgrade.
+= 4.1 =
+* Added the ability to save documents on the tool page as templates for future use. Includes your selected pages.
+* Added tags and categories to the pages and posts datagrid on the tool page.
+* Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
+* Divided contextual help menus on settings and tool pages into two tabs.
+* Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
+* YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
+* YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
 
-= 0.9.2 =
-* Fixed a PHP error thrown on the Menus page when in debug mode. Got rid of warnings for previous upgrade problem.
+= 4.0 =
+* Migrated front-end into AngularJS and Bootstrap, away from jQuery.
+* Improved appearance of user interface for both tool and settings pages.
+* UI should now function much better on mobile devices.
+* Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
+* Sorting of pages in document on tool page has been improved.
+* Added same dynamic sorting and filtering to the list of created documents.
+* Added ability to create .txt and .html files as well as .pdfs in the tool page.
+* Added a widget to allow you to have the post's link in the sidebar without hacking your theme.
+* Added a box in the menu section to allow you to easily link to your files created in the tool page.
+* Fixed a minor bug with apostrophes in the filename on the tool page.
 
-= 1.0 =
-Added [post_permalink] shortcode. Also added "Use post slug for PDF filename" and "Show on home, category, tag and search pages" options on settings page. Changed the clunky character count to word count, which should now function more accurately.
+= 3.2 =
+* Upgraded TCPDF engine to 6.0.061. PDF compiling should be faster and more reliable now. We may get other bonuses with this upgrade as well.
+* Added new options for post author so you are no longer stuck with just the login name
+* Expanded functionality for post thumbnail shortcode
 
-= 1.1 =
-Bug fix. I broke the PDF creation popup with v 1.0 and had to make an emergency fix.
-
-= 1.2 =
-removed testing alerts
-
-= 2.0 =
-* Added support for custom post types
-* moved the code identifying the default PDF directory and URL into a few constants at the top of kalins-pdf-creation-station.pdf, so that hackers can easily change them to whatever they want. Added example code that can be un-commented to change the PDF directory to use the base domain of your site instead of the wordpress uploads directory.
-* Fixed minor bug where 'reset defaults' on the settings page wasn't refreshing the 'post slug' and 'show on home' checkboxes
-* Added "create all" button on settings page
-* Added "automatically generate PDFs on publish and update" option on settings page
-* changed blockquote code so it uses the 'pre' tag because it was the only way to get TCPDF to actually display anything since it doesn't want to render blockquotes or tables properly
-* added post_excerpt code to use "wp_trim_excerpt", which doesn't appear to be functioning anymore -- then changed to manually extract 250 characters from the page content
-* added option to run other plugin shortcodes to both settings and tool pages
-* added option to convert embedded youtube videos into a link to that video
-* added 'format' parameter to all time shortcodes for total custom date/time formatting
-* added 'length' parameter to the post_excerpt shortcode to set character count of the excerpt
-
-= 2.0.1 =
-* Bug fix. This plugin no longer destroys all other admin help menus.
-
-= 2.0.2 =
-* Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
+= 3.1 =
+* Fixed 'create PDF' popup in Firefox
+* Changed default font to Times and default size to 12, which improves overall look/feel of documents
 
 = 3.0 =
 * upgraded TCPDF engine. This should improve image handling and also fixes the blockquotes issue, so blockquotes no longer need to use a monospaced font
@@ -135,108 +132,111 @@ removed testing alerts
 * added post parent shortcode
 * added post thumbnail shortcode
 
-= 3.1 =
-* Fixed 'create PDF' popup in Firefox
-* Changed default font to Times and default size to 12, which improves overall look/feel of documents
+= 2.0.2 =
+* Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
 
-= 3.2 =
-* Upgraded TCPDF engine to 6.0.061. PDF compiling should be faster and more reliable now. We may get other bonuses with this upgrade as well.
-* Added new options for post author so you are no longer stuck with just the login name
-* Expanded functionality for post thumbnail shortcode
+= 2.0.1 =
+* Bug fix. This plugin no longer destroys all other admin help menus.
 
-= 4.0 =
-* Migrated front-end into AngularJS and Bootstrap, away from jQuery.
-* Improved appearance of user interface for both tool and settings pages.
-* UI should now function much better on mobile devices.
-* Added dynamic sorting and filtering to help you find the correct page or post on the tools page.
-* Sorting of pages in document on tool page has been improved.
-* Added same dynamic sorting and filtering to the list of created documents.
-* Added ability to create .txt and .html files as well as .pdfs in the tool page.
-* Added a widget to allow you to have the post's link in the sidebar without hacking your theme.
-* Added a box in the menu section to allow you to easily link to your files created in the tool page.
-* Fixed a minor bug with apostrophes in the filename on the tool page.
-
-= 4.1 =
-* Added the ability to save documents on the tool page as templates for future use. Includes your selected pages.
-* Added tags and categories to the pages and posts datagrid on the tool page.
-* Cleaned up backend handling of AJAX calls, so there is no longer a maximum input length for your options. Should hopefully be less prone to errors.
-* Divided contextual help menus on settings and tool pages into two tabs.
-* Upgraded the TCPDF library from 6.0.061 to 6.0.099. I think this fixed an issue with transparency in .png images.
-* YouTube, Vimeo and Ted video link conversion now works with the standard WordPress embed.
-* YouTube, Vimeo and Ted video link conversion should now work with single quotes and urls without the 'www'.
-
-= 4.2.0 =
-* Table of Contents is no longer hardcoded to page 2, so multi-page title pages and empty title pages now work correctly.
-* Added an Add All button to the tool page's post list.
-* Added a Remove All button to tool page's My Document post list.
-* Added selector checkboxes so you can choose which columns to display in your post list on the tool page.
-* Added 'Author' as a post list column.
-
-= 4.2.1 =
-* Now showing the correct YouTube demo video for version 4.2 on the tools page. I thought YouTube would let me overwrite the old video when I released 4.2 but it forced me to create a new one.
-* Updated the screenshots for WordPress.org.
-
-= 4.2.2 =
-* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
-
-== Upgrade Notice ==
-
-= 0.7 =
-First version. Beta. Use with Caution.
-
-= 0.8 =
-No point in upgrading unless you have problems with the Create PDF! button
-
-= 0.9 =
-Slight overall blog performance increase. Minor security improvement. New 'Use default' option on page/post edit screen. New feature: disable database cleanup upon plugin deactivation
-
-= 0.9.1 =
-Bug fix: After this, your PDF files should not disappear after future plugin upgrades.
-
-= 0.9.2 = 
-Not a terribly important release.
-
-= 1.0 =
-I broke this release. Move on to next version.
-
-= 1.1 =
-Bug fix. Added a couple new little features. Character count is now Word Count. You will need to update your settings.
+= 2.0 =
+* Added support for custom post types
+* moved the code identifying the default PDF directory and URL into a few constants at the top of kalins-pdf-creation-station.pdf, so that hackers can easily change them to whatever they want. Added example code that can be un-commented to change the PDF directory to use the base domain of your site instead of the wordpress uploads directory.
+* Fixed minor bug where 'reset defaults' on the settings page wasn't refreshing the 'post slug' and 'show on home' checkboxes
+* Added "create all" button on settings page
+* Added "automatically generate PDFs on publish and update" option on settings page
+* changed blockquote code so it uses the 'pre' tag because it was the only way to get TCPDF to actually display anything since it doesn't want to render blockquotes or tables properly
+* added post_excerpt code to use "wp_trim_excerpt", which doesn't appear to be functioning anymore -- then changed to manually extract 250 characters from the page content
+* added option to run other plugin shortcodes to both settings and tool pages
+* added option to convert embedded youtube videos into a link to that video
+* added 'format' parameter to all time shortcodes for total custom date/time formatting
+* added 'length' parameter to the post_excerpt shortcode to set character count of the excerpt
 
 = 1.2 =
 removed testing alerts
 
-= 2.0 =
-A few new features. Default formatting on Date/time shortcodes changed a little with the new formatting possibilities.
+= 1.1 =
+Bug fix. I broke the PDF creation popup with v 1.0 and had to make an emergency fix.
 
-= 2.0.1 =
-My sincerest apologies to everyone who has been wondering what the hell happened to their help menus.
+= 1.0 =
+Added [post_permalink] shortcode. Also added "Use post slug for PDF filename" and "Show on home, category, tag and search pages" options on settings page. Changed the clunky character count to word count, which should now function more accurately.
 
-= 2.0.2 =
-Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
+= 0.9.2 =
+* Fixed a PHP error thrown on the Menus page when in debug mode. Got rid of warnings for previous upgrade problem.
 
-= 3.0 =
-Some new shortcodes, features and other improvements. New Table of Contents feature. Better image handling, improved integration with other plugins.
+= 0.9.1 =
+* Changed all code to direct, and/or create the kalins-pdf folder inside the uploads directory instead of placing the PDF files in the plugin directory to squash the bug where files were deleted upon plugin upgrade.
 
-= 3.1 =
-Firefox fix and PDF font change to Times so PDFs should look a little better.
+= 0.9 =
+* Moved some initialization functions into kalins_pdf_init() so that they are only run in the admin.
+* Added new security check to make sure the plugin pages are only being run from within wordpress.
+* Added 'default' option to page/post edit box so you aren't forced to make a permanent choice when saving a page/post.
+* Added checkbox at the bottom of settings page to turn off the plugin's deactivation routine.
+* changed default link placement to 'none' so that links are not added to pages/posts until the user authorizes it
 
-= 3.2 =
-After all this time, finally releasing a small update. Should work a little faster. New author and thumbnail options.
+= 0.8 =
+*  Added a create now button for someone who had trouble getting the jquery page-ordering popup to work.
 
-= 4.0 =
-Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
+= 0.7 =
+*  First version. Beta. Includes basic functionality for tool menu and settings menu including page order, title page, include images, font size, ajaxified interface, shortcodes, etc.
 
-= 4.1 =
-Added ability to save templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions, added categories and tags to tool's post list.
+== Upgrade Notice ==
 
-= 4.2.0 =
-Improved handling of multi-page and empty title pages. Added convenience features for sorting and adding posts on the tool page.
+= 4.2.2 =
+* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
 
 = 4.2.1 =
 Nothing important unless you didn't get the 4.2 update. This one is just a fix for the link to the demo YouTube video on the tools page.
 
-= 4.2.2 =
-* tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
+= 4.2.0 =
+Improved handling of multi-page and empty title pages. Added convenience features for sorting and adding posts on the tool page.
+
+= 4.1 =
+Added ability to save templates for future use. Also: code cleanup; updated TCPDF library; improved YouTube, Vimeo and Ted Talk link conversions, added categories and tags to tool's post list.
+
+= 4.0 =
+Major user interface redesign. Improved page/post sorting on the tool page. Added custom menu and widget support. Added .txt and .html creation ability.
+
+= 3.2 =
+After all this time, finally releasing a small update. Should work a little faster. New author and thumbnail options.
+
+= 3.1 =
+Firefox fix and PDF font change to Times so PDFs should look a little better.
+
+= 3.0 =
+Some new shortcodes, features and other improvements. New Table of Contents feature. Better image handling, improved integration with other plugins.
+
+= 2.0.2 =
+Bug fix. PDFs now properly generate when using 'quick edit' on posts when 'auto generate' is turned on.
+
+= 2.0.1 =
+My sincerest apologies to everyone who has been wondering what the hell happened to their help menus.
+
+= 2.0 =
+A few new features. Default formatting on Date/time shortcodes changed a little with the new formatting possibilities.
+
+= 1.2 =
+removed testing alerts
+
+= 1.1 =
+Bug fix. Added a couple new little features. Character count is now Word Count. You will need to update your settings.
+
+= 1.0 =
+I broke this release. Move on to next version.
+
+= 0.9.2 = 
+Not a terribly important release.
+
+= 0.9.1 =
+Bug fix: After this, your PDF files should not disappear after future plugin upgrades.
+
+= 0.9 =
+Slight overall blog performance increase. Minor security improvement. New 'Use default' option on page/post edit screen. New feature: disable database cleanup upon plugin deactivation
+
+= 0.8 =
+No point in upgrading unless you have problems with the Create PDF! button
+
+= 0.7 =
+First version. Beta. Use with Caution.
 
 == About ==
 
