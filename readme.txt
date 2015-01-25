@@ -179,6 +179,9 @@ removed testing alerts
 = 4.2.2 =
 * tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
 
+= 4.2.3 =
+* added menu_order to the tool page post list so you can easily order pages the same as you have in your menus.
+
 == Upgrade Notice ==
 
 = 0.7 =
@@ -237,6 +240,9 @@ Nothing important unless you didn't get the 4.2 update. This one is just a fix f
 
 = 4.2.2 =
 * tool and admin pages are now correctly loading JavaScript and CSS files on sites using https
+
+= 4.2.3 =
+* added menu_order to the tool page post list so you can easily order pages the same as you have in your menus.
 
 == About ==
 

@@ -31,6 +31,7 @@
     $newItem->ID = $allPostList[$i]->ID;
     $newItem->title = $allPostList[$i]->post_title;
     $newItem->type = $allPostList[$i]->post_type;
+    $newItem->menu_order = $allPostList[$i]->menu_order;
     $newItem->date = substr($allPostList[$i]->post_date, 0, strpos($allPostList[$i]->post_date, " "));
     $newItem->status = $allPostList[$i]->post_status;
     $newItem->author = get_the_author_meta("display_name", $allPostList[$i]->post_author);
@@ -116,7 +117,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
   
   //build our toggle manager for the accordion and post list show/hide options. Includes "all" button management and local storage.
   $scope.kalinsToggles = new kalinsToggles([true, true, true, true, true, true, true, true, true, true], "Close All", "Open All", "kalinsToolPageAccordionToggles");
-  $scope.oPostToggles = new kalinsToggles([false, true, false, true, true, false, false], "Show None", "Show All", "kalinsToolPagePostViewToggles");
+  $scope.oPostToggles = new kalinsToggles([false, true, false, true, true, false, false, false], "Show None", "Show All", "kalinsToolPagePostViewToggles");
 
   //set up the alerts that show under the form buttons
   $scope.kalinsAlertManager = new kalinsAlertManager(4);
@@ -131,7 +132,7 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
   
   self.pdfUrl = "<?php echo KALINS_PDF_URL; ?>";
   self.pdfList = <?php echo json_encode($pdfList); ?>;
-  self.postList = <?php echo json_encode($customList); ?>;
+  self.postList = <?php echo json_encode($customList); ?>;  
   self.sCurTemplate = "<?php echo $templateOptions->sCurTemplate; ?>";
   self.templateList = <?php echo json_encode($templateOptions->aTemplates); ?>;
   self.oOptions = {};//this is our currently active set of options that populates the entire page. It gets populated via loadTemplate()
@@ -584,6 +585,9 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
             <td data-title="'Author'" sortable="'author'" filter="{ 'author': 'text' }" ng-show="oPostToggles.aBooleans[6]">
               {{post.author}}
             </td>
+            <td class="k-small-width" data-title="'Menu Order'" sortable="'menu_order'" filter="{ 'menu_order': 'text' }" ng-show="oPostToggles.aBooleans[7]">
+              {{post.menu_order}}
+            </td>
             <td data-title="'Add'" ng-click="InputCtrl.addPost(post.ID);">
               <button class="btn btn-success btn-xs">Add</button>
             </td>
@@ -605,6 +609,8 @@ app.controller("InputController",["$scope", "$http", "$filter", "ngTableParams",
           <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[5]"></input> Tags </label>
           &nbsp;|&nbsp;
           <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[6]"></input> Author </label>
+          &nbsp;|&nbsp;
+          <label class="k-checkbox"><input type='checkbox' class="form-control" ng-model="oPostToggles.aBooleans[7]"></input> Menu Order </label>
           &nbsp;|&nbsp;
           <a href="" ng-click="oPostToggles.toggleAll();">{{oPostToggles.sToggleAll}}</a>
         </p>
