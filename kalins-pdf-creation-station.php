@@ -1075,6 +1075,7 @@ function kalins_pdf_global_shortcode_replace($str){//replace global shortcodes
   $str = str_replace("[blog_description]", get_option('blogdescription'), $str);
   $str = str_replace("[blog_url]", get_option('home'), $str);  
   $str = preg_replace_callback('#\[ *current_time *(format=[\'|\"]([^\'\"]*)[\'|\"])? *\]#', "kalinsPDF_timeCallback", $str);//this one has its own proprietary function so no need for class and parameters
+  $str = do_shortcode($str);
   return $str;
 }
 
