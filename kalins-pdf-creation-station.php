@@ -805,7 +805,7 @@ function kalins_pdf_page_shortcode_replace($str, $page){//replace all passed in 
   
   $l = count($SCList);
   for($i = 0; $i<$l; $i++){//loop through all page shortcodes (the ones that only work for before/after page/post and refer directly to a page/post attribute)
-    $scName = substr($SCList[$i], 1, count($SCList[$i]) - 2);
+    $scName = substr($SCList[$i], 1, strlen($SCList[$i]) - 2);
     $str = str_replace($SCList[$i], $page->$scName, $str);
   }
   
