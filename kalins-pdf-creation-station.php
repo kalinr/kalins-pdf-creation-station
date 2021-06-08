@@ -1216,9 +1216,15 @@ class WP_Kalins_PDF_Creation_Station_Widget extends WP_Widget {
 
 } // end class WP_Widget_BareBones
 
+
+function kalins_pdf_widgets_init() {
+  return register_widget("WP_Kalins_PDF_Creation_Station_Widget");
+}
+
+
 //wp actions to get everything started
 
-add_action('widgets_init', create_function('', 'return register_widget("WP_Kalins_PDF_Creation_Station_Widget");'));// Register the widget.
+add_action('widgets_init', 'kalins_pdf_widgets_init');// Register the widget.
 add_action('admin_init', 'kalins_pdf_admin_init');
 add_action('admin_menu', 'kalins_pdf_configure_pages');
 add_action('publish_post', 'kalinsPDF_publish_post');//runs action on post publish
